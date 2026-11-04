@@ -1,7 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useState } from 'react'
 import {
   ArrowLeft,
   IdCard,
@@ -14,12 +14,17 @@ import {
   Stethoscope,
   Clock,
   Globe,
-  AlertTriangle,
   FileText,
   ExternalLink,
+  CheckCircle2,
+  ListOrdered,
+  AlertCircle,
+  HelpCircle,
+  Loader2,
 } from 'lucide-react'
 import { cn, CATEGORY_META } from '@/lib/utils'
-import type { ServiceCategory } from '@/types'
+import type { Service, ServiceCategory } from '@/types'
+import { fetchServiceBySlug } from '@/lib/api'
 
 const CATEGORY_ICONS: Record<ServiceCategory, React.ElementType> = {
   identity: IdCard,
@@ -32,37 +37,54 @@ const CATEGORY_ICONS: Record<ServiceCategory, React.ElementType> = {
   health: Stethoscope,
 }
 
-// TODO: Replace with dynamic data from services.json
-const allServices = [
-  { slug: 'passport', name_bn: 'পাসপোর্ট আবেদন', name_en: 'Passport Application', category: 'identity' as const, fee: '৩,৪৫০', fee_note_bn: 'সাধারণ আবেদন (৪৮ পাতা, ৫ বছর)', processing_time_bn: '২১ কার্যদিবস', submission_type: 'hybrid' as const, official_url: 'https://www.epassport.gov.bd', apply_location_bn: 'অনলাইনে আবেদন করুন, তারপর নিকটস্থ আঞ্চলিক পাসপোর্ট অফিসে যান', department_bn: 'ইমিগ্রেশন ও পাসপোর্ট অধিদপ্তর' },
-  { slug: 'passport-renewal', name_bn: 'পাসপোর্ট নবায়ন', name_en: 'Passport Renewal', category: 'identity' as const, fee: '৩,৪৫০', fee_note_bn: 'পুনর্নবীকরণ (৪৮ পাতা, ৫ বছর)', processing_time_bn: '২১ কার্যদিবস', submission_type: 'hybrid' as const, official_url: 'https://www.epassport.gov.bd', apply_location_bn: 'অনলাইনে আবেদন করুন, তারপর নিকটস্থ আঞ্চলিক পাসপোর্ট অফিসে যান', department_bn: 'ইমিগ্রেশন ও পাসপোর্ট অধিদপ্তর' },
-  { slug: 'nid-correction', name_bn: 'NID সংশোধন', name_en: 'NID Correction', category: 'identity' as const, fee: '২৩০', fee_note_bn: 'তথ্য সংশোধন ফি', processing_time_bn: '৪৫ কার্যদিবস', submission_type: 'online_bot' as const, official_url: 'https://services.nidw.gov.bd', apply_location_bn: 'অনলাইনে আবেদন করুন', department_bn: 'বাংলাদেশ নির্বাচন কমিশন' },
-  { slug: 'birth-registration', name_bn: 'জন্ম নিবন্ধন', name_en: 'Birth Registration', category: 'identity' as const, fee: 'বিনামূল্যে', fee_note_bn: '৪৫ দিনের মধ্যে বিনামূল্যে, পরে ৫০ টাকা বিলম্ব ফি', processing_time_bn: '৭ কার্যদিবস', submission_type: 'hybrid' as const, official_url: 'https://bdris.gov.bd', apply_location_bn: 'ইউনিয়ন পরিষদ, পৌরসভা, বা সিটি কর্পোরেশন', department_bn: 'স্থানীয় সরকার বিভাগ' },
-  { slug: 'birth-registration-correction', name_bn: 'জন্ম নিবন্ধন সংশোধন', name_en: 'Birth Certificate Correction', category: 'identity' as const, fee: '৫০', fee_note_bn: 'সংশোধন ফি', processing_time_bn: '৭-৩০ কার্যদিবস', submission_type: 'hybrid' as const, official_url: 'https://bdris.gov.bd', apply_location_bn: 'ইউনিয়ন পরিষদ, পৌরসভা, বা সিটি কর্পোরেশন', department_bn: 'স্থানীয় সরকার বিভাগ' },
-  { slug: 'death-registration', name_bn: 'মৃত্যু নিবন্ধন', name_en: 'Death Registration', category: 'identity' as const, fee: 'বিনামূল্যে', fee_note_bn: '৪৫ দিনের মধ্যে বিনামূল্যে', processing_time_bn: '৭ কার্যদিবস', submission_type: 'hybrid' as const, official_url: 'https://bdris.gov.bd', apply_location_bn: 'ইউনিয়ন পরিষদ, পৌরসভা, বা সিটি কর্পোরেশন', department_bn: 'স্থানীয় সরকার বিভাগ' },
-  { slug: 'widow-allowance', name_bn: 'বিধবা ভাতা', name_en: 'Widow Allowance', category: 'welfare' as const, fee: 'বিনামূল্যে', fee_note_bn: 'কোনো ফি নেই', processing_time_bn: '৬০+ কার্যদিবস', submission_type: 'pdf_only' as const, official_url: 'https://dss.gov.bd', apply_location_bn: 'ইউনিয়ন পরিষদ বা উপজেলা সমাজসেবা অফিস', department_bn: 'সমাজসেবা অধিদপ্তর' },
-  { slug: 'old-age-allowance', name_bn: 'বয়স্ক ভাতা', name_en: 'Old Age Allowance', category: 'welfare' as const, fee: 'বিনামূল্যে', fee_note_bn: 'কোনো ফি নেই', processing_time_bn: '৬০+ কার্যদিবস', submission_type: 'pdf_only' as const, official_url: 'https://dss.gov.bd', apply_location_bn: 'ইউনিয়ন পরিষদ বা উপজেলা সমাজসেবা অফিস', department_bn: 'সমাজসেবা অধিদপ্তর' },
-  { slug: 'disability-allowance', name_bn: 'প্রতিবন্ধী ভাতা', name_en: 'Disability Allowance', category: 'welfare' as const, fee: 'বিনামূল্যে', fee_note_bn: 'কোনো ফি নেই', processing_time_bn: '৬০+ কার্যদিবস', submission_type: 'pdf_only' as const, official_url: 'https://dss.gov.bd', apply_location_bn: 'ইউনিয়ন পরিষদ বা উপজেলা সমাজসেবা অফিস', department_bn: 'সমাজসেবা অধিদপ্তর' },
-  { slug: 'scholarship', name_bn: 'উপবৃত্তি আবেদন', name_en: 'Scholarship Application', category: 'education' as const, fee: 'বিনামূল্যে', fee_note_bn: 'কোনো ফি নেই', processing_time_bn: 'সেশন অনুযায়ী', submission_type: 'online_bot' as const, official_url: 'https://shed.gov.bd', apply_location_bn: 'শিক্ষা প্রতিষ্ঠানের মাধ্যমে অনলাইনে', department_bn: 'মাধ্যমিক ও উচ্চ শিক্ষা অধিদপ্তর' },
-  { slug: 'trade-license', name_bn: 'ট্রেড লাইসেন্স', name_en: 'Trade License', category: 'business' as const, fee: '৫০০-৫,০০০', fee_note_bn: 'ব্যবসার ধরন ও আকার অনুযায়ী', processing_time_bn: '৭-১৫ কার্যদিবস', submission_type: 'pdf_only' as const, official_url: '#', apply_location_bn: 'সিটি কর্পোরেশন, পৌরসভা, বা ইউনিয়ন পরিষদ', department_bn: 'স্থানীয় সরকার প্রতিষ্ঠান' },
-  { slug: 'land-mutation', name_bn: 'ভূমি নামজারি', name_en: 'Land Mutation', category: 'land' as const, fee: '১,০০০-৫,০০০', fee_note_bn: 'জমির মূল্যের উপর নির্ভরশীল', processing_time_bn: '৩০-৯০ কার্যদিবস', submission_type: 'pdf_only' as const, official_url: 'https://land.gov.bd', apply_location_bn: 'সহকারী কমিশনার (ভূমি) অফিস', department_bn: 'ভূমি মন্ত্রণালয়' },
-  { slug: 'tin-certificate', name_bn: 'টিআইএন সার্টিফিকেট', name_en: 'TIN Certificate', category: 'tax' as const, fee: 'বিনামূল্যে', fee_note_bn: 'কোনো ফি নেই', processing_time_bn: 'তাৎক্ষণিক', submission_type: 'online_bot' as const, official_url: 'https://secure.incometax.gov.bd/TINHome', apply_location_bn: 'অনলাইনে আবেদন করুন', department_bn: 'জাতীয় রাজস্ব বোর্ড (NBR)' },
-  { slug: 'tax-return', name_bn: 'আয়কর রিটার্ন', name_en: 'Income Tax Return', category: 'tax' as const, fee: 'বিনামূল্যে', fee_note_bn: 'কোনো ফি নেই, তবে কর প্রযোজ্য', processing_time_bn: 'বার্ষিক', submission_type: 'hybrid' as const, official_url: 'https://etaxnbr.gov.bd', apply_location_bn: 'অনলাইন বা নিকটস্থ কর অফিস', department_bn: 'জাতীয় রাজস্ব বোর্ড (NBR)' },
-  { slug: 'overseas-welfare-card', name_bn: 'প্রবাসী কল্যাণ কার্ড', name_en: 'Overseas Welfare Card', category: 'overseas' as const, fee: 'বিনামূল্যে', fee_note_bn: 'কোনো ফি নেই', processing_time_bn: '৭-১৫ কার্যদিবস', submission_type: 'hybrid' as const, official_url: 'https://bmet.gov.bd', apply_location_bn: 'জেলা কর্মসংস্থান ও জনশক্তি অফিস', department_bn: 'জনশক্তি, কর্মসংস্থান ও প্রশিক্ষণ ব্যুরো (BMET)' },
-]
-
 const SUBMISSION_TYPE_LABELS: Record<string, { bn: string; class: string }> = {
-  online_bot: { bn: 'অনলাইন', class: 'bg-green-100 text-green-700' },
-  pdf_only: { bn: 'সরাসরি', class: 'bg-amber-100 text-amber-700' },
-  hybrid: { bn: 'অনলাইন + সরাসরি', class: 'bg-blue-100 text-blue-700' },
+  online_bot: { bn: 'সম্পূর্ণ অনলাইন', class: 'bg-green-100 text-green-700' },
+  pdf_only: { bn: 'সরাসরি জমা', class: 'bg-amber-100 text-amber-700' },
+  hybrid: { bn: 'অনলাইন আবেদন + সরাসরি যাচাই', class: 'bg-blue-100 text-blue-700' },
+}
+
+const COPY_TYPE_LABELS: Record<string, { label: string; class: string }> = {
+  original: { label: 'মূল কপি আবশ্যক', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  photocopy: { label: 'ফটোকপি', class: 'bg-stone-50 text-stone-600 border-stone-200' },
+  both: { label: 'মূল ও ফটোকপি উভয়ই', class: 'bg-blue-50 text-blue-700 border-blue-200' },
+  online_print: { label: 'অনলাইন প্রিন্ট কপি', class: 'bg-purple-50 text-purple-700 border-purple-200' },
 }
 
 type TabKey = 'docs' | 'steps' | 'info'
 
 export default function ServiceDetailContent({ slug }: { slug: string }) {
+  const [service, setService] = useState<Service | null>(null)
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabKey>('docs')
 
-  const service = allServices.find((s) => s.slug === slug)
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+
+    fetchServiceBySlug(slug)
+      .then((data) => {
+        if (active) {
+          setService(data)
+          setLoading(false)
+        }
+      })
+      .catch(() => {
+        if (active) setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [slug])
+
+  if (loading) {
+    return (
+      <div className="py-24 flex flex-col items-center justify-center gap-3 text-stone-500">
+        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+        <p className="text-base font-medium">ডাটাবেজ থেকে সেবার বিস্তারিত লোড হচ্ছে...</p>
+      </div>
+    )
+  }
 
   if (!service) {
     return (
@@ -70,7 +92,7 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
         <div className="max-w-6xl mx-auto text-center">
           <FileText className="w-16 h-16 text-stone-300 mx-auto" />
           <h1 className="text-2xl font-bold text-stone-800 mt-4">সেবাটি পাওয়া যায়নি</h1>
-          <p className="text-stone-500 mt-2">আপনি যে সেবাটি খুঁজছেন সেটি এখনো যোগ করা হয়নি।</p>
+          <p className="text-stone-500 mt-2">আপনি যে সেবাটি খুঁজছেন সেটি ডাটাবেজে উপস্থিত নেই।</p>
           <Link
             href="/services"
             className="inline-flex items-center gap-2 mt-6 bg-green-600 text-white rounded-xl px-6 h-12 font-medium hover:bg-green-700 transition-colors"
@@ -83,24 +105,32 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
     )
   }
 
-  const meta = CATEGORY_META[service.category]
-  const Icon = CATEGORY_ICONS[service.category]
-  const submissionLabel = SUBMISSION_TYPE_LABELS[service.submission_type]
+  const meta = CATEGORY_META[service.category] || CATEGORY_META.identity
+  const Icon = CATEGORY_ICONS[service.category] || IdCard
+  const submissionLabel = SUBMISSION_TYPE_LABELS[service.submission_type] || {
+    bn: 'সরকারি সেবা',
+    class: 'bg-stone-100 text-stone-700',
+  }
 
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: 'docs', label: 'প্রয়োজনীয় কাগজপত্র' },
-    { key: 'steps', label: 'ধাপে ধাপে প্রক্রিয়া' },
+  const tabs: { key: TabKey; label: string; count?: number }[] = [
+    { key: 'docs', label: 'প্রয়োজনীয় কাগজপত্র', count: service.required_docs?.length || 0 },
+    { key: 'steps', label: 'ধাপে ধাপে প্রক্রিয়া', count: service.steps?.length || 0 },
     { key: 'info', label: 'ফি ও তথ্য' },
   ]
 
   return (
     <section className="py-6 lg:py-10 px-4 pb-28">
       <div className="max-w-4xl mx-auto">
-        <Link href="/services" className="inline-flex items-center gap-2 text-stone-500 hover:text-green-600 transition-colors mb-6 text-sm">
+        {/* Back Link */}
+        <Link
+          href="/services"
+          className="inline-flex items-center gap-2 text-stone-500 hover:text-green-600 transition-colors mb-6 text-sm"
+        >
           <ArrowLeft className="w-4 h-4" />
           সকল সেবা
         </Link>
 
+        {/* Service Header */}
         <div className="flex items-start gap-4">
           <div className={cn('w-14 h-14 rounded-xl flex items-center justify-center shrink-0', meta.bgColor)}>
             <Icon className={cn('w-7 h-7', meta.color)} />
@@ -108,112 +138,268 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-stone-900">{service.name_bn}</h1>
             <p className="text-stone-500 mt-1">{service.name_en}</p>
-            <p className="text-sm text-stone-400 mt-0.5">{service.department_bn}</p>
+            <p className="text-sm text-stone-500 font-medium mt-1">{service.department_bn}</p>
           </div>
         </div>
 
+        {/* Badges */}
         <div className="flex flex-wrap gap-2 mt-4">
-          <span className={cn('rounded-full px-3 py-1 text-xs font-medium', meta.badgeBg)}>{meta.name_bn}</span>
-          <span className="bg-stone-100 text-stone-700 rounded-full px-3 py-1 text-xs flex items-center gap-1">
-            <Clock className="w-3 h-3" />
+          <span className={cn('rounded-full px-3 py-1 text-xs font-medium', meta.badgeBg)}>
+            {meta.name_bn}
+          </span>
+          <span className="bg-stone-100 text-stone-700 rounded-full px-3 py-1 text-xs flex items-center gap-1 font-medium">
+            <Clock className="w-3.5 h-3.5" />
             {service.processing_time_bn}
           </span>
-          <span className="bg-stone-100 text-stone-700 rounded-full px-3 py-1 text-xs">
+          <span className="bg-stone-100 text-stone-700 rounded-full px-3 py-1 text-xs font-medium">
             {service.fee === 'বিনামূল্যে' ? 'বিনামূল্যে' : `৳${service.fee}`}
           </span>
-          <span className={cn('rounded-full px-3 py-1 text-xs font-medium', submissionLabel.class)}>{submissionLabel.bn}</span>
+          <span className={cn('rounded-full px-3 py-1 text-xs font-medium', submissionLabel.class)}>
+            {submissionLabel.bn}
+          </span>
         </div>
 
+        {/* Sticky Tab Navigation */}
         <div className="sticky top-16 z-40 bg-[#FAFAF8] border-b border-stone-200 -mx-4 px-4 mt-8">
-          <div className="flex gap-0">
+          <div className="flex gap-2">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
-                  'px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap cursor-pointer',
-                  activeTab === tab.key ? 'border-green-600 text-green-700' : 'border-transparent text-stone-500 hover:text-stone-700'
+                  'px-4 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5',
+                  activeTab === tab.key
+                    ? 'border-green-600 text-green-700'
+                    : 'border-transparent text-stone-500 hover:text-stone-800'
                 )}
               >
-                {tab.label}
+                <span>{tab.label}</span>
+                {typeof tab.count === 'number' && (
+                  <span
+                    className={cn(
+                      'text-xs px-2 py-0.5 rounded-full',
+                      activeTab === tab.key ? 'bg-green-100 text-green-800' : 'bg-stone-100 text-stone-500'
+                    )}
+                  >
+                    {tab.count}
+                  </span>
+                )}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="mt-6">
-          {activeTab === 'docs' && (
-            <div>
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-amber-800 text-sm font-medium">বিস্তারিত তালিকা শীঘ্রই আসছে</p>
-                  <p className="text-amber-700 text-xs mt-1">এই সেবার প্রয়োজনীয় কাগজপত্রের সম্পূর্ণ তালিকা শীঘ্রই যোগ করা হবে।</p>
-                </div>
-              </div>
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4">
-                <p className="text-green-800 text-sm font-medium">📄 আপনার নথিপত্র সেভ করুন</p>
-                <p className="text-green-700 text-xs mt-1">আপনার কাগজপত্র আপলোড করলে আমরা স্বয়ংক্রিয়ভাবে চেক করব কোন কোন কাগজ আপনার আছে।</p>
-                <Link href="/register" className="inline-flex items-center gap-1 text-green-700 text-sm font-medium mt-3 hover:underline">নিবন্ধন করুন →</Link>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'steps' && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        {/* Tab 1: Required Documents */}
+        {activeTab === 'docs' && (
+          <div className="mt-6 space-y-4">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <p className="text-amber-800 text-sm font-medium">ধাপে ধাপে গাইড শীঘ্রই আসছে</p>
-                <p className="text-amber-700 text-xs mt-1">এই সেবার বিস্তারিত প্রক্রিয়া শীঘ্রই যোগ করা হবে। ততক্ষণ সরকারি ওয়েবসাইট দেখুন।</p>
+                <p className="text-emerald-900 text-sm font-semibold">অফিসিয়াল চেকলিস্ট</p>
+                <p className="text-emerald-700 text-xs mt-0.5">
+                  কম্পিউটার দোকানে বা সরকারি অফিসে যাওয়ার আগে নিশ্চিত করুন নিচের প্রতিটি কাগজ আপনার সাথে আছে।
+                </p>
               </div>
             </div>
-          )}
 
-          {activeTab === 'info' && (
-            <div className="space-y-4">
-              <div className="bg-white rounded-xl border border-stone-200 divide-y divide-stone-100">
-                <div className="p-4 flex justify-between items-center">
-                  <span className="text-stone-500 text-sm">ফি</span>
-                  <div className="text-right">
-                    <span className="font-medium text-stone-800">{service.fee === 'বিনামূল্যে' ? 'বিনামূল্যে' : `৳${service.fee}`}</span>
-                    {service.fee_note_bn && <p className="text-xs text-stone-400 mt-0.5">{service.fee_note_bn}</p>}
-                  </div>
-                </div>
-                <div className="p-4 flex justify-between items-center">
-                  <span className="text-stone-500 text-sm">প্রক্রিয়াকরণ সময়</span>
-                  <span className="font-medium text-stone-800">{service.processing_time_bn}</span>
-                </div>
-                <div className="p-4 flex justify-between items-center">
-                  <span className="text-stone-500 text-sm">আবেদন পদ্ধতি</span>
-                  <span className={cn('rounded-full px-3 py-1 text-xs font-medium', submissionLabel.class)}>{submissionLabel.bn}</span>
-                </div>
-                <div className="p-4 flex justify-between items-center">
-                  <span className="text-stone-500 text-sm">কোথায় আবেদন করবেন</span>
-                  <span className="font-medium text-stone-800 text-right text-sm max-w-[60%]">{service.apply_location_bn}</span>
-                </div>
-                <div className="p-4 flex justify-between items-center">
-                  <span className="text-stone-500 text-sm">দায়িত্বপ্রাপ্ত বিভাগ</span>
-                  <span className="font-medium text-stone-800 text-sm text-right max-w-[60%]">{service.department_bn}</span>
-                </div>
-              </div>
-              {service.official_url && service.official_url !== '#' && (
-                <a href={service.official_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white rounded-xl border border-stone-200 p-4 hover:border-green-300 transition-colors group">
-                  <Globe className="w-5 h-5 text-green-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-stone-800 group-hover:text-green-700">সরকারি ওয়েবসাইট</p>
-                    <p className="text-xs text-stone-400 truncate">{service.official_url}</p>
-                  </div>
-                  <ExternalLink className="w-4 h-4 text-stone-400" />
-                </a>
+            <div className="bg-white rounded-2xl border border-stone-200 divide-y divide-stone-100 overflow-hidden shadow-sm">
+              {service.required_docs && service.required_docs.length > 0 ? (
+                service.required_docs.map((doc, idx) => {
+                  const copyBadge = COPY_TYPE_LABELS[doc.copy_type] || COPY_TYPE_LABELS.photocopy
+                  return (
+                    <div key={idx} className="p-4 sm:p-5 flex items-start gap-3 hover:bg-stone-50/50 transition-colors">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="font-semibold text-stone-900 text-base">{doc.name_bn}</h4>
+                          <span className={cn('text-xs px-2.5 py-0.5 rounded-md border font-medium', copyBadge.class)}>
+                            {copyBadge.label}
+                          </span>
+                        </div>
+                        {doc.name_en && <p className="text-xs text-stone-500 mt-0.5">{doc.name_en}</p>}
+                        {doc.note_bn && (
+                          <p className="text-xs text-stone-600 bg-stone-50 rounded-lg p-2 mt-2 border border-stone-200/60 leading-relaxed">
+                            💡 {doc.note_bn}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="p-8 text-center text-stone-500">কোনো নির্ধারিত কাগজপত্রের তালিকা পাওয়া যায়নি।</div>
               )}
             </div>
-          )}
-        </div>
+
+            {/* Smart Document Locker Callout */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-5 mt-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h4 className="font-bold text-green-900 text-base">📁 স্মার্ট ডকুমেন্ট লকার</h4>
+                  <p className="text-green-800 text-xs mt-1 leading-relaxed">
+                    আপনার এই কাগজগুলো দিশারীতে সেভ করে রাখলে ফর্ম স্বয়ংক্রিয়ভাবে (Auto-Fill) পূরণ হয়ে যাবে। বারবার খুঁজতে হবে না।
+                  </p>
+                </div>
+                <Link
+                  href="/register"
+                  className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-4 py-2 text-xs font-semibold shrink-0 transition-colors shadow-sm"
+                >
+                  ডকুমেন্ট সেভ করুন
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 2: Step-by-Step Guide */}
+        {activeTab === 'steps' && (
+          <div className="mt-6 space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-start gap-3">
+              <ListOrdered className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-blue-900 text-sm font-semibold">ধাপে ধাপে সরকারি গাইডলাইন</p>
+                <p className="text-blue-700 text-xs mt-0.5">
+                  অফিসিয়াল পোর্টাল বা কার্যালয় অনুযায়ী আবেদন সম্পন্ন করার সঠিক ক্রম।
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {service.steps && service.steps.length > 0 ? (
+                service.steps.map((st) => (
+                  <div
+                    key={st.step}
+                    className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm hover:border-green-300 transition-all flex items-start gap-4"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-green-600 text-white font-extrabold flex items-center justify-center shrink-0 shadow-sm text-base">
+                      {st.step}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-base font-bold text-stone-900">{st.title_bn}</h4>
+                      <p className="text-sm text-stone-600 leading-relaxed mt-1.5">{st.description_bn}</p>
+                      {st.url && st.url !== '#' && (
+                        <a
+                          href={st.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs text-green-700 hover:text-green-800 font-semibold mt-3 hover:underline"
+                        >
+                          সরাসরি আবেদন পোর্টালে যান <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center text-stone-500">ধাপের তথ্য পাওয়া যায়নি।</div>
+              )}
+            </div>
+
+            {/* Important Notes & Common Mistakes */}
+            {(service.important_notes_bn?.length || service.common_mistakes_bn?.length) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                {service.important_notes_bn && service.important_notes_bn.length > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                    <div className="flex items-center gap-2 text-amber-900 font-semibold text-sm mb-2">
+                      <AlertCircle className="w-4 h-4 text-amber-600" />
+                      <span>জরুরি জ্ঞাতব্য</span>
+                    </div>
+                    <ul className="space-y-1.5 text-xs text-amber-800 leading-relaxed list-disc list-inside">
+                      {service.important_notes_bn.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {service.common_mistakes_bn && service.common_mistakes_bn.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+                    <div className="flex items-center gap-2 text-red-900 font-semibold text-sm mb-2">
+                      <HelpCircle className="w-4 h-4 text-red-600" />
+                      <span>সাধারণ ভুলসমূহ থেকে সতর্ক থাকুন</span>
+                    </div>
+                    <ul className="space-y-1.5 text-xs text-red-800 leading-relaxed list-disc list-inside">
+                      {service.common_mistakes_bn.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 3: Fees & Official Info */}
+        {activeTab === 'info' && (
+          <div className="mt-6 space-y-4">
+            <div className="bg-white rounded-2xl border border-stone-200 divide-y divide-stone-100 overflow-hidden shadow-sm">
+              <div className="p-4 sm:p-5 flex justify-between items-center">
+                <span className="text-stone-500 text-sm">সরকারি ফি</span>
+                <div className="text-right">
+                  <span className="font-bold text-stone-900 text-lg">
+                    {service.fee === 'বিনামূল্যে' ? 'বিনামূল্যে' : `৳${service.fee}`}
+                  </span>
+                  {service.fee_note_bn && <p className="text-xs text-stone-500 mt-0.5">{service.fee_note_bn}</p>}
+                </div>
+              </div>
+              <div className="p-4 sm:p-5 flex justify-between items-center">
+                <span className="text-stone-500 text-sm">প্রক্রিয়াকরণ সময়</span>
+                <span className="font-semibold text-stone-800">{service.processing_time_bn}</span>
+              </div>
+              <div className="p-4 sm:p-5 flex justify-between items-center">
+                <span className="text-stone-500 text-sm">আবেদন পদ্ধতি</span>
+                <span className={cn('rounded-full px-3 py-1 text-xs font-semibold', submissionLabel.class)}>
+                  {submissionLabel.bn}
+                </span>
+              </div>
+              <div className="p-4 sm:p-5 flex justify-between items-start gap-4">
+                <span className="text-stone-500 text-sm shrink-0">কোথায় জমা দিতে হবে</span>
+                <span className="font-medium text-stone-800 text-right text-sm leading-relaxed max-w-[65%]">
+                  {service.apply_location_bn}
+                </span>
+              </div>
+              <div className="p-4 sm:p-5 flex justify-between items-start gap-4">
+                <span className="text-stone-500 text-sm shrink-0">দায়িত্বপ্রাপ্ত অধিদপ্তর / মন্ত্রণালয়</span>
+                <span className="font-medium text-stone-800 text-sm text-right leading-relaxed max-w-[65%]">
+                  {service.department_bn}
+                </span>
+              </div>
+            </div>
+
+            {service.official_url && service.official_url !== '#' && (
+              <a
+                href={service.official_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-white rounded-2xl border border-stone-200 p-5 hover:border-green-400 hover:shadow-md transition-all group shadow-sm"
+              >
+                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-700 shrink-0">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-stone-900 group-hover:text-green-700">সরকারি অফিসিয়াল পোর্টাল</p>
+                  <p className="text-xs text-stone-400 truncate mt-0.5">{service.official_url}</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-stone-400 group-hover:text-green-600" />
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="fixed bottom-16 lg:bottom-0 left-0 right-0 bg-white border-t border-stone-200 p-4 z-30">
-        <div className="max-w-4xl mx-auto">
-          <Link href="/login" className="flex items-center justify-center w-full bg-green-600 hover:bg-green-700 text-white rounded-xl h-12 font-semibold transition-colors">
+      {/* Sticky Bottom CTA */}
+      <div className="fixed bottom-16 lg:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200 p-4 z-30">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+          <div className="hidden sm:block">
+            <p className="text-xs text-stone-500 font-medium">প্রস্তুত আছেন?</p>
+            <p className="text-sm font-bold text-stone-900">{service.name_bn}</p>
+          </div>
+          <Link
+            href="/login"
+            className="flex-1 sm:flex-none flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-xl px-8 h-12 font-bold transition-colors shadow-md shadow-green-600/20"
+          >
             আবেদন শুরু করুন
           </Link>
         </div>
