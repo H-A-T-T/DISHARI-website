@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'আমাদের সম্পর্কে | দিশারী',
+  description: 'সরকারি সেবা সহজ ভাষায় মানুষের কাছে পৌঁছে দেওয়াই দিশারীর লক্ষ্য।',
+}
 
 export default function AboutPage() {
   const personas = [
