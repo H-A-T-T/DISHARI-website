@@ -1,15 +1,10 @@
 import { Suspense } from 'react'
 import ServiceDetailContent from './ServiceDetailContent'
+import { fetchAllServices } from '@/lib/api'
 
-const KNOWN_SLUGS = [
-  'passport', 'passport-renewal', 'nid-correction', 'birth-registration',
-  'birth-registration-correction', 'death-registration', 'widow-allowance',
-  'old-age-allowance', 'disability-allowance', 'scholarship', 'trade-license',
-  'land-mutation', 'tin-certificate', 'tax-return', 'overseas-welfare-card',
-]
-
-export function generateStaticParams() {
-  return KNOWN_SLUGS.map((slug) => ({ slug }))
+export async function generateStaticParams() {
+  const services = await fetchAllServices()
+  return services.map((s) => ({ slug: s.slug }))
 }
 
 export default async function ServiceDetailPage({
