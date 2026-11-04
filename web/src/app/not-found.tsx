@@ -1,20 +1,17 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { DishariLogo } from '@/components/shared/DishariLogo'
 import { ArrowLeft } from 'lucide-react'
 
 export default function NotFound() {
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 bg-[#FAFAF8] py-16">
       <div className="border-2 border-stone-900 bg-white p-8 sm:p-12 text-center max-w-lg shadow-[6px_6px_0_0_#1c1917]">
-        <div className="mb-4 inline-block bg-white p-2 border border-stone-300">
-          <Image
-            src="/dishari_logo.svg"
-            alt="দিশারী"
-            width={120}
-            height={48}
-            className="h-8 w-auto object-contain"
+        <Link href="/" className="mb-4 inline-block">
+          <DishariLogo
+            theme="light"
+            className="h-10 w-auto"
           />
-        </div>
+        </Link>
         <p className="font-mono text-6xl sm:text-7xl font-black text-stone-300 tracking-wider">
           ৪০৪
         </p>

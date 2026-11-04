@@ -30,8 +30,8 @@
     </filter>
   </defs>
 
-  <!-- Clean White Background -->
-  <rect width="600" height="240" fill="#FFFFFF" />
+  <!-- Transparent Background -->
+  <rect width="600" height="240" fill="none" />
 
   <!-- LOGO MARK: Compass + Chat Bubble + Checkmark/Path -->
   <g transform="translate(45, 30)" filter="url(#softShadow)">

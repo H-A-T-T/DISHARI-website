@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { DishariLogo } from '@/components/shared/DishariLogo'
 import { FileText, ClipboardList, Search, ArrowRight, ShieldCheck, FolderLock } from 'lucide-react'
 
 function getGreeting(): string {
@@ -27,14 +27,10 @@ export default function DashboardPage() {
       <section className="border-b-2 border-stone-900 bg-white pt-8 pb-10 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-6 border-b border-stone-200">
-            <Link href="/" className="inline-block bg-white p-2 border-2 border-stone-900 shadow-[3px_3px_0_0_#1c1917]">
-              <Image
-                src="/dishari_logo.svg"
-                alt="দিশারী"
-                width={130}
-                height={52}
-                className="h-9 w-auto object-contain"
-                priority
+            <Link href="/" className="inline-block group">
+              <DishariLogo
+                theme="light"
+                className="h-10 w-auto transition-transform group-hover:scale-105"
               />
             </Link>
 

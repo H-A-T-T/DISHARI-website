@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { DishariLogo } from '@/components/shared/DishariLogo'
 
 export default function Footer() {
   return (
@@ -8,15 +8,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Column 1: Branding */}
           <div>
-            <div className="bg-white p-2.5 inline-block border border-stone-800 shadow-[3px_3px_0_0_#059669] mb-3">
-              <Image
-                src="/dishari_logo.svg"
-                alt="দিশারী"
-                width={130}
-                height={52}
-                className="h-10 w-auto object-contain"
+            <Link href="/" className="inline-block mb-3 group">
+              <DishariLogo
+                theme="dark"
+                className="h-11 sm:h-12 w-auto transition-transform group-hover:scale-105"
               />
-            </div>
+            </Link>
             <p className="mt-2 text-stone-300 text-sm leading-relaxed">
               সরকারি সেবাকে প্রতিটি নাগরিকের কাছে সহজ, স্বচ্ছ ও নির্ভুলভাবে পৌঁছে দেওয়ার জাতীয় ডিজিটাল উদ্যোগ।
             </p>

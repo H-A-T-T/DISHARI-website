@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
+import { DishariLogo } from '@/components/shared/DishariLogo'
 import { ShieldCheck, ArrowRight, BookOpen, Users, Compass, CheckCircle2 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -50,16 +50,12 @@ export default function AboutPage() {
       {/* ─── Editorial Header / Gazette Banner ─────────────────────────────── */}
       <section className="border-b-2 border-stone-900 bg-white pt-10 pb-12 px-4">
         <div className="max-w-5xl mx-auto">
-          {/* Logo Frame & Official Stamp */}
+          {/* Logo & Official Stamp */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-8 border-b border-stone-200">
-            <Link href="/" className="inline-block bg-white p-2.5 border-2 border-stone-900 shadow-[3px_3px_0_0_#1c1917]">
-              <Image
-                src="/dishari_logo.svg"
-                alt="দিশারী — ডিজিটাল নাগরিক সহায়ক"
-                width={150}
-                height={60}
-                className="h-11 w-auto object-contain"
-                priority
+            <Link href="/" className="inline-block group">
+              <DishariLogo
+                theme="light"
+                className="h-11 sm:h-12 w-auto transition-transform group-hover:scale-105"
               />
             </Link>
 

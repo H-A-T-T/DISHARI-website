@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { DishariLogo } from '@/components/shared/DishariLogo'
 import { Eye, EyeOff, ShieldCheck, ArrowRight, CheckCircle2 } from 'lucide-react'
 
 export default function RegisterPage() {
@@ -14,15 +14,11 @@ export default function RegisterPage() {
       {/* ─── Left Brand Panel — Desktop Only ─────────────────────────────── */}
       <div className="hidden lg:flex w-1/2 bg-stone-950 text-white flex-col justify-between p-12 lg:p-16 border-r-2 border-stone-900 relative">
         <div>
-          {/* Logo Frame */}
-          <Link href="/" className="inline-block bg-white p-3 border-2 border-stone-800 shadow-[4px_4px_0_0_#059669]">
-            <Image
-              src="/dishari_logo.svg"
-              alt="দিশারী — ডিজিটাল নাগরিক সহায়ক"
-              width={160}
-              height={64}
-              className="h-12 w-auto object-contain"
-              priority
+          {/* Logo directly on dark background — transparent, white typography */}
+          <Link href="/" className="inline-block group mb-4">
+            <DishariLogo
+              theme="dark"
+              className="h-14 sm:h-16 w-auto transition-transform group-hover:scale-105"
             />
           </Link>
 
@@ -72,14 +68,10 @@ export default function RegisterPage() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
-            <Link href="/" className="inline-block bg-white p-2.5 border-2 border-stone-900 shadow-[3px_3px_0_0_#1c1917]">
-              <Image
-                src="/dishari_logo.svg"
-                alt="দিশারী"
-                width={140}
-                height={56}
-                className="h-10 w-auto object-contain"
-                priority
+            <Link href="/" className="inline-block">
+              <DishariLogo
+                theme="light"
+                className="h-11 w-auto"
               />
             </Link>
           </div>

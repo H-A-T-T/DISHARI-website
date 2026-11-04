@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { DishariLogo } from '@/components/shared/DishariLogo'
 import { useLanguage } from '@/lib/language-context'
 import { t } from '@/lib/translations'
 import { cn } from '@/lib/utils'
@@ -31,13 +31,9 @@ export default function Navbar() {
       <nav className="max-w-6xl mx-auto h-full px-4 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group py-1">
-          <Image
-            src="/dishari_logo.svg"
-            alt="দিশারী — ডিজিটাল নাগরিক সহায়ক"
-            width={120}
-            height={48}
-            className="h-10 sm:h-11 w-auto object-contain transition-transform group-hover:scale-105"
-            priority
+          <DishariLogo
+            theme="light"
+            className="h-10 sm:h-11 w-auto transition-transform group-hover:scale-105"
           />
         </Link>
 
