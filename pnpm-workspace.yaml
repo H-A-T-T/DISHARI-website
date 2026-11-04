@@ -1,0 +1,9 @@
+packages:
+  - 'web'
+  - 'server'
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - framer-motion@14.9.1
+  - lucide-react@1.68.0
+  - motion-dom@14.9.1

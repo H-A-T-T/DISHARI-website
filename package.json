@@ -1,0 +1,15 @@
+{
+  "name": "dishari-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dishari (দিশারী) — Civic Tech Digital Government Assistant",
+  "scripts": {
+    "dev": "pnpm --parallel run dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:server": "pnpm --filter server dev",
+    "build": "pnpm --filter server build && pnpm --filter web build",
+    "seed": "pnpm --filter server seed",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down"
+  }
+}
