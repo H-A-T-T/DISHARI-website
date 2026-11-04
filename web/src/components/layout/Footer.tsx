@@ -1,15 +1,24 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Footer() {
   return (
-    <footer className="bg-green-800 text-white py-12">
+    <footer className="border-t-2 border-stone-900 bg-stone-950 text-white py-12">
       <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Column 1: Branding */}
           <div>
-            <h3 className="text-2xl font-bold text-white">দিশারী</h3>
-            <p className="mt-2 text-green-200 text-sm leading-relaxed">
-              সরকারি সেবাকে সাধারণ মানুষের কাছে সহজ করে তোলা।
+            <div className="bg-white p-2.5 inline-block border border-stone-800 shadow-[3px_3px_0_0_#059669] mb-3">
+              <Image
+                src="/dishari_logo.svg"
+                alt="দিশারী"
+                width={130}
+                height={52}
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+            <p className="mt-2 text-stone-300 text-sm leading-relaxed">
+              সরকারি সেবাকে প্রতিটি নাগরিকের কাছে সহজ, স্বচ্ছ ও নির্ভুলভাবে পৌঁছে দেওয়ার জাতীয় ডিজিটাল উদ্যোগ।
             </p>
           </div>
 

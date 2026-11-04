@@ -56,8 +56,8 @@ export function CategoryGrid() {
         </p>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-          {CATEGORY_ORDER.map((slug) => {
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
+          {CATEGORY_ORDER.map((slug, idx) => {
             const meta = CATEGORY_META[slug]
             const Icon = CATEGORY_ICONS[slug]
 
@@ -65,24 +65,30 @@ export function CategoryGrid() {
               <Link
                 key={slug}
                 href={`/services?category=${slug}`}
-                className={`bg-white rounded-2xl p-5 lg:p-6 border border-stone-200 border-l-4 ${meta.borderColor} shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group`}
+                className="bg-white border-2 border-stone-900 p-5 lg:p-6 shadow-[4px_4px_0_0_#1c1917] hover:shadow-[6px_6px_0_0_#15803d] hover:-translate-y-1 transition-all duration-150 group flex flex-col justify-between"
               >
-                {/* Icon */}
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${meta.bgColor}`}
-                >
-                  <Icon className={`w-6 h-6 ${meta.color}`} />
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 border border-stone-900 bg-stone-50 flex items-center justify-center">
+                      <Icon className={`w-5 h-5 ${meta.color}`} />
+                    </div>
+                    <span className="font-mono text-xs font-bold text-stone-400 group-hover:text-stone-900">
+                      ০{idx + 1}
+                    </span>
+                  </div>
+
+                  {/* Name */}
+                  <h3 className="font-bold text-lg sm:text-xl text-stone-950 group-hover:text-green-800 transition-colors leading-snug">
+                    {meta.name_bn}
+                  </h3>
+                  <p className="text-xs text-stone-500 font-medium mt-0.5">{meta.name_en}</p>
                 </div>
 
-                {/* Name */}
-                <p className="font-semibold text-stone-800">{meta.name_bn}</p>
-                <p className="text-sm text-stone-500 mt-0.5">{meta.name_en}</p>
-
                 {/* View link */}
-                <p className="text-sm text-stone-500 mt-3 flex items-center gap-1">
-                  {lang === 'bn' ? 'সেবা দেখুন' : 'View services'}
+                <div className="pt-4 mt-3 border-t border-stone-200 flex items-center justify-between text-xs font-bold text-stone-700 group-hover:text-green-800">
+                  <span>{lang === 'bn' ? 'সেবা দেখুন' : 'View services'}</span>
                   <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </p>
+                </div>
               </Link>
             )
           })}

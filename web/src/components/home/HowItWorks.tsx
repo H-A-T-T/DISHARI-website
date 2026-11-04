@@ -48,17 +48,17 @@ export function HowItWorks() {
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-0">
           {steps.map((step, index) => (
             <div key={step.num} className="flex flex-col lg:flex-row items-center flex-1">
-              {/* Step card */}
+              {/* Step item (Architectural, NO AI Card) */}
               <div
                 className={`flex flex-col items-center text-center w-full max-w-xs ${
                   step.emphasized
-                    ? 'bg-green-50 border border-green-200 rounded-2xl p-6'
-                    : 'p-6'
+                    ? 'border-2 border-stone-900 bg-white p-6 shadow-[5px_5px_0_0_#15803d]'
+                    : 'border-2 border-transparent p-6'
                 }`}
               >
                 {/* Step number */}
-                <div className="w-10 h-10 rounded-full bg-green-600 text-white font-bold flex items-center justify-center text-lg">
-                  {step.num}
+                <div className="w-10 h-10 bg-stone-900 text-white font-mono font-black flex items-center justify-center text-base border-2 border-stone-900 shadow-[2px_2px_0_0_#059669]">
+                  ০{step.num}
                 </div>
 
                 {/* Icon */}

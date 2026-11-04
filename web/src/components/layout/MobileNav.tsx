@@ -20,8 +20,8 @@ export default function MobileNav() {
   const { lang } = useLanguage()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white shadow-[0_-1px_3px_rgba(0,0,0,0.05)] lg:hidden pb-safe">
-      <div className="flex items-center h-16">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-stone-900 lg:hidden pb-safe">
+      <div className="flex items-center h-16 divide-x divide-stone-200">
         {tabs.map(({ key, icon: Icon, href }) => {
           const isActive =
             (key === 'home' && pathname === '/') ||

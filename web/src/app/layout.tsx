@@ -19,6 +19,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="bn">
+      <head>
+        <link href="https://fonts.maateen.me/kalpurush/font.css" rel="stylesheet" />
+      </head>
       <body>
         <LanguageProvider>
           <Suspense>

@@ -1,13 +1,21 @@
-/* ── Google Fonts ─────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+/* ── CSS Imports & Font Loading ───────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;600;700&display=swap');
 
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'Kalpurush';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/kalpurush.woff2') format('woff2');
+}
 
 /* ── Brand Color Tokens ───────────────────────────────────────────────── */
 @theme inline {
   /* Fonts */
-  --font-sans: 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: 'Kalpurush', 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Kalpurush', 'Plus Jakarta Sans', system-ui, sans-serif;
 
   /* Brand Green */
   --color-green-50:  #f0fdf4;
@@ -68,9 +76,9 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Kalpurush', 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
   font-size: 16px;
-  line-height: 1.75; /* Extra line-height for Bengali script */
+  line-height: 1.8; /* Extra line-height for Bengali script */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
