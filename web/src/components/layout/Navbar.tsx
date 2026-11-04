@@ -65,15 +65,15 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          {/* Language toggle pill */}
-          <div className="bg-stone-100 rounded-full px-1 py-1 flex items-center text-sm cursor-pointer">
+          {/* Language toggle (Rectangular, NO Cramped Pill) */}
+          <div className="border border-stone-400 bg-stone-100 p-0.5 flex items-center text-xs font-bold">
             <button
               onClick={() => setLang('bn')}
               className={cn(
-                'px-3 py-0.5 rounded-full transition-all',
+                'px-2.5 py-1 transition-all cursor-pointer',
                 lang === 'bn'
-                  ? 'bg-white shadow-sm text-stone-900 font-medium'
-                  : 'text-stone-500'
+                  ? 'bg-stone-900 text-white'
+                  : 'text-stone-600 hover:text-stone-950'
               )}
             >
               বাং
@@ -81,10 +81,10 @@ export default function Navbar() {
             <button
               onClick={() => setLang('en')}
               className={cn(
-                'px-3 py-0.5 rounded-full transition-all',
+                'px-2.5 py-1 transition-all cursor-pointer',
                 lang === 'en'
-                  ? 'bg-white shadow-sm text-stone-900 font-medium'
-                  : 'text-stone-500'
+                  ? 'bg-stone-900 text-white'
+                  : 'text-stone-600 hover:text-stone-950'
               )}
             >
               EN
@@ -94,7 +94,7 @@ export default function Navbar() {
           {/* Login — hidden on mobile */}
           <Link
             href="/login"
-            className="hidden lg:inline-flex items-center justify-center text-green-700 hover:bg-green-50 rounded-xl px-5 h-10 font-medium transition-colors"
+            className="hidden lg:inline-flex items-center justify-center border-2 border-stone-900 bg-white hover:bg-stone-100 text-stone-900 px-4 h-9 text-xs font-bold transition-colors"
           >
             {t('nav', 'login', lang)}
           </Link>
@@ -102,7 +102,7 @@ export default function Navbar() {
           {/* Register — hidden on mobile */}
           <Link
             href="/register"
-            className="hidden lg:inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-xl px-5 h-10 font-medium transition-colors"
+            className="hidden lg:inline-flex items-center justify-center border-2 border-stone-900 bg-stone-900 hover:bg-green-700 text-white px-5 h-9 text-xs font-bold transition-colors shadow-[2px_2px_0_0_#1c1917]"
           >
             {t('nav', 'register', lang)}
           </Link>

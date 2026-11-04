@@ -2,127 +2,203 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, Phone, Mail } from 'lucide-react'
+import Image from 'next/image'
+import { Eye, EyeOff, Phone, Mail, ShieldCheck, ArrowRight } from 'lucide-react'
 
 export default function LoginPage() {
   const [mode, setMode] = useState<'phone' | 'email'>('phone')
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left Brand Panel — Desktop Only */}
-      <div className="hidden lg:flex w-1/2 bg-green-700 flex-col justify-center items-center p-12">
-        <h1 className="text-5xl font-extrabold text-white">দিশারী</h1>
-        <p className="text-green-200 mt-4 text-center text-lg leading-relaxed max-w-sm">
-          সরকারি সেবা পাওয়ার সবচেয়ে সহজ মাধ্যম। কাগজপত্র সেভ করুন, ফর্ম স্বয়ংক্রিয়ভাবে পূরণ হোক।
-        </p>
-        <div className="mt-12 bg-green-600/50 rounded-2xl px-6 py-4 max-w-xs">
-          <p className="text-green-100 text-sm italic">
-            &ldquo;এখন আর কম্পিউটার দোকানে যেতে হয় না। নিজেই ঘরে বসে সব কাজ করতে পারি।&rdquo;
+    <div className="flex flex-col lg:flex-row min-h-screen bg-[#FAFAF8] text-stone-900 font-sans">
+      {/* ─── Left Brand Panel — Desktop Only (Civic Broadside) ───────────── */}
+      <div className="hidden lg:flex w-1/2 bg-stone-950 text-white flex-col justify-between p-12 lg:p-16 border-r-2 border-stone-900 relative">
+        <div>
+          {/* Logo Frame */}
+          <Link href="/" className="inline-block bg-white p-3 border-2 border-stone-800 shadow-[4px_4px_0_0_#059669]">
+            <Image
+              src="/dishari_logo.svg"
+              alt="দিশারী — ডিজিটাল নাগরিক সহায়ক"
+              width={160}
+              height={64}
+              className="h-12 w-auto object-contain"
+              priority
+            />
+          </Link>
+
+          <div className="mt-12 max-w-md">
+            <span className="font-mono text-xs text-green-400 font-bold uppercase tracking-wider block mb-2">
+              [ নিরাপদ নাগরিক পোর্টাল ]
+            </span>
+            <h1 className="text-4xl font-black text-white leading-tight">
+              সরকারি সেবা গ্রহণের সবচেয়ে সহজ মাধ্যম
+            </h1>
+            <p className="text-stone-300 mt-4 text-base leading-relaxed font-normal">
+              আপনার গুরুত্বপূর্ণ কাগজপত্র নিরাপদ লকারে সংরক্ষণ করুন। দিশারী আপনার হয়ে ফরম স্বয়ংক্রিয়ভাবে পূরণ করবে।
+            </p>
+          </div>
+        </div>
+
+        {/* Civic Testimonial Box */}
+        <div className="border-2 border-stone-700 bg-stone-900 p-6 max-w-md shadow-[4px_4px_0_0_#059669]">
+          <div className="flex items-center gap-2 text-green-400 text-xs font-mono font-bold mb-2">
+            <ShieldCheck className="w-4 h-4" />
+            <span>নাগরিকের বাস্তব অভিজ্ঞতা</span>
+          </div>
+          <p className="text-stone-200 text-sm leading-relaxed italic">
+            &ldquo;আগে যে কোনো সরকারি কাজের জন্য কম্পিউটারের দোকানে দাঁড়িয়ে থাকতে হতো। এখন দিশারীতে সব নিয়ম ও ফি দেখে নিজেই নির্ভুলভাবে আবেদন করতে পারি।&rdquo;
           </p>
-          <p className="text-green-300 text-xs mt-3">— একজন দিশারী ব্যবহারকারী</p>
+          <p className="text-stone-400 text-xs mt-3 font-semibold">— একজন দিশারী ব্যবহারকারী, ময়মনসিংহ</p>
+        </div>
+
+        {/* Bottom gazette note */}
+        <div className="font-mono text-xs text-stone-500">
+          গণপ্রজাতন্ত্রী বাংলাদেশ সরকার · নাগরিক তথ্য সহায়তা
         </div>
       </div>
 
-      {/* Right Form Panel */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm">
+      {/* ─── Right Form Panel ─────────────────────────────────────────────── */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12 sm:px-8">
+        <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <Link href="/" className="lg:hidden block text-center mb-8">
-            <span className="text-green-700 font-bold text-2xl">দিশারী</span>
-          </Link>
+          <div className="lg:hidden text-center mb-8">
+            <Link href="/" className="inline-block bg-white p-2.5 border-2 border-stone-900 shadow-[3px_3px_0_0_#1c1917]">
+              <Image
+                src="/dishari_logo.svg"
+                alt="দিশারী"
+                width={140}
+                height={56}
+                className="h-10 w-auto object-contain"
+                priority
+              />
+            </Link>
+          </div>
 
-          <h2 className="text-2xl font-bold text-stone-900">স্বাগতম</h2>
-          <p className="text-stone-500 mt-2">আপনার অ্যাকাউন্টে লগইন করুন</p>
+          <div className="border-b-2 border-stone-900 pb-4 mb-6">
+            <span className="font-mono text-xs font-bold text-stone-500 uppercase tracking-wider block">
+              [ নাগরিক প্রবেশদ্বার ]
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-stone-950 mt-1">
+              লগইন করুন
+            </h2>
+            <p className="text-stone-600 text-sm mt-1">
+              আপনার সংরক্ষিত নথিপত্র ও চলমান আবেদন দেখতে লগইন করুন
+            </p>
+          </div>
 
-          {/* Mode Toggle */}
-          <div className="flex mt-6 bg-stone-100 rounded-xl p-1">
+          {/* Mode Toggle (Rectangular Segmented Control, NO Cramped Pills) */}
+          <div className="grid grid-cols-2 border-2 border-stone-900 bg-stone-100 p-1 mb-6">
             <button
+              type="button"
               onClick={() => setMode('phone')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                mode === 'phone' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500'
+              className={`flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-all cursor-pointer ${
+                mode === 'phone'
+                  ? 'bg-stone-900 text-white shadow-xs'
+                  : 'text-stone-700 hover:text-stone-950'
               }`}
             >
               <Phone className="w-4 h-4" />
-              মোবাইল নম্বর
+              <span>মোবাইল নম্বর</span>
             </button>
             <button
+              type="button"
               onClick={() => setMode('email')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                mode === 'email' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500'
+              className={`flex items-center justify-center gap-2 py-2.5 text-sm font-bold transition-all cursor-pointer ${
+                mode === 'email'
+                  ? 'bg-stone-900 text-white shadow-xs'
+                  : 'text-stone-700 hover:text-stone-950'
               }`}
             >
               <Mail className="w-4 h-4" />
-              ইমেইল
+              <span>ইমেইল</span>
             </button>
           </div>
 
-          <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
+          {/* Form */}
+          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
             {mode === 'phone' ? (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">মোবাইল নম্বর</label>
+                  <label className="block text-xs font-mono font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                    মোবাইল নম্বর <span className="text-red-600">*</span>
+                  </label>
                   <input
                     type="tel"
                     placeholder="01XXXXXXXXX"
-                    className="h-14 w-full border-2 border-stone-200 rounded-xl px-4 text-base focus:border-green-500 outline-none transition-colors"
+                    className="h-13 w-full border-2 border-stone-900 bg-white px-4 text-base font-medium focus:ring-2 focus:ring-green-700 outline-none transition-all placeholder:text-stone-400"
                   />
+                  <p className="text-xs text-stone-500 mt-1 font-mono">
+                    আমরা আপনার নম্বরে একটি গোপন ওটিপি (OTP) পাঠাব।
+                  </p>
                 </div>
+
                 <button
                   type="submit"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl h-12 font-semibold transition-colors cursor-pointer"
+                  className="w-full border-2 border-stone-900 bg-stone-900 hover:bg-green-700 text-white h-12 font-bold text-base transition-colors cursor-pointer shadow-[4px_4px_0_0_#1c1917] flex items-center justify-center gap-2"
                 >
-                  OTP পাঠান
+                  <span>ওটিপি (OTP) পাঠান</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </>
             ) : (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">ইমেইল</label>
+                  <label className="block text-xs font-mono font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                    ইমেইল ঠিকানা <span className="text-red-600">*</span>
+                  </label>
                   <input
                     type="email"
                     placeholder="your@email.com"
-                    className="h-14 w-full border-2 border-stone-200 rounded-xl px-4 text-base focus:border-green-500 outline-none transition-colors"
+                    className="h-13 w-full border-2 border-stone-900 bg-white px-4 text-base font-medium focus:ring-2 focus:ring-green-700 outline-none transition-all placeholder:text-stone-400"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">পাসওয়ার্ড</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-mono font-bold uppercase tracking-wider text-stone-700">
+                      পাসওয়ার্ড <span className="text-red-600">*</span>
+                    </label>
+                    <button type="button" className="text-xs text-green-700 font-bold hover:underline cursor-pointer">
+                      পাসওয়ার্ড ভুলে গেছেন?
+                    </button>
+                  </div>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
-                      className="h-14 w-full border-2 border-stone-200 rounded-xl px-4 pr-12 text-base focus:border-green-500 outline-none transition-colors"
+                      className="h-13 w-full border-2 border-stone-900 bg-white px-4 pr-12 text-base font-medium focus:ring-2 focus:ring-green-700 outline-none transition-all placeholder:text-stone-400"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 cursor-pointer"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-900 cursor-pointer"
+                      title={showPassword ? 'লুকান' : 'দেখুন'}
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  <div className="flex justify-end mt-2">
-                    <button type="button" className="text-green-600 text-sm hover:underline cursor-pointer">
-                      পাসওয়ার্ড ভুলে গেছেন?
-                    </button>
-                  </div>
                 </div>
+
                 <button
                   type="submit"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl h-12 font-semibold transition-colors cursor-pointer"
+                  className="w-full border-2 border-stone-900 bg-stone-900 hover:bg-green-700 text-white h-12 font-bold text-base transition-colors cursor-pointer shadow-[4px_4px_0_0_#1c1917] flex items-center justify-center gap-2"
                 >
-                  লগইন করুন
+                  <span>লগইন করুন</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </>
             )}
           </form>
 
-          <p className="text-center text-stone-500 text-sm mt-8">
-            নতুন ব্যবহারকারী?{' '}
-            <Link href="/register" className="text-green-600 font-medium hover:underline">
-              নিবন্ধন করুন
-            </Link>
-          </p>
+          {/* Registration Link */}
+          <div className="mt-8 pt-6 border-t border-stone-200 text-center">
+            <p className="text-stone-600 text-sm">
+              এখনও অ্যাকাউন্ট নেই?{' '}
+              <Link href="/register" className="text-green-800 font-bold underline decoration-2 underline-offset-4 hover:text-green-950">
+                নতুন অ্যাকাউন্ট নিবন্ধন করুন →
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

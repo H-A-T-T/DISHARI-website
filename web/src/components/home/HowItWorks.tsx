@@ -62,8 +62,8 @@ export function HowItWorks() {
                 </div>
 
                 {/* Icon */}
-                <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mt-4">
-                  <step.icon className="w-8 h-8 text-green-600" />
+                <div className="w-14 h-14 border-2 border-stone-900 bg-stone-50 flex items-center justify-center mx-auto mt-4 shadow-[3px_3px_0_0_#1c1917]">
+                  <step.icon className="w-7 h-7 text-stone-900" />
                 </div>
 
                 {/* Title */}
