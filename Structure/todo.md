@@ -14,7 +14,7 @@
 ## Task 0 — Project Initialization
 *Do this first. Everything else depends on it.*
 
-- [ ] **0.1** Scaffold Next.js 14 project with App Router
+- [x] **0.1** Scaffold Next.js 14 project with App Router
   ```bash
   npx create-next-app@latest dishari --typescript --tailwind --eslint --app --src-dir
   ```
@@ -24,12 +24,12 @@
   ```
   Choose: Default style, Zinc base color, CSS variables: yes
 
-- [ ] **0.3** Install required packages
+- [x] **0.3** Install required packages
   ```bash
   npm install lucide-react next-themes clsx tailwind-merge
   ```
 
-- [ ] **0.4** Configure Bangla font in `app/layout.tsx`
+- [x] **0.4** Configure Bangla font in `app/layout.tsx`
   - Use Google Fonts: **Noto Sans Bengali** (primary) + **Inter** (English fallback)
   - Add to `<head>`:
     ```html
@@ -37,7 +37,7 @@
     ```
   - Set `font-family: 'Noto Sans Bengali', 'Inter', sans-serif` as the global default
 
-- [ ] **0.5** Set up global CSS variables in `app/globals.css`
+- [x] **0.5** Set up global CSS variables in `app/globals.css`
   - Define brand colors (see Design System section below)
 
 - [ ] **0.6** Set up folder structure:
@@ -121,31 +121,31 @@
 
 ### 1.1 — Navbar (`components/layout/Navbar.tsx`)
 - [ ] **1.1.1** Logo on the left: "দিশারী" text logo in brand green + small tagline "জনবন্ধু AI"
-- [ ] **1.1.2** Desktop nav links (center or right):
+- [x] **1.1.2** Desktop nav links (center or right):
   - সেবাসমূহ (Services)
   - আমাদের সম্পর্কে (About)
   - যোগাযোগ (Contact)
-- [ ] **1.1.3** Right side buttons:
+- [x] **1.1.3** Right side buttons:
   - "লগইন" (Login) — outlined button
   - "নিবন্ধন করুন" (Register) — solid green button
-- [ ] **1.1.4** Language toggle button: "বাং | EN" — switches between Bangla and English display (use React context, no library needed yet)
+- [x] **1.1.4** Language toggle button: "বাং | EN" — switches between Bangla and English display (use React context, no library needed yet)
 - [ ] **1.1.5** On mobile: Hide desktop nav links. Show hamburger icon.
 - [ ] **1.1.6** Mobile drawer nav (`components/layout/MobileNav.tsx`):
   - Slide-in from left or bottom sheet
   - Full-width links with icons
   - Login / Register buttons at bottom
-- [ ] **1.1.7** Navbar should be sticky (`sticky top-0 z-50`) with a subtle shadow on scroll
+- [x] **1.1.7** Navbar should be sticky (`sticky top-0 z-50`) with a subtle shadow on scroll
 
 ### 1.2 — Footer (`components/layout/Footer.tsx`)
-- [ ] **1.2.1** Three column layout (stacks to single column on mobile):
+- [x] **1.2.1** Three column layout (stacks to single column on mobile):
   - **Col 1:** Logo + 1-line mission statement in Bangla
   - **Col 2:** দ্রুত লিংক (Quick Links) — same as nav links + FAQ
   - **Col 3:** জরুরি হেল্পলাইন (Emergency Helplines):
     - জাতীয় হেল্পলাইন: ৩৩৩
     - জরুরি সেবা: ৯৯৯
     - দুর্নীতি দমন: ১০৬
-- [ ] **1.2.2** Bottom bar: Copyright text + "তৈরি করেছে দিশারী টিম"
-- [ ] **1.2.3** Background: dark green (`#15803d`) with white text
+- [x] **1.2.2** Bottom bar: Copyright text + "তৈরি করেছে দিশারী টিম"
+- [x] **1.2.3** Background: dark green (`#15803d`) with white text
 
 ---
 
@@ -153,19 +153,19 @@
 *The most important page. First impression for rural users.*
 
 ### 2.1 — Hero Section
-- [ ] **2.1.1** Full-width section, green gradient background
-- [ ] **2.1.2** Large headline (Bangla): **"সরকারি সেবা এখন আপনার হাতের মুঠোয়"**
-- [ ] **2.1.3** Subheadline (Bangla): "কোন কাগজ লাগবে? কোথায় যেতে হবে? কীভাবে আবেদন করবেন? সব উত্তর এখানে।"
-- [ ] **2.1.4** Large search bar with placeholder: "আপনি কী খুঁজছেন? যেমন: পাসপোর্ট, জন্ম নিবন্ধন..."
+- [x] **2.1.1** Full-width section, green gradient background
+- [x] **2.1.2** Large headline (Bangla): **"সরকারি সেবা এখন আপনার হাতের মুঠোয়"**
+- [x] **2.1.3** Subheadline (Bangla): "কোন কাগজ লাগবে? কোথায় যেতে হবে? কীভাবে আবেদন করবেন? সব উত্তর এখানে।"
+- [x] **2.1.4** Large search bar with placeholder: "আপনি কী খুঁজছেন? যেমন: পাসপোর্ট, জন্ম নিবন্ধন..."
   - Non-functional for now (just UI) — wire up in a later phase
   - Search icon button on the right
-- [ ] **2.1.5** Below search bar: Popular search tags as clickable chips
+- [x] **2.1.5** Below search bar: Popular search tags as clickable chips
   - পাসপোর্ট · NID সংশোধন · জন্ম নিবন্ধন · উপবৃত্তি · ভাতা · ট্রেড লাইসেন্স
 
 ### 2.2 — Service Category Grid
-- [ ] **2.2.1** Section title: "কোন সেবা খুঁজছেন?"
-- [ ] **2.2.2** Grid of category cards: 2 columns on mobile, 3 on tablet, 4 on desktop
-- [ ] **2.2.3** Categories to include (with icons from lucide-react):
+- [x] **2.2.1** Section title: "কোন সেবা খুঁজছেন?"
+- [x] **2.2.2** Grid of category cards: 2 columns on mobile, 3 on tablet, 4 on desktop
+- [x] **2.2.3** Categories to include (with icons from lucide-react):
   | Category (Bangla) | Category (English) | Icon |
   |---|---|---|
   | পরিচয় ও নথিপত্র | Identity & Documents | `IdCard` |
@@ -176,47 +176,47 @@
   | কর ও রাজস্ব | Tax & Revenue | `Receipt` |
   | প্রবাসী সেবা | Overseas Services | `Plane` |
   | স্বাস্থ্যসেবা | Health Services | `Stethoscope` |
-- [ ] **2.2.4** Each card: icon (top) + category name (Bangla bold, English small) + arrow icon
-- [ ] **2.2.5** Cards link to `/services?category=[slug]`
+- [x] **2.2.4** Each card: icon (top) + category name (Bangla bold, English small) + arrow icon
+- [x] **2.2.5** Cards link to `/services?category=[slug]`
 
 ### 2.3 — "How It Works" Section
-- [ ] **2.3.1** Section title: "কীভাবে কাজ করে?"
-- [ ] **2.3.2** 3-step horizontal flow (stacks vertically on mobile):
+- [x] **2.3.1** Section title: "কীভাবে কাজ করে?"
+- [x] **2.3.2** 3-step horizontal flow (stacks vertically on mobile):
   - Step 1: 🔍 "সেবা বেছে নিন" — আপনার প্রয়োজনীয় সরকারি সেবাটি খুঁজুন
   - Step 2: 📋 "কাগজপত্র দেখুন" — কী কী লাগবে তা আগেই জেনে নিন
   - Step 3: ✅ "আবেদন করুন" — আমরা আপনার হয়ে ফর্ম পূরণ করে দেব
-- [ ] **2.3.3** Each step: numbered circle + icon + title + description
+- [x] **2.3.3** Each step: numbered circle + icon + title + description
 
 ### 2.4 — Featured Services Section
-- [ ] **2.4.1** Section title: "জনপ্রিয় সেবাসমূহ"
-- [ ] **2.4.2** Horizontal scrollable row of service cards on mobile, grid on desktop
+- [x] **2.4.1** Section title: "জনপ্রিয় সেবাসমূহ"
+- [x] **2.4.2** Horizontal scrollable row of service cards on mobile, grid on desktop
 - [ ] **2.4.3** Show 6 services (use mock data from `lib/constants.ts`):
   - পাসপোর্ট আবেদন, NID সংশোধন, জন্ম নিবন্ধন, বিধবা ভাতা, উপবৃত্তি আবেদন, ট্রেড লাইসেন্স
-- [ ] **2.4.4** Each card: service icon + name (Bangla) + processing time + fee badge + "দেখুন →" link
-- [ ] **2.4.5** "সব সেবা দেখুন →" button at the end, links to `/services`
+- [x] **2.4.4** Each card: service icon + name (Bangla) + processing time + fee badge + "দেখুন →" link
+- [x] **2.4.5** "সব সেবা দেখুন →" button at the end, links to `/services`
 
 ### 2.5 — AI Assistant Teaser Section
-- [ ] **2.5.1** Full-width banner with green background
-- [ ] **2.5.2** Text: "🤖 জনবন্ধু AI — শীঘ্রই আসছে"
-- [ ] **2.5.3** Subtext: "বাংলায় কথা বলুন, ভয়েসে প্রশ্ন করুন — আমরা উত্তর দেব"
-- [ ] **2.5.4** "আগ্রহী? অপেক্ষা তালিকায় যোগ দিন" button (non-functional, just UI)
+- [x] **2.5.1** Full-width banner with green background
+- [x] **2.5.2** Text: "🤖 জনবন্ধু AI — শীঘ্রই আসছে"
+- [x] **2.5.3** Subtext: "বাংলায় কথা বলুন, ভয়েসে প্রশ্ন করুন — আমরা উত্তর দেব"
+- [x] **2.5.4** "আগ্রহী? অপেক্ষা তালিকায় যোগ দিন" button (non-functional, just UI)
 
 ### 2.6 — Stats Section (Trust Builder)
 - [ ] **2.6.1** 3 stats in a row:
   - ৫০+ সরকারি সেবা (50+ Government Services)
   - ৮ বিভাগে সেবা (Services in 8 Divisions)
   - সম্পূর্ণ বিনামূল্যে (Completely Free)
-- [ ] **2.6.2** Use large bold numbers, small descriptive text below
+- [x] **2.6.2** Use large bold numbers, small descriptive text below
 
 ---
 
 ## Task 3 — Services List Page (`app/(marketing)/services/page.tsx`)
 *Browse and filter all available services.*
 
-- [ ] **3.1** Page title: "সকল সেবা"
-- [ ] **3.2** Category filter tabs at top (horizontal scrollable on mobile):
+- [x] **3.1** Page title: "সকল সেবা"
+- [x] **3.2** Category filter tabs at top (horizontal scrollable on mobile):
   - সব · পরিচয় · শিক্ষা · ভূমি · কল্যাণ · ব্যবসা · কর · প্রবাসী
-- [ ] **3.3** Search input (filters the list client-side)
+- [x] **3.3** Search input (filters the list client-side)
 - [ ] **3.4** Service list as cards (use mock data from `lib/constants.ts`):
   - Service name (Bangla + English)
   - Category badge
@@ -224,16 +224,16 @@
   - Fee (বিনামূল্যে if free)
   - Required documents count badge
   - "বিস্তারিত দেখুন" button → links to `/services/[slug]`
-- [ ] **3.5** Empty state if no results match search
-- [ ] **3.6** "আরও সেবা আসছে..." note at the bottom
+- [x] **3.5** Empty state if no results match search
+- [x] **3.6** "আরও সেবা আসছে..." note at the bottom
 
 ---
 
 ## Task 4 — Individual Service Detail Page (`app/(marketing)/services/[slug]/page.tsx`)
 *The most important page for the user. This is where the value is delivered.*
 
-- [ ] **4.1** Generate static params from mock service data
-- [ ] **4.2** Service header:
+- [x] **4.1** Generate static params from mock service data
+- [x] **4.2** Service header:
   - Large icon + service name (Bangla bold) + English name (small, gray)
   - Category badge + processing time badge + fee badge
 - [ ] **4.3** Tab navigation (or accordion on mobile):
@@ -252,7 +252,7 @@
   - Numbered steps with icons
   - Each step: title + description + (optional) link
   - Important warnings in a yellow alert box
-- [ ] **4.6** CTA button (bottom, sticky on mobile):
+- [x] **4.6** CTA button (bottom, sticky on mobile):
   - "আবেদন শুরু করুন" — green, full-width on mobile
   - For now: links to login page with a message "আবেদন করতে প্রথমে নিবন্ধন করুন"
 
@@ -263,25 +263,25 @@
 > Do NOT wire up Supabase yet. Just build the UI. Auth logic comes in Phase 2.
 
 ### 5.1 — Register Page (`app/(auth)/register/page.tsx`)
-- [ ] **5.1.1** Page title: "নতুন অ্যাকাউন্ট তৈরি করুন"
-- [ ] **5.1.2** Form fields:
+- [x] **5.1.1** Page title: "নতুন অ্যাকাউন্ট তৈরি করুন"
+- [x] **5.1.2** Form fields:
   - পূর্ণ নাম (Full Name) — text
   - মোবাইল নম্বর (Phone Number) — tel input, BD format (+880)
   - ইমেইল (Email) — optional, labeled as "(ঐচ্ছিক)"
   - পাসওয়ার্ড (Password) — with show/hide toggle
   - পাসওয়ার্ড নিশ্চিত করুন (Confirm Password)
-- [ ] **5.1.3** Register button: "নিবন্ধন করুন" — full width, green
-- [ ] **5.1.4** Below: "ইতিমধ্যে অ্যাকাউন্ট আছে? লগইন করুন →"
-- [ ] **5.1.5** No social login buttons for now (target users don't use Google login)
+- [x] **5.1.3** Register button: "নিবন্ধন করুন" — full width, green
+- [x] **5.1.4** Below: "ইতিমধ্যে অ্যাকাউন্ট আছে? লগইন করুন →"
+- [x] **5.1.5** No social login buttons for now (target users don't use Google login)
 
 ### 5.2 — Login Page (`app/(auth)/login/page.tsx`)
-- [ ] **5.2.1** Page title: "লগইন করুন"
-- [ ] **5.2.2** Two tabs: "মোবাইল নম্বর" | "ইমেইল"
-- [ ] **5.2.3** Mobile tab: Phone input + OTP button (UI only)
-- [ ] **5.2.4** Email tab: Email + Password inputs
-- [ ] **5.2.5** Login button: "লগইন করুন"
-- [ ] **5.2.6** "পাসওয়ার্ড ভুলে গেছেন?" link
-- [ ] **5.2.7** Below: "নতুন ব্যবহারকারী? নিবন্ধন করুন →"
+- [x] **5.2.1** Page title: "লগইন করুন"
+- [x] **5.2.2** Two tabs: "মোবাইল নম্বর" | "ইমেইল"
+- [x] **5.2.3** Mobile tab: Phone input + OTP button (UI only)
+- [x] **5.2.4** Email tab: Email + Password inputs
+- [x] **5.2.5** Login button: "লগইন করুন"
+- [x] **5.2.6** "পাসওয়ার্ড ভুলে গেছেন?" link
+- [x] **5.2.7** Below: "নতুন ব্যবহারকারী? নিবন্ধন করুন →"
 
 ---
 
@@ -295,7 +295,7 @@
   - 📋 আমার আবেদন (My Applications) — placeholder
   - 🔔 নোটিফিকেশন (Notifications) — placeholder
   - ⚙️ সেটিংস (Settings) — placeholder
-- [ ] **6.3** Main content area: Welcome message + placeholder cards
+- [x] **6.3** Main content area: Welcome message + placeholder cards
   - "আপনার নথিপত্র আপলোড করুন" — CTA card
   - "কোন সেবা দরকার?" — Browse services CTA
 - [ ] **6.4** Show "🔒 লগইন করুন" gate if user visits while logged out (middleware added in Phase 2)
@@ -303,11 +303,11 @@
 ---
 
 ## Task 7 — About Page (`app/(marketing)/about/page.tsx`)
-- [ ] **7.1** Mission statement in Bangla (full paragraph from `statement.txt`)
-- [ ] **7.2** Problem scenarios section — the 10 personas from `statement.txt` (Rahim, Rahima Begum, Jamil, etc.) shown as story cards
-- [ ] **7.3** "আমাদের লক্ষ্য" section with the vision quote
+- [x] **7.1** Mission statement in Bangla (full paragraph from `statement.txt`)
+- [x] **7.2** Problem scenarios section — the 10 personas from `statement.txt` (Rahim, Rahima Begum, Jamil, etc.) shown as story cards
+- [x] **7.3** "আমাদের লক্ষ্য" section with the vision quote
 - [ ] **7.4** Features list (coming soon labels where needed)
-- [ ] **7.5** Team section (placeholder for now)
+- [x] **7.5** Team section (placeholder for now)
 
 ---
 
@@ -352,16 +352,16 @@
 ## Task 9 — Language Toggle (Bangla / English)
 *Lightweight implementation without a heavy i18n library.*
 
-- [ ] **9.1** Create `lib/language-context.tsx`:
+- [x] **9.1** Create `lib/language-context.tsx`:
   - `LanguageContext` with `lang: 'bn' | 'en'` and `setLang` function
   - Persist to `localStorage`
   - Wrap root layout in `LanguageProvider`
-- [ ] **9.2** Create `lib/translations.ts`:
+- [x] **9.2** Create `lib/translations.ts`:
   - Export `t(key, lang)` helper function
   - Add translations for all UI strings (nav labels, buttons, section titles)
   - Bangla is the default; English is the fallback
-- [ ] **9.3** Wire up language toggle button in Navbar
-- [ ] **9.4** Apply `lang` attribute to `<html>` tag for browser accessibility
+- [x] **9.3** Wire up language toggle button in Navbar
+- [x] **9.4** Apply `lang` attribute to `<html>` tag for browser accessibility
 
 > ⚠️ Note: Service content (names, descriptions, steps) is stored in separate `_bn` and `_en` fields in the data. The `t()` function is only for UI chrome (buttons, labels, navigation).
 
@@ -372,9 +372,9 @@
 
 - [ ] **10.1** Test every page at: 375px (iPhone SE), 390px (iPhone 14), 768px (tablet), 1280px (desktop)
 - [ ] **10.2** Check all tap targets are minimum 48x48px
-- [ ] **10.3** Verify Bangla text renders correctly (Noto Sans Bengali loaded)
-- [ ] **10.4** Check all navigation links work (no dead links, correct routes)
-- [ ] **10.5** Add a simple 404 page (`app/not-found.tsx`) in Bangla
+- [x] **10.3** Verify Bangla text renders correctly (Noto Sans Bengali loaded)
+- [x] **10.4** Check all navigation links work (no dead links, correct routes)
+- [x] **10.5** Add a simple 404 page (`app/not-found.tsx`) in Bangla
 - [ ] **10.6** Add page metadata (`metadata` export) on all pages for SEO:
   - Title format: "পৃষ্ঠার নাম | দিশারী"
   - Description in Bangla
