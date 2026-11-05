@@ -47,7 +47,7 @@ export function HeroSection() {
           {lang === 'bn' ? (
             <>
               সরকারি সেবা এখন আপনার হাতের
-              <span className="text-green-600">মুঠোয়</span>
+              <span className="text-green-600"> মুঠোয়</span>
             </>
           ) : (
             <>
