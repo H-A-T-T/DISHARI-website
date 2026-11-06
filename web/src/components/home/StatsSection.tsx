@@ -4,25 +4,29 @@ import { useLanguage } from '@/lib/language-context'
 import { t } from '@/lib/translations'
 
 const stats = [
-  { number: '৫০+', key: 'services' },
-  { number: '৮', key: 'divisions' },
-  { number: '৩৩৩', key: 'helpline' },
-  { number: '১০০%', key: 'free' },
+  { numKey: 's1Num', key: 'services' },
+  { numKey: 's2Num', key: 'divisions' },
+  { numKey: 's3Num', key: 'helpline' },
+  { numKey: 's4Num', key: 'free' },
 ]
 
 export function StatsSection() {
   const { lang } = useLanguage()
 
   return (
-    <section className="py-16 border-y-2 border-stone-900 bg-stone-950 text-white">
+    <section className="py-12 bg-[#F5F6F8] border-y border-neutral-200">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 border-2 border-stone-800 bg-stone-900 divide-y sm:divide-y-0 sm:divide-x-2 divide-stone-800 shadow-[6px_6px_0_0_#059669]">
+        {/* Windows 10 Flat Metric Tiles */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
           {stats.map((stat) => (
-            <div key={stat.key} className="text-center p-6 sm:p-8">
-              <p className="text-4xl lg:text-5xl font-black text-white font-mono tracking-tight">
-                {stat.number}
+            <div
+              key={stat.key}
+              className="bg-white border border-neutral-200 border-t-3 border-t-[#006A4E] p-5 sm:p-6 text-center shadow-xs rounded-none"
+            >
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#006A4E] font-mono tracking-tight">
+                {t('stats', stat.numKey, lang)}
               </p>
-              <p className="text-xs sm:text-sm font-bold text-green-300 mt-2 uppercase tracking-wide">
+              <p className="text-xs sm:text-sm font-semibold text-neutral-600 mt-2 uppercase tracking-wide">
                 {t('stats', stat.key, lang)}
               </p>
             </div>
@@ -32,3 +36,5 @@ export function StatsSection() {
     </section>
   )
 }
+
+export default StatsSection

@@ -1,22 +1,34 @@
 'use client'
 
 import React from 'react'
+import { useLanguage } from '@/lib/language-context'
 
 interface DishariLogoProps extends React.SVGProps<SVGSVGElement> {
   theme?: 'light' | 'dark'
   className?: string
+  lang?: 'bn' | 'en'
 }
 
 export function DishariLogo({
   theme = 'light',
   className = 'h-10 w-auto',
+  lang: propLang,
   ...props
 }: DishariLogoProps) {
+  let contextLang: 'bn' | 'en' = 'bn'
+  try {
+    const ctx = useLanguage()
+    if (ctx?.lang) contextLang = ctx.lang
+  } catch {
+    // Outside provider fallback
+  }
+
+  const activeLang = propLang || contextLang || 'bn'
   const isDark = theme === 'dark'
   const titleColor = isDark ? '#FFFFFF' : '#064E3B'
   const subtitleColor = isDark ? '#34D399' : '#059669'
   const shadowColor = isDark ? '#10B981' : '#064E3B'
-  const shadowOpacity = isDark ? '0.35' : '0.12'
+  const shadowOpacity = isDark ? '0.30' : '0.10'
 
   // Unique IDs for gradients to avoid collisions if multiple instances are mounted
   const idPrefix = isDark ? 'dishari_dark_' : 'dishari_light_'
@@ -24,7 +36,7 @@ export function DishariLogo({
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 600 240"
+      viewBox="8 8 444 168"
       className={className}
       fill="none"
       {...props}
@@ -60,8 +72,8 @@ export function DishariLogo({
         <filter id={`${idPrefix}softShadow`} x="-15%" y="-15%" width="135%" height="135%">
           <feDropShadow
             dx="0"
-            dy="6"
-            stdDeviation="8"
+            dy="4"
+            stdDeviation="6"
             floodColor={shadowColor}
             floodOpacity={shadowOpacity}
           />
@@ -69,7 +81,7 @@ export function DishariLogo({
       </defs>
 
       {/* ─── LOGO MARK: Compass + Chat Bubble + Guiding Needle ─── */}
-      <g transform="translate(45, 30)" filter={`url(#${idPrefix}softShadow)`}>
+      <g transform="translate(4, 4)" filter={`url(#${idPrefix}softShadow)`}>
         {/* Outer Mint Ring */}
         <circle
           cx="90"
@@ -129,43 +141,85 @@ export function DishariLogo({
       </g>
 
       {/* ─── TYPOGRAPHY SECTION ─── */}
-      <g transform="translate(245, 0)">
-        {/* Title: দিশারী */}
-        <text
-          x="0"
-          y="122"
-          fontFamily="'Kalpurush', 'Noto Sans Bengali', system-ui, sans-serif"
-          fontSize="80"
-          fontWeight="800"
-          fill={titleColor}
-          letterSpacing="1"
-        >
-          দিশারী
-        </text>
+      <g transform="translate(186, 0)">
+        {activeLang === 'bn' ? (
+          <>
+            {/* Title: দিশারী */}
+            <text
+              x="0"
+              y="108"
+              fontFamily="'Kalpurush', sans-serif"
+              fontSize="78"
+              fontWeight="800"
+              fill={titleColor}
+              letterSpacing="0.5"
+            >
+              দিশারী
+            </text>
 
-        {/* Red & Green Accent Dots */}
-        <circle cx="250" cy="68" r="8.5" fill={`url(#${idPrefix}crimsonGrad)`} />
-        <circle cx="268" cy="68" r="5.5" fill="#10B981" />
+            {/* Red & Green Accent Dots */}
+            <circle cx="244" cy="54" r="8.5" fill={`url(#${idPrefix}crimsonGrad)`} />
+            <circle cx="262" cy="54" r="5.5" fill="#10B981" />
 
-        {/* Multi-shade Divider Bar */}
-        <rect x="4" y="142" width="85" height="5.5" rx="2.75" fill={`url(#${idPrefix}emeraldGrad)`} />
-        <rect x="97" y="142" width="45" height="5.5" rx="2.75" fill={`url(#${idPrefix}mintGrad)`} />
-        <rect x="150" y="142" width="35" height="5.5" rx="2.75" fill={`url(#${idPrefix}crimsonGrad)`} />
+            {/* Multi-shade Divider Bar */}
+            <rect x="2" y="122" width="85" height="5.5" rx="2.75" fill={`url(#${idPrefix}emeraldGrad)`} />
+            <rect x="94" y="122" width="45" height="5.5" rx="2.75" fill={`url(#${idPrefix}mintGrad)`} />
+            <rect x="146" y="122" width="35" height="5.5" rx="2.75" fill={`url(#${idPrefix}crimsonGrad)`} />
 
-        {/* Tagline: ডিজিটাল নাগরিক সহায়ক */}
-        <text
-          x="4"
-          y="174"
-          fontFamily="'Kalpurush', 'Noto Sans Bengali', system-ui, sans-serif"
-          fontSize="22"
-          fontWeight="600"
-          fill={subtitleColor}
-          letterSpacing="0.5"
-        >
-          ডিজিটাল নাগরিক সহায়ক
-        </text>
+            {/* Tagline: ডিজিটাল নাগরিক সহায়ক */}
+            <text
+              x="2"
+              y="150"
+              fontFamily="'Kalpurush', sans-serif"
+              fontSize="21"
+              fontWeight="600"
+              fill={subtitleColor}
+              letterSpacing="0.5"
+            >
+              ডিজিটাল নাগরিক সহায়ক
+            </text>
+          </>
+        ) : (
+          <>
+            {/* Title: DISHARI */}
+            <text
+              x="0"
+              y="106"
+              fontFamily="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif"
+              fontSize="70"
+              fontWeight="900"
+              fill={titleColor}
+              letterSpacing="2"
+            >
+              DISHARI
+            </text>
+
+            {/* Red & Green Accent Dots */}
+            <circle cx="250" cy="54" r="8.5" fill={`url(#${idPrefix}crimsonGrad)`} />
+            <circle cx="268" cy="54" r="5.5" fill="#10B981" />
+
+            {/* Multi-shade Divider Bar */}
+            <rect x="2" y="122" width="90" height="5.5" rx="2.75" fill={`url(#${idPrefix}emeraldGrad)`} />
+            <rect x="99" y="122" width="48" height="5.5" rx="2.75" fill={`url(#${idPrefix}mintGrad)`} />
+            <rect x="154" y="122" width="38" height="5.5" rx="2.75" fill={`url(#${idPrefix}crimsonGrad)`} />
+
+            {/* Tagline: DIGITAL CITIZEN ASSISTANT */}
+            <text
+              x="2"
+              y="148"
+              fontFamily="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif"
+              fontSize="16.5"
+              fontWeight="700"
+              fill={subtitleColor}
+              letterSpacing="1"
+            >
+              DIGITAL CITIZEN ASSISTANT
+            </text>
+          </>
+        )}
       </g>
     </svg>
   )
 }
+
 export default DishariLogo

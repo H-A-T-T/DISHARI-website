@@ -1,67 +1,65 @@
 /* ── CSS Imports & Font Loading ───────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;600;700&display=swap');
+@import url('https://fonts.maateen.me/kalpurush/font.css');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @import "tailwindcss";
 
+/* ── Primary Local Kalpurush Font Declaration ─────────────────────────── */
 @font-face {
   font-family: 'Kalpurush';
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
   src: url('/fonts/kalpurush.woff2') format('woff2');
+  unicode-range: U+0980-09FF, U+0020-007E, U+2000-206F;
 }
 
-/* ── Brand Color Tokens ───────────────────────────────────────────────── */
+/* ── Windows 10 Flat & Bangladesh Flag Color Tokens ────────────────────── */
 @theme inline {
   /* Fonts */
-  --font-sans: 'Kalpurush', 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: 'Kalpurush', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: 'Kalpurush', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Kalpurush', monospace;
 
-  /* Brand Green */
+  /* Bangladesh Flag Green (National & Professional) */
+  --color-bdgreen:       #006A4E;
+  --color-bdgreen-dark:  #004D38;
+  --color-bdgreen-light: #0D8262;
+  --color-bdgreen-subtle:#E6F4F0;
+
+  /* Bangladesh Flag Crimson Red (Accents & Vital Alerts) */
+  --color-bdred:         #C8102E;
+  --color-bdred-dark:    #9E0C24;
+  --color-bdred-light:   #E02444;
+  --color-bdred-subtle:  #FDF2F4;
+
+  /* Brand Green Shades */
   --color-green-50:  #f0fdf4;
   --color-green-100: #dcfce7;
   --color-green-200: #bbf7d0;
-  --color-green-500: #22c55e;
-  --color-green-600: #16a34a;
-  --color-green-700: #15803d;
-  --color-green-800: #166534;
-  --color-green-900: #14532d;
+  --color-green-500: #10B981;
+  --color-green-600: #059669;
+  --color-green-700: #006A4E;
+  --color-green-800: #004D38;
+  --color-green-900: #003627;
 
-  /* Brand Red (Bangladesh flag accent) */
-  --color-red-500: #ef4444;
-  --color-red-50:  #fef2f2;
-
-  /* Amber — alerts, deadlines */
-  --color-amber-500: #f59e0b;
-  --color-amber-50:  #fffbeb;
-
-  /* Neutral — Warm stone palette */
-  --color-bg-page:    #FAFAF8;
+  /* Neutral Paper Palette (Windows 10 Modern Flat UI) */
+  --color-bg-page:    #F5F6F8;
   --color-bg-surface: #FFFFFF;
-  --color-bg-muted:   #F4F4F2;
+  --color-bg-muted:   #EAEBED;
 
-  --color-text-primary:   #1C1917;
-  --color-text-secondary: #78716C;
-  --color-text-muted:     #A8A29E;
+  --color-text-primary:   #18181B;
+  --color-text-secondary: #52525B;
+  --color-text-muted:     #71717A;
 
-  --color-border:        #E7E5E4;
-  --color-border-strong: #D6D3D1;
-
-  /* Category Colors */
-  --color-cat-identity:  #3B82F6;
-  --color-cat-education: #8B5CF6;
-  --color-cat-land:      #F59E0B;
-  --color-cat-welfare:   #EC4899;
-  --color-cat-business:  #14B8A6;
-  --color-cat-tax:       #F97316;
-  --color-cat-overseas:  #06B6D4;
-  --color-cat-health:    #22C55E;
+  --color-border:        #E4E4E7;
+  --color-border-strong: #A1A1AA;
 }
 
 /* ── Base Styles ──────────────────────────────────────────────────────── */
 :root {
-  --background: #FAFAF8;
-  --foreground: #1C1917;
+  --background: #F5F6F8;
+  --foreground: #18181B;
 }
 
 * {
@@ -76,61 +74,64 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Kalpurush', 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Kalpurush', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 16px;
-  line-height: 1.8; /* Extra line-height for Bengali script */
+  line-height: 1.75;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Bangla-specific typography ───────────────────────────────────────── */
-/* Bengali script needs more vertical breathing room */
+/* ── Force Kalpurush on all Bengali and UI Text Elements ─────────────── */
+:lang(bn), [lang="bn"], html[lang="bn"], html[lang="bn"] body, html[lang="bn"] * {
+  font-family: 'Kalpurush', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+p, li, label, span, td, th, h1, h2, h3, h4, h5, h6, a, button, input, select, textarea {
+  font-family: 'Kalpurush', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Monospace font fallback ensuring Bengali numerals and glyphs use Kalpurush */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Kalpurush', monospace;
+}
+
 p, li, label, span, td, th {
-  line-height: 1.8;
+  line-height: 1.75;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  line-height: 1.3;
+  line-height: 1.25;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-/* ── Focus styles ─────────────────────────────────────────────────────── */
+/* ── Windows 10 Flat Focus Outline ─────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid #16a34a;
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: 2px solid #006A4E;
+  outline-offset: 1px;
 }
 
-/* ── Dot grid background pattern (used in hero) ───────────────────────── */
-.dot-grid {
-  background-image: radial-gradient(#16a34a22 1px, transparent 1px);
-  background-size: 24px 24px;
+/* ── Windows 10 Tile & Flat Paper Utilities ────────────────────────────── */
+.win-tile {
+  background-color: #FFFFFF;
+  border: 1px solid #E4E4E7;
+  transition: all 0.15s ease-in-out;
 }
 
-/* ── Shimmer skeleton animation ───────────────────────────────────────── */
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+.win-tile:hover {
+  border-color: #006A4E;
+  background-color: #FAFAFA;
 }
 
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 8px;
+.win-tile-active {
+  border-left: 4px solid #006A4E;
 }
 
-/* ── Hide scrollbar but keep scroll ──────────────────────────────────── */
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
+.win-tile-red {
+  border-left: 4px solid #C8102E;
 }
 
-/* ── Mobile safe area padding (bottom nav) ────────────────────────────── */
+/* ── Safe area insets for mobile edge devices ─────────────────────────── */
 .pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 16px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

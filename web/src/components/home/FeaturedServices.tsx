@@ -32,6 +32,30 @@ const CATEGORY_ICONS: Record<ServiceCategory, React.ElementType> = {
   health: Stethoscope,
 }
 
+function formatProcessingTime(time: string, lang: 'bn' | 'en'): string {
+  if (!time) return ''
+  if (lang === 'bn') return time
+  return time
+    .replace(/কার্যদিবস/g, ' working days')
+    .replace(/সাধারণ/g, 'Regular')
+    .replace(/জরুরি/g, 'Express')
+    .replace(/তাৎক্ষণিক/g, 'Instant')
+    .replace(/রিয়েল-টাইম/g, 'Real-time')
+    .replace(/বার্ষিক/g, 'Annual')
+    .replace(/সেশন অনুযায়ী/g, 'Per academic session')
+    .replace(/দিন/g, ' days')
+    .replace(/০/g, '0')
+    .replace(/১/g, '1')
+    .replace(/২/g, '2')
+    .replace(/৩/g, '3')
+    .replace(/৪/g, '4')
+    .replace(/৫/g, '5')
+    .replace(/৬/g, '6')
+    .replace(/৭/g, '7')
+    .replace(/৮/g, '8')
+    .replace(/৯/g, '9')
+}
+
 export function FeaturedServices() {
   const { lang } = useLanguage()
   const [featuredServices, setFeaturedServices] = useState<Service[]>([])
@@ -42,8 +66,14 @@ export function FeaturedServices() {
     fetchAllServices()
       .then((data) => {
         if (active) {
-          // Take top 6 popular services
-          const topSlugs = ['passport', 'nid-correction', 'birth-registration', 'widow-allowance', 'scholarship', 'trade-license']
+          const topSlugs = [
+            'passport',
+            'nid-correction',
+            'birth-registration',
+            'widow-allowance',
+            'scholarship',
+            'trade-license',
+          ]
           const filtered = data.filter((s) => topSlugs.includes(s.slug))
           setFeaturedServices(filtered.length > 0 ? filtered : data.slice(0, 6))
           setLoading(false)
@@ -59,99 +89,100 @@ export function FeaturedServices() {
   }, [])
 
   return (
-    <section className="py-16 lg:py-24 px-4">
+    <section className="py-10 lg:py-14 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
-        {/* Heading */}
-        <h2 className="text-2xl lg:text-3xl font-bold text-stone-900 text-center mb-2">
-          {t('sections', 'featured', lang)}
-        </h2>
-        <p className="text-stone-500 text-center mb-10">
-          {lang === 'bn'
-            ? 'সবচেয়ে বেশি জিজ্ঞাসিত ও প্রয়োজনীয় সেবা'
-            : 'Most requested and essential citizen services'}
-        </p>
+        {/* Section Header — Clean Windows 10 Typography */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 pb-3 border-b border-neutral-200 gap-2">
+          <div>
+            <h2 className="text-xl lg:text-2xl font-bold text-neutral-900 tracking-tight">
+              {t('sections', 'featured', lang)}
+            </h2>
+            <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
+              {t('sections', 'featuredSub', lang)}
+            </p>
+          </div>
+          <Link
+            href="/services"
+            className="text-xs font-semibold text-[#006A4E] hover:underline flex items-center gap-1 self-start sm:self-auto"
+          >
+            <span>{t('sections', 'viewAll', lang)}</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
 
         {/* Loading state */}
         {loading && (
-          <div className="flex items-center justify-center py-12 gap-3 text-stone-400">
-            <Loader2 className="w-5 h-5 animate-spin text-green-600" />
-            <span className="text-sm">ডাটাবেজ থেকে সেবাসমূহ আসছে...</span>
+          <div className="flex items-center justify-center py-12 gap-3 text-neutral-500 font-semibold">
+            <Loader2 className="w-5 h-5 animate-spin text-[#006A4E]" />
+            <span className="text-sm">{t('sections', 'loadingServices', lang)}</span>
           </div>
         )}
 
-        {/* Services List (NO CARDS, Civic Broadside Ledger) */}
+        {/* Services List (Windows 10 Flat Paper Ledger) */}
         {!loading && (
-          <div className="border-2 border-stone-900 bg-white divide-y-2 divide-stone-200 shadow-[6px_6px_0_0_#1c1917]">
-            {featuredServices.map((service, idx) => {
+          <div className="border border-neutral-200 bg-white divide-y divide-neutral-200 rounded-none shadow-none">
+            {featuredServices.map((service) => {
               const meta = CATEGORY_META[service.category] || CATEGORY_META.identity
               const Icon = CATEGORY_ICONS[service.category] || IdCard
+              const categoryTag = lang === 'bn' ? meta.name_bn : meta.name_en
+              const primaryName = lang === 'bn' ? service.name_bn : service.name_en
+              const feeDisplay =
+                service.fee === 'বিনামূল্যে'
+                  ? lang === 'bn'
+                    ? 'বিনামূল্যে'
+                    : 'Free'
+                  : `৳${service.fee}`
 
               return (
                 <Link
                   key={service.slug}
                   href={`/services/${service.slug}`}
-                  className="p-4 sm:p-6 hover:bg-stone-50 transition-colors duration-150 group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  className="p-3.5 sm:p-4 hover:bg-neutral-50 transition-colors group flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-l-3 border-l-transparent hover:border-l-[#006A4E]"
                 >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <span className="font-mono text-sm sm:text-base font-bold text-stone-400 group-hover:text-stone-900 w-6">
-                      ০{idx + 1}
-                    </span>
-                    <div className="w-10 h-10 border border-stone-900 bg-stone-50 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="shrink-0">
                       <Icon className={cn('w-5 h-5', meta.color)} />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-stone-500 uppercase">
-                          [{meta.name_bn}]
+                        <span className="text-[10px] font-mono font-semibold text-neutral-400 uppercase tracking-wider">
+                          {categoryTag}
                         </span>
                       </div>
-                      <h3 className="font-bold text-lg sm:text-xl text-stone-950 group-hover:text-green-800 transition-colors leading-snug truncate">
-                        {service.name_bn}
+                      <h3 className="font-bold text-sm sm:text-base text-neutral-900 group-hover:text-[#006A4E] transition-colors leading-snug truncate">
+                        {primaryName}
                       </h3>
-                      <p className="text-xs text-stone-500 truncate">{service.name_en}</p>
                     </div>
                   </div>
 
                   {/* Facts + Action */}
-                  <div className="flex items-center justify-between sm:justify-end gap-5 pl-10 sm:pl-0 shrink-0">
-                    <div className="flex items-center gap-1.5 text-xs text-stone-600 font-medium">
-                      <Clock className="w-3.5 h-3.5 text-stone-400" />
-                      <span>{service.processing_time_bn}</span>
+                  <div className="flex items-center justify-between sm:justify-end gap-4 pl-8 sm:pl-0 shrink-0">
+                    <div className="flex items-center gap-1.5 text-xs text-neutral-500 font-mono">
+                      <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                      <span>{formatProcessingTime(service.processing_time_bn, lang)}</span>
                     </div>
 
                     <span
                       className={cn(
-                        'text-xs font-mono font-bold px-2 py-0.5 border',
+                        'text-xs font-mono font-bold px-2 py-0.5 border rounded-none',
                         service.fee === 'বিনামূল্যে'
-                          ? 'border-green-600 text-green-800 bg-green-50'
-                          : 'border-stone-400 text-stone-900 bg-stone-100'
+                          ? 'text-[#006A4E] bg-emerald-50 border-emerald-200'
+                          : 'text-neutral-900 bg-neutral-100 border-neutral-300'
                       )}
                     >
-                      {service.fee === 'বিনামূল্যে' ? 'বিনামূল্যে' : `৳${service.fee}`}
+                      {feeDisplay}
                     </span>
 
-                    <span className="text-xs font-bold text-stone-900 group-hover:text-green-800 flex items-center gap-1">
-                      <span>নিয়মাবলী</span>
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
+                    <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-[#006A4E] group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </Link>
               )
             })}
           </div>
         )}
-
-        {/* View all button */}
-        <div className="text-center mt-10">
-          <Link
-            href="/services"
-            className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium transition-colors"
-          >
-            <span>{t('sections', 'viewAll', lang)}</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
       </div>
     </section>
   )
 }
+
+export default FeaturedServices

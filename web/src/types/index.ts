@@ -56,3 +56,56 @@ export interface Category {
   bgColor: string
   borderColor: string
 }
+
+export type DocType =
+  | 'nid_front'
+  | 'nid_back'
+  | 'birth_certificate'
+  | 'photo'
+  | 'tin_certificate'
+  | 'trade_license'
+  | 'citizenship_certificate'
+  | 'educational_transcript'
+  | 'other'
+
+export interface CitizenDocument {
+  id: number
+  user_id: number
+  doc_type: DocType
+  file_name: string
+  file_size: number
+  mime_type: string
+  verified: boolean
+  extracted_meta?: Record<string, any>
+  uploaded_at: string
+  file_data?: string
+}
+
+export interface CitizenApplication {
+  id: number
+  docket_id: string
+  user_id: number
+  service_slug: string
+  service_name_bn: string
+  service_name_en: string
+  status: 'ready' | 'submitted' | 'processing' | 'approved'
+  applicant_data: Record<string, any>
+  documents_attached: string[]
+  fee_status: string
+  official_portal_url?: string
+  submitted_at: string
+  updated_at: string
+}
+
+export interface CitizenDeadline {
+  id: string
+  title_bn: string
+  title_en: string
+  deadline: string
+  category: string
+  urgency: 'high' | 'medium' | 'normal'
+  description_bn: string
+  description_en: string
+  required_docs: string[]
+  official_link?: string
+}

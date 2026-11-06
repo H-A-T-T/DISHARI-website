@@ -129,8 +129,8 @@
   - "লগইন" (Login) — outlined button
   - "নিবন্ধন করুন" (Register) — solid green button
 - [x] **1.1.4** Language toggle button: "বাং | EN" — switches between Bangla and English display (use React context, no library needed yet)
-- [ ] **1.1.5** On mobile: Hide desktop nav links. Show hamburger icon.
-- [ ] **1.1.6** Mobile drawer nav (`components/layout/MobileNav.tsx`):
+- [x] **1.1.5** On mobile: Hide desktop nav links. Show hamburger icon.
+- [x] **1.1.6** Mobile drawer nav (`components/layout/MobileNav.tsx`):
   - Slide-in from left or bottom sheet
   - Full-width links with icons
   - Login / Register buttons at bottom
@@ -157,10 +157,11 @@
 - [x] **2.1.2** Large headline (Bangla): **"সরকারি সেবা এখন আপনার হাতের মুঠোয়"**
 - [x] **2.1.3** Subheadline (Bangla): "কোন কাগজ লাগবে? কোথায় যেতে হবে? কীভাবে আবেদন করবেন? সব উত্তর এখানে।"
 - [x] **2.1.4** Large search bar with placeholder: "আপনি কী খুঁজছেন? যেমন: পাসপোর্ট, জন্ম নিবন্ধন..."
-  - Non-functional for now (just UI) — wire up in a later phase
+  - Fully wired to live database search API with real-time autocomplete dropdown
   - Search icon button on the right
 - [x] **2.1.5** Below search bar: Popular search tags as clickable chips
   - পাসপোর্ট · NID সংশোধন · জন্ম নিবন্ধন · উপবৃত্তি · ভাতা · ট্রেড লাইসেন্স
+- [x] **2.1.6** Animated Logo Intro: Seamless bespoke multi-stage choreographed SVG logo intro (compass stroke draw, spring-damped needle sweep, star flare, Kalpurush typography reveal, and glint pass) on the hero page
 
 ### 2.2 — Service Category Grid
 - [x] **2.2.1** Section title: "কোন সেবা খুঁজছেন?"
@@ -288,8 +289,8 @@
 ## Task 6 — Dashboard Shell (`app/dashboard/page.tsx`)
 *Just the layout and placeholder cards. No real data yet.*
 
-- [ ] **6.1** Dashboard layout: sidebar on desktop, bottom tab bar on mobile
-- [ ] **6.2** Sidebar links:
+- [x] **6.1** Dashboard layout: sidebar on desktop, bottom tab bar on mobile
+- [x] **6.2** Sidebar links:
   - 🏠 হোম (Home)
   - 📄 আমার নথিপত্র (My Documents) — placeholder
   - 📋 আমার আবেদন (My Applications) — placeholder
@@ -298,7 +299,7 @@
 - [x] **6.3** Main content area: Welcome message + placeholder cards
   - "আপনার নথিপত্র আপলোড করুন" — CTA card
   - "কোন সেবা দরকার?" — Browse services CTA
-- [ ] **6.4** Show "🔒 লগইন করুন" gate if user visits while logged out (middleware added in Phase 2)
+- [x] **6.4** Show "🔒 লগইন করুন" gate if user visits while logged out (middleware added in Phase 2)
 
 ---
 
@@ -306,7 +307,7 @@
 - [x] **7.1** Mission statement in Bangla (full paragraph from `statement.txt`)
 - [x] **7.2** Problem scenarios section — the 10 personas from `statement.txt` (Rahim, Rahima Begum, Jamil, etc.) shown as story cards
 - [x] **7.3** "আমাদের লক্ষ্য" section with the vision quote
-- [ ] **7.4** Features list (coming soon labels where needed)
+- [x] **7.4** Features list (coming soon labels where needed)
 - [x] **7.5** Team section (placeholder for now)
 
 ---
@@ -370,20 +371,34 @@
 ## Task 10 — Polish & Responsiveness Check
 *Do this last before considering the base done.*
 
-- [ ] **10.1** Test every page at: 375px (iPhone SE), 390px (iPhone 14), 768px (tablet), 1280px (desktop)
-- [ ] **10.2** Check all tap targets are minimum 48x48px
+- [x] **10.1** Test every page at: 375px (iPhone SE), 390px (iPhone 14), 768px (tablet), 1280px (desktop)
+- [x] **10.2** Check all tap targets are minimum 48x48px
 - [x] **10.3** Verify Bangla text renders correctly (Noto Sans Bengali loaded)
 - [x] **10.4** Check all navigation links work (no dead links, correct routes)
 - [x] **10.5** Add a simple 404 page (`app/not-found.tsx`) in Bangla
 - [x] **10.6** Add page metadata (`metadata` export) on all pages for SEO:
   - Title format: "পৃষ্ঠার নাম | দিশারী"
   - Description in Bangla
-- [ ] **10.7** Test on Chrome mobile emulator for a low-end Android simulation
+- [x] **10.7** Test on Chrome mobile emulator for a low-end Android simulation
 - [x] **10.8** Add `loading.tsx` skeleton screens for the services list and detail pages
 
 ---
 
-## What is NOT in Scope for the Base Website
+## Phase 2 & Civic Product Foundation Progress
+
+- [x] Database connection (Local PostgreSQL via Docker dishari_db is active)
+- [x] User authentication (real register & login APIs with persistent session)
+- [x] Document upload / Digital Citizen Document Locker (Active)
+- [x] Search functionality (backend-powered real-time autocomplete search)
+- [x] In-app citizen notification center & deadline alert badge
+- [x] Counter application docket & printable official receipt slip
+- [x] Real government data (15 verified public services seeded)
+- [ ] Form auto-fill / Playwright bot automation
+- [ ] AI chatbot & voice assistant (Deferred per user instruction)
+- [ ] Payment integration
+- [ ] Admin panel
+
+## Original Base Website Scope Notes
 *Do not implement these yet. They are Phase 2 and beyond.*
 
 - ❌ Supabase / database connection (Local PostgreSQL via Docker is active)

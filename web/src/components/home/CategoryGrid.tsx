@@ -43,52 +43,57 @@ export function CategoryGrid() {
   const { lang } = useLanguage()
 
   return (
-    <section className="py-16 lg:py-24 px-4">
+    <section className="py-10 lg:py-14 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
-        {/* Heading */}
-        <h2 className="text-2xl lg:text-3xl font-bold text-stone-900 text-center mb-2">
-          {t('sections', 'categories', lang)}
-        </h2>
-        <p className="text-stone-500 text-center mb-10">
-          {lang === 'bn'
-            ? 'আপনার প্রয়োজন অনুযায়ী ক্যাটাগরি বেছে নিন'
-            : 'Choose a category based on your need'}
-        </p>
+        {/* Section Header — Clean Windows 10 Typography */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 pb-3 border-b border-neutral-200 gap-2">
+          <div>
+            <h2 className="text-xl lg:text-2xl font-bold text-neutral-900 tracking-tight">
+              {t('sections', 'categories', lang)}
+            </h2>
+            <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
+              {t('sections', 'categoriesSub', lang)}
+            </p>
+          </div>
+          <Link
+            href="/services"
+            className="text-xs font-semibold text-[#006A4E] hover:underline flex items-center gap-1 self-start sm:self-auto"
+          >
+            <span>{t('sections', 'viewAll', lang)}</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
-          {CATEGORY_ORDER.map((slug, idx) => {
+        {/* Windows 10 Flat Paper Tiles Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {CATEGORY_ORDER.map((slug) => {
             const meta = CATEGORY_META[slug]
             const Icon = CATEGORY_ICONS[slug]
+            const primaryName = lang === 'bn' ? meta.name_bn : meta.name_en
+            const secondaryName = lang === 'bn' ? meta.name_en : meta.name_bn
 
             return (
               <Link
                 key={slug}
                 href={`/services?category=${slug}`}
-                className="bg-white border-2 border-stone-900 p-5 lg:p-6 shadow-[4px_4px_0_0_#1c1917] hover:shadow-[6px_6px_0_0_#15803d] hover:-translate-y-1 transition-all duration-150 group flex flex-col justify-between"
+                className="bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 p-4 transition-colors group flex items-start gap-3.5 rounded-none border-l-3 border-l-transparent hover:border-l-[#006A4E]"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-10 h-10 border border-stone-900 bg-stone-50 flex items-center justify-center">
-                      <Icon className={`w-5 h-5 ${meta.color}`} />
-                    </div>
-                    <span className="font-mono text-xs font-bold text-stone-400 group-hover:text-stone-900">
-                      ০{idx + 1}
-                    </span>
-                  </div>
+                {/* Crisp Icon */}
+                <div className="mt-0.5 shrink-0">
+                  <Icon className={`w-5 h-5 ${meta.color}`} />
+                </div>
 
-                  {/* Name */}
-                  <h3 className="font-bold text-lg sm:text-xl text-stone-950 group-hover:text-green-800 transition-colors leading-snug">
-                    {meta.name_bn}
+                {/* Content */}
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold text-sm sm:text-base text-neutral-900 group-hover:text-[#006A4E] transition-colors leading-snug truncate">
+                    {primaryName}
                   </h3>
-                  <p className="text-xs text-stone-500 font-medium mt-0.5">{meta.name_en}</p>
+                  <p className="text-[11px] text-neutral-400 font-mono mt-0.5 truncate">
+                    {secondaryName}
+                  </p>
                 </div>
 
-                {/* View link */}
-                <div className="pt-4 mt-3 border-t border-stone-200 flex items-center justify-between text-xs font-bold text-stone-700 group-hover:text-green-800">
-                  <span>{lang === 'bn' ? 'সেবা দেখুন' : 'View services'}</span>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
+                <ChevronRight className="w-4 h-4 text-neutral-300 group-hover:text-[#006A4E] group-hover:translate-x-0.5 transition-all shrink-0 self-center" />
               </Link>
             )
           })}
@@ -97,3 +102,5 @@ export function CategoryGrid() {
     </section>
   )
 }
+
+export default CategoryGrid

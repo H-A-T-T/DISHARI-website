@@ -7,43 +7,44 @@ export function AITeaser() {
   const { lang } = useLanguage()
 
   return (
-    <section className="py-16 lg:py-24 px-4">
-      <div className="max-w-6xl mx-auto bg-stone-950 border-2 border-stone-900 p-8 lg:p-12 overflow-hidden relative shadow-[8px_8px_0_0_#059669]">
+    <section className="py-14 lg:py-20 px-4">
+      <div className="max-w-6xl mx-auto bg-[#004D38] border border-[#006A4E] p-7 sm:p-10 lg:p-12 text-white relative rounded-none shadow-sm">
+        {/* Top 3px Bangladesh Red Accent Strip */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[#C8102E]" />
+
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
           {/* Left — text */}
           <div className="flex-1">
-            <span className="font-mono text-xs text-green-400 font-bold uppercase tracking-wider block mb-2">
-              [ কৃত্রিম বুদ্ধিমত্তা নাগরিক সহকারী ]
+            <span className="inline-block px-2.5 py-0.5 bg-[#C8102E] text-white text-[11px] font-bold uppercase tracking-wider mb-2.5 rounded-none">
+              {t('sections', 'aiTeaserBadge', lang)}
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-white">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
               {t('sections', 'aiTeaser', lang)}
             </h2>
-            <p className="text-stone-300 mt-4 leading-relaxed text-base">
-              {lang === 'bn'
-                ? 'বাংলায় কথা বলুন। ভয়েসে প্রশ্ন করুন। আমরা বলব — কী করতে হবে, কোথায় যেতে হবে।'
-                : 'Speak in Bangla. Ask questions by voice. We will tell you — what to do and where to go.'}
+            <p className="text-emerald-100 mt-3 leading-relaxed text-sm sm:text-base">
+              {t('sections', 'aiTeaserDesc', lang)}
             </p>
-            <button className="border-2 border-white bg-transparent hover:bg-white hover:text-stone-950 text-white px-6 h-12 font-bold mt-6 transition-colors cursor-pointer">
-              {lang === 'bn' ? 'অপেক্ষা তালিকায় যোগ দিন →' : 'Join waitlist →'}
+            <button className="border border-white bg-white hover:bg-neutral-100 text-[#004D38] px-6 h-10 font-bold text-xs uppercase tracking-wider mt-5 transition-colors cursor-pointer rounded-none">
+              {t('sections', 'joinWaitlist', lang)}
             </button>
           </div>
 
-          {/* Right — fake chat mockup */}
-          <div className="border-2 border-stone-700 bg-stone-900 p-5 w-full lg:w-88 space-y-4 shadow-[4px_4px_0_0_#000]">
-            <div className="text-[11px] font-mono text-stone-400 pb-2 border-b border-stone-800">
-              দিশারী জনবন্ধু এআই সিমুলেশন
+          {/* Right — chat mockup */}
+          <div className="border border-[#0D8262] bg-[#003627] p-4.5 w-full lg:w-96 space-y-3.5 rounded-none shadow-sm">
+            <div className="text-[11px] font-mono text-emerald-300 pb-2 border-b border-[#0D8262]/50 font-bold uppercase">
+              {t('sections', 'simHeader', lang)}
             </div>
             {/* User bubble */}
             <div className="flex justify-end">
-              <div className="bg-green-700 text-white border border-green-500 p-3 text-sm max-w-[85%] font-medium">
-                আমি পাসপোর্ট করতে চাই, কী কাগজ লাগবে?
+              <div className="bg-[#006A4E] text-white border border-[#0D8262] p-2.5 text-xs sm:text-sm max-w-[88%] font-medium rounded-none">
+                {t('sections', 'simUser', lang)}
               </div>
             </div>
 
             {/* AI bubble */}
             <div className="flex justify-start">
-              <div className="bg-stone-800 text-stone-200 border border-stone-700 p-3 text-sm max-w-[90%] leading-relaxed">
-                আপনার ১৭ ডিজিটের অনলাইন জন্ম নিবন্ধন অথবা NID নম্বর জানা থাকলে আমাকে দিন। আমি নিজেই epassport.gov.bd পোর্টাল থেকে ফরম যাচাই করে দিচ্ছি... ✅
+              <div className="bg-[#002B1F] text-emerald-100 border border-[#0D8262]/40 p-2.5 text-xs sm:text-sm max-w-[92%] leading-relaxed rounded-none">
+                {t('sections', 'simAi', lang)}
               </div>
             </div>
           </div>
@@ -52,3 +53,5 @@ export function AITeaser() {
     </section>
   )
 }
+
+export default AITeaser

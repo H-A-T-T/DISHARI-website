@@ -1,32 +1,39 @@
+'use client'
+
 import Link from 'next/link'
 import { DishariLogo } from '@/components/shared/DishariLogo'
 import { ArrowLeft } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
+import { t } from '@/lib/translations'
 
 export default function NotFound() {
+  const { lang } = useLanguage()
+
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 bg-[#FAFAF8] py-16">
-      <div className="border-2 border-stone-900 bg-white p-8 sm:p-12 text-center max-w-lg shadow-[6px_6px_0_0_#1c1917]">
-        <Link href="/" className="mb-4 inline-block">
+    <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 bg-[#F5F6F8] py-16">
+      <div className="border border-neutral-200 bg-white p-8 sm:p-10 text-center max-w-lg rounded-none shadow-xs border-t-3 border-t-[#006A4E]">
+        <Link href="/" className="mb-5 inline-block">
           <DishariLogo
             theme="light"
-            className="h-10 w-auto"
+            lang={lang}
+            className="h-8 sm:h-9 w-auto"
           />
         </Link>
-        <p className="font-mono text-6xl sm:text-7xl font-black text-stone-300 tracking-wider">
-          ৪০৪
+        <p className="font-mono text-5xl sm:text-6xl font-black text-neutral-300 tracking-wider">
+          {lang === 'bn' ? '৪০৪' : '404'}
         </p>
-        <h1 className="text-2xl font-black text-stone-950 mt-2">
-          কাঙ্ক্ষিত পৃষ্ঠাটি পাওয়া যায়নি
+        <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 mt-2">
+          {t('notFound', 'title', lang)}
         </h1>
-        <p className="text-stone-600 mt-2 text-sm leading-relaxed">
-          আপনি যে লিঙ্ক বা কার্যপত্রটি খুঁজছেন তা স্থানান্তরিত হয়েছে অথবা লিঙ্কটি সঠিক নয়।
+        <p className="text-neutral-600 mt-2 text-xs sm:text-sm leading-relaxed max-w-sm mx-auto">
+          {t('notFound', 'desc', lang)}
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex items-center gap-2 border-2 border-stone-900 bg-stone-900 hover:bg-green-700 text-white px-6 py-3 font-bold text-sm transition-colors shadow-[3px_3px_0_0_#1c1917]"
+          className="mt-6 inline-flex items-center gap-2 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white px-5 py-2.5 font-bold text-xs uppercase tracking-wider transition-colors rounded-none shadow-xs"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>হোম পেজে ফিরে যান</span>
+          <span>{t('notFound', 'backHome', lang)}</span>
         </Link>
       </div>
     </div>
