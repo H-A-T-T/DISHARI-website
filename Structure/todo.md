@@ -72,11 +72,20 @@
       index.ts
   ```
 
-- [x] **0.7** Create a `.env.local` file (empty for now, with placeholder keys)
-  ```
-  NEXT_PUBLIC_APP_URL=http://localhost:3000
-  NEXT_PUBLIC_APP_NAME=দিশারী
-  ```
+- [x] **0.7** Configure .env files for both frontend and backend
+  - Frontend (web/.env.local & web/.env.example):
+    `
+    NEXT_PUBLIC_APP_URL=http://localhost:3000
+    NEXT_PUBLIC_APP_NAME=দিশারী
+    NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    `
+  - Backend (server/.env & server/.env.example):
+    `
+    PORT=5000
+    NODE_ENV=development
+    DATABASE_URL=postgresql://dishari_user:dishari_password_secure_2026@localhost:5432/dishari_db
+    CORS_ORIGIN=http://localhost:3000
+    `
 
 ---
 

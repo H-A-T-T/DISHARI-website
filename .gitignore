@@ -6,6 +6,7 @@ web/.vercel/
 
 # ── Dependencies ─────────────────────────────────────────────
 web/node_modules/
+server/node_modules/
 node_modules/
 
 # ── Environment Variables ─────────────────────────────────────
@@ -15,6 +16,12 @@ node_modules/
 web/.env
 web/.env.local
 web/.env.*.local
+server/.env
+server/.env.local
+server/.env.*.local
+
+# ── Server ───────────────────────────────────────────────────
+server/dist/
 
 # ── OS & Editor ───────────────────────────────────────────────
 .DS_Store
