@@ -1,6 +1,6 @@
 'use client'
 
-import { BellRing, Calendar, AlertTriangle, ExternalLink, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react'
+import { BellRing, Calendar, AlertTriangle, ExternalLink, Sparkles } from 'lucide-react'
 import type { CitizenDeadline } from '@/types'
 
 interface DeadlinesViewProps {
@@ -27,7 +27,7 @@ export default function DeadlinesView({ deadlines, lang }: DeadlinesViewProps) {
         </p>
       </div>
 
-      {/* ─── Deadlines List (Windows 10 Flat Tiles) ───────────────────────── */}
+      {/* ─── Deadlines List (Windows 10 Flat Tiles with Press Feedback) ─────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5">
         {deadlines.map((item) => {
           const isUrgent = item.urgency === 'high'
@@ -37,7 +37,7 @@ export default function DeadlinesView({ deadlines, lang }: DeadlinesViewProps) {
           return (
             <div
               key={item.id}
-              className={`border border-neutral-200 bg-white p-5 rounded-none shadow-xs flex flex-col justify-between ${
+              className={`win-tile p-5 rounded-none shadow-xs flex flex-col justify-between ${
                 isUrgent ? 'border-t-3 border-t-[#C8102E]' : 'border-t-3 border-t-[#006A4E]'
               }`}
             >
@@ -96,7 +96,7 @@ export default function DeadlinesView({ deadlines, lang }: DeadlinesViewProps) {
                     href={item.official_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-h-[36px] px-3.5 border border-neutral-800 bg-neutral-900 hover:bg-[#006A4E] text-white font-bold text-xs uppercase inline-flex items-center gap-1.5 rounded-none transition-colors"
+                    className="min-h-[36px] px-3.5 border border-neutral-800 bg-neutral-900 hover:bg-[#006A4E] text-white font-bold text-xs uppercase inline-flex items-center gap-1.5 rounded-none transition-colors win-press"
                   >
                     <span>{lang === 'bn' ? 'অফিসিয়াল পোর্টাল' : 'Gov Portal'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />

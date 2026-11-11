@@ -88,7 +88,7 @@ export default function RegisterPage() {
         <div className="absolute top-0 left-0 right-0 h-1 bg-[#C8102E]" />
 
         <div>
-          <Link href="/" className="inline-block group mb-4">
+          <Link href="/" className="inline-block group mb-4 win-press">
             <DishariLogo
               theme="dark"
               lang={lang}
@@ -119,66 +119,42 @@ export default function RegisterPage() {
             <span className="font-mono text-xs font-bold text-emerald-300 pt-0.5">
               {lang === 'bn' ? '১.' : '1.'}
             </span>
-            <p className="text-xs sm:text-sm text-emerald-100">
-              <strong className="text-white font-bold">
-                {lang === 'bn' ? 'স্মার্ট ডকুমেন্ট লকার:' : 'Smart Document Locker:'}
-              </strong>{' '}
+            <span className="text-xs sm:text-sm text-emerald-100 font-medium">
               {lang === 'bn'
-                ? 'কাগজপত্র একবার সেভ করলে যেকোনো ফর্মে অটো-ফিল।'
-                : 'Save documents once and autofill them into any official form.'}
-            </p>
+                ? 'ডিজিটাল লকার: এনআইডি, জন্ম সনদ ও ছবি সুরক্ষিতভাবে সংরক্ষণ করুন।'
+                : 'Digital Locker: Store NID, Birth Certificate, and photos securely.'}
+            </span>
           </div>
           <div className="flex items-start gap-2.5">
             <span className="font-mono text-xs font-bold text-emerald-300 pt-0.5">
               {lang === 'bn' ? '২.' : '2.'}
             </span>
-            <p className="text-xs sm:text-sm text-emerald-100">
-              <strong className="text-white font-bold">
-                {lang === 'bn' ? 'সঠিক ফি নির্দেশিকা:' : 'Accurate Official Fees:'}
-              </strong>{' '}
+            <span className="text-xs sm:text-sm text-emerald-100 font-medium">
               {lang === 'bn'
-                ? 'কোনো বাড়তি দালাল খরচ নেই, সরকারি মূল্যে কাজ।'
-                : 'Zero extra broker fees; pay only the gazette rates.'}
-            </p>
+                ? 'অটো-ডকেট তৈরি: যেকোনো সরকারি ফর্মের জন্য মুহূর্তেই প্রস্তুত কার্যপত্র।'
+                : 'Auto-Docket: Instant pre-filled applications ready for direct submission.'}
+            </span>
           </div>
           <div className="flex items-start gap-2.5">
             <span className="font-mono text-xs font-bold text-emerald-300 pt-0.5">
               {lang === 'bn' ? '৩.' : '3.'}
             </span>
-            <p className="text-xs sm:text-sm text-emerald-100">
-              <strong className="text-white font-bold">
-                {lang === 'bn' ? 'সময়োপযোগী নোটিফিকেশন:' : 'Timely Notifications:'}
-              </strong>{' '}
+            <span className="text-xs sm:text-sm text-emerald-100 font-medium">
               {lang === 'bn'
-                ? 'ডেডলাইন ও আবেদন স্ট্যাটাসের তাৎক্ষণিক আপডেট।'
-                : 'Real-time updates on deadlines and application status.'}
-            </p>
+                ? 'সরকারি ফি ও সময়সীমা ট্র্যাকিং: কোনো অতিরিক্ত খরচ ছাড়া সঠিক সেবা।'
+                : 'Official Fee & Deadline Tracking: Guaranteed official charges only.'}
+            </span>
           </div>
-        </div>
-
-        {/* Bottom gazette note */}
-        <div className="font-mono text-xs text-emerald-200/70 font-medium">
-          {t('auth', 'gazetteNote', lang)}
         </div>
       </div>
 
-      {/* ─── Right Form Panel — Flat Windows 10 Paper Surface ─────────────── */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12 sm:px-8">
-        <div className="w-full max-w-md bg-white border border-neutral-200 p-7 sm:p-8 rounded-none shadow-xs">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-6">
-            <Link href="/" className="inline-block">
-              <DishariLogo
-                theme="light"
-                lang={lang}
-                className="h-8 w-auto"
-              />
-            </Link>
-          </div>
-
-          <div className="border-b border-neutral-200 pb-3 mb-5">
-            <span className="font-mono text-xs font-bold text-[#006A4E] uppercase tracking-wider block mb-1">
-              {lang === 'bn' ? 'নতুন নাগরিক অ্যাকাউন্ট' : 'New Citizen Account'}
+      {/* ─── Right Form Panel ──────────────────────────────────────────────── */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 lg:p-16">
+        <div className="w-full max-w-md border border-neutral-200 bg-white p-7 sm:p-9 rounded-none shadow-xs">
+          {/* Header */}
+          <div className="mb-6">
+            <span className="font-mono text-xs text-[#006A4E] font-bold uppercase tracking-wider block mb-1">
+              {lang === 'bn' ? 'নতুন নাগরিক অ্যাকাউন্ট' : 'Citizen Registration'}
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">
               {t('auth', 'registerHeader', lang)}
@@ -196,9 +172,11 @@ export default function RegisterPage() {
           )}
 
           {success && (
-            <div className="mb-4 border border-emerald-300 bg-emerald-50 text-[#006A4E] p-3 text-xs sm:text-sm font-semibold flex items-center gap-2 rounded-none">
+            <div className="mb-4 border border-emerald-300 bg-emerald-50 text-[#006A4E] p-3 text-xs sm:text-sm font-bold flex items-center gap-2 rounded-none">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-[#006A4E]" />
-              <span>{t('auth', 'successMessage', lang)}</span>
+              <span>
+                {lang === 'bn' ? 'নিবন্ধন সফল হয়েছে! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...' : 'Registration successful! Redirecting to workspace...'}
+              </span>
             </div>
           )}
 
@@ -263,7 +241,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer win-press"
                   aria-label="Toggle password visibility"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -287,7 +265,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer win-press"
                   aria-label="Toggle confirm password visibility"
                 >
                   {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -298,7 +276,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-5 w-full border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] disabled:bg-neutral-400 text-white h-11 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-none"
+              className="mt-5 w-full border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] disabled:bg-neutral-400 text-white h-11 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-none win-btn"
             >
               {loading ? (
                 <>
@@ -319,7 +297,7 @@ export default function RegisterPage() {
             <span>{t('auth', 'hasAccount', lang)} </span>
             <Link
               href="/login"
-              className="text-[#006A4E] font-bold hover:underline transition-colors ml-1"
+              className="text-[#006A4E] font-bold hover:underline transition-colors ml-1 win-press"
             >
               {t('auth', 'loginLink', lang)}
             </Link>

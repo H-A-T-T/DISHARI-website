@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft,
   IdCard,
@@ -23,6 +24,11 @@ import {
   Check,
   X,
   ArrowRight,
+  Layers,
+  RotateCcw,
+  CheckCircle2,
+  FolderCheck,
+  Sparkles,
 } from 'lucide-react'
 import { cn, CATEGORY_META } from '@/lib/utils'
 import type { Service, ServiceCategory, CitizenDocument } from '@/types'
@@ -30,6 +36,7 @@ import { fetchServiceBySlug, fetchDocuments, type UserProfile } from '@/lib/api'
 import { useLanguage } from '@/lib/language-context'
 import { t } from '@/lib/translations'
 import ApplicationModal from '@/components/services/ApplicationModal'
+import { WIN10_INDICATOR_SPRING, WIN10_EASE_ENTRANCE } from '@/lib/motion'
 
 const CATEGORY_ICONS: Record<ServiceCategory, React.ElementType> = {
   identity: IdCard,
@@ -84,6 +91,7 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [userDocs, setUserDocs] = useState<CitizenDocument[]>([])
   const [showAppModal, setShowAppModal] = useState<boolean>(false)
+  const [docFilter, setDocFilter] = useState<'all' | 'pending' | 'ready'>('all')
 
   // Check login and fetch user documents
   useEffect(() => {
@@ -122,30 +130,33 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
     }
   }, [slug])
 
+  const checkDocInLocker = (doc: { name_bn: string; name_en?: string }) => {
+    return userDocs.some((ud) => {
+      if (doc.name_bn.includes('পরিচয়পত্র') || doc.name_bn.includes('NID')) {
+        return ud.doc_type === 'nid_front' || ud.doc_type === 'nid_back'
+      }
+      if (doc.name_bn.includes('জন্ম নিবন্ধন') || doc.name_en?.toLowerCase().includes('birth')) {
+        return ud.doc_type === 'birth_certificate'
+      }
+      if (doc.name_bn.includes('ছবি') || doc.name_en?.toLowerCase().includes('photo')) {
+        return ud.doc_type === 'photo'
+      }
+      if (doc.name_bn.includes('টিআইএন') || doc.name_bn.includes('TIN')) {
+        return ud.doc_type === 'tin_certificate'
+      }
+      if (doc.name_bn.includes('ট্রেড লাইসেন্স')) {
+        return ud.doc_type === 'trade_license'
+      }
+      return false
+    })
+  }
+
   // Smart matching: auto-check required docs if already present in user's Document Locker
   useEffect(() => {
     if (service && service.required_docs && userDocs.length > 0) {
       const autoChecks: Record<number, boolean> = {}
       service.required_docs.forEach((doc, idx) => {
-        const found = userDocs.some((ud) => {
-          if (doc.name_bn.includes('পরিচয়পত্র') || doc.name_bn.includes('NID')) {
-            return ud.doc_type === 'nid_front' || ud.doc_type === 'nid_back'
-          }
-          if (doc.name_bn.includes('জন্ম নিবন্ধন') || doc.name_en?.toLowerCase().includes('birth')) {
-            return ud.doc_type === 'birth_certificate'
-          }
-          if (doc.name_bn.includes('ছবি') || doc.name_en?.toLowerCase().includes('photo')) {
-            return ud.doc_type === 'photo'
-          }
-          if (doc.name_bn.includes('টিআইএন') || doc.name_bn.includes('TIN')) {
-            return ud.doc_type === 'tin_certificate'
-          }
-          if (doc.name_bn.includes('ট্রেড লাইসেন্স')) {
-            return ud.doc_type === 'trade_license'
-          }
-          return false
-        })
-        if (found) {
+        if (checkDocInLocker(doc)) {
           autoChecks[idx] = true
         }
       })
@@ -158,6 +169,31 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
       ...prev,
       [index]: !prev[index],
     }))
+  }
+
+  // Bulk document actions
+  const markAllDocsReady = () => {
+    if (!service?.required_docs) return
+    const allChecked: Record<number, boolean> = {}
+    service.required_docs.forEach((_, idx) => {
+      allChecked[idx] = true
+    })
+    setCheckedDocs(allChecked)
+  }
+
+  const resetAllDocs = () => {
+    setCheckedDocs({})
+  }
+
+  const syncWithLocker = () => {
+    if (!service?.required_docs || userDocs.length === 0) return
+    const autoChecks: Record<number, boolean> = {}
+    service.required_docs.forEach((doc, idx) => {
+      if (checkDocInLocker(doc)) {
+        autoChecks[idx] = true
+      }
+    })
+    setCheckedDocs(autoChecks)
   }
 
   if (loading) {
@@ -199,6 +235,17 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
   const meta = CATEGORY_META[service.category] || CATEGORY_META.identity
   const totalDocs = service.required_docs?.length || 0
   const completedDocsCount = Object.values(checkedDocs).filter(Boolean).length
+  const pendingDocsCount = Math.max(0, totalDocs - completedDocsCount)
+  const isAllReady = totalDocs > 0 && completedDocsCount === totalDocs
+  const percentReady = totalDocs > 0 ? Math.round((completedDocsCount / totalDocs) * 100) : 0
+
+  const filteredDocs = (service.required_docs || [])
+    .map((doc, idx) => ({ doc, idx }))
+    .filter(({ idx }) => {
+      if (docFilter === 'ready') return !!checkedDocs[idx]
+      if (docFilter === 'pending') return !checkedDocs[idx]
+      return true
+    })
 
   const getSubmissionLabel = (type: string) => {
     switch (type) {
@@ -407,8 +454,9 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
 
       {/* ─── MAIN DOSSIER BODY ─────────────────────────────────── */}
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-12">
-        {/* ─── SECTION 1: REQUIRED DOCUMENTS CHECKLIST LEDGER ──────────────── */}
+        {/* ─── SECTION 1: REQUIRED DOCUMENTS CHECKLIST & READINESS CENTER ──── */}
         <section id="documents" className="scroll-mt-24">
+          {/* Section Header */}
           <div className="border-b border-neutral-200 pb-3 mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5">
@@ -420,11 +468,13 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
                 </h2>
               </div>
               <p className="text-xs sm:text-sm text-neutral-600 mt-1 leading-relaxed">
-                {t('serviceDetail', 'docsChecklistDesc', lang)}
+                {lang === 'bn'
+                  ? 'কাগজপত্রের ওপর ক্লিক করে সহজেই প্রস্তুত কিনা চিহ্নিত করুন। স্ক্রল ছাড়াই ওপরের সারসংক্ষেপ দেখে এক নজরে পূর্ণাঙ্গ চিত্র পান।'
+                  : 'Check off required papers to verify submission readiness. View your live completion status at a glance without scrolling.'}
               </p>
             </div>
 
-            {/* Interactive Progress Indicator */}
+            {/* Quick Count Badge */}
             {totalDocs > 0 && (
               <div className="border border-neutral-200 bg-white px-3.5 py-1.5 shrink-0 text-right rounded-none shadow-xs border-l-3 border-l-[#006A4E]">
                 <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 block">
@@ -438,106 +488,370 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
             )}
           </div>
 
-          {/* Lined Document Ledger Table */}
-          <div className="border border-neutral-200 divide-y divide-neutral-200 bg-white rounded-none shadow-xs">
-            {service.required_docs && service.required_docs.length > 0 ? (
-              service.required_docs.map((doc, idx) => {
+          {/* ─── BIRD'S-EYE VIEW: QUICK-CHIPS RIBBON (0-Scroll Overview Hub) ─── */}
+          {totalDocs > 0 && (
+            <div className="border border-neutral-200 bg-white p-4 sm:p-5 rounded-none shadow-xs mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-100">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-[#006A4E]" />
+                    <h3 className="text-sm font-bold uppercase tracking-wide text-neutral-800">
+                      {lang === 'bn'
+                        ? 'এক নজরে পূর্ণাঙ্গ চিত্র (সরাসরি ক্লিক করে টিক দিন)'
+                        : 'At-a-Glance Readiness Hub (Click chip to toggle)'}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    {lang === 'bn'
+                      ? 'পৃষ্ঠা স্ক্রল না করেই এখান থেকে সব কাগজপত্র যাচাই ও পরিবর্তন করুন'
+                      : 'Review and toggle all your documents directly from this single compact overview'}
+                  </p>
+                </div>
+
+                {/* Bulk Actions */}
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={markAllDocsReady}
+                    className="win-press inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-neutral-300 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 transition-colors"
+                  >
+                    <Check className="w-3.5 h-3.5 text-[#006A4E]" />
+                    <span>{lang === 'bn' ? 'সব প্রস্তুত' : 'Select All'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetAllDocs}
+                    className="win-press inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-neutral-300 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 transition-colors"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-neutral-500" />
+                    <span>{lang === 'bn' ? 'রিসেট' : 'Reset'}</span>
+                  </button>
+                  {userDocs.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={syncWithLocker}
+                      className="win-press inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-[#006A4E] transition-colors"
+                    >
+                      <FolderCheck className="w-3.5 h-3.5" />
+                      <span>{lang === 'bn' ? 'লকার সিঙ্ক' : 'Vault Sync'}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Progress Meter with Percentage */}
+              <div className="mt-3.5 mb-4">
+                <div className="flex items-center justify-between text-xs mb-1.5 font-mono">
+                  <span className="font-semibold text-neutral-700">
+                    {lang === 'bn' ? 'প্রস্তুতির অগ্রগতি:' : 'Readiness Progress:'}{' '}
+                    <strong className="text-neutral-900">{formatNumber(percentReady, lang)}%</strong>
+                  </span>
+                  <span
+                    className={cn(
+                      'font-bold',
+                      isAllReady ? 'text-[#006A4E]' : 'text-amber-700'
+                    )}
+                  >
+                    {formatNumber(completedDocsCount, lang)} / {formatNumber(totalDocs, lang)}{' '}
+                    {lang === 'bn' ? 'টি সংগৃহীত' : 'collected'}
+                  </span>
+                </div>
+                <div className="w-full h-2.5 bg-neutral-100 border border-neutral-200 overflow-hidden">
+                  <motion.div
+                    className={cn(
+                      'h-full transition-all duration-300',
+                      isAllReady ? 'bg-[#006A4E]' : 'bg-amber-500'
+                    )}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentReady}%` }}
+                    transition={{ duration: 0.35, ease: WIN10_EASE_ENTRANCE }}
+                  />
+                </div>
+              </div>
+
+              {/* Quick Interactive Chips (Zero Scroll Overview) */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {service.required_docs?.map((doc, idx) => {
+                  const isChecked = !!checkedDocs[idx]
+                  const docTitle = lang === 'bn' ? doc.name_bn : (doc.name_en || doc.name_bn)
+
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => toggleDoc(idx)}
+                      className={cn(
+                        'win-press inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium border transition-all text-left select-none',
+                        isChecked
+                          ? 'bg-emerald-50 border-[#006A4E] text-[#006A4E] shadow-2xs'
+                          : 'bg-white border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50/80'
+                      )}
+                      title={
+                        isChecked
+                          ? lang === 'bn'
+                            ? 'প্রস্তুত (ক্লিক করে আনটিক করুন)'
+                            : 'Ready (Click to uncheck)'
+                          : lang === 'bn'
+                          ? 'বাকি আছে (ক্লিক করে প্রস্তুত চিহ্নিত করুন)'
+                          : 'Pending (Click to mark ready)'
+                      }
+                    >
+                      <span
+                        className={cn(
+                          'w-4 h-4 border flex items-center justify-center shrink-0 transition-colors',
+                          isChecked
+                            ? 'bg-[#006A4E] border-[#006A4E] text-white'
+                            : 'border-neutral-400 bg-white'
+                        )}
+                      >
+                        {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                      </span>
+                      <span className={cn('truncate max-w-[220px] sm:max-w-none', isChecked && 'font-bold')}>
+                        {docTitle}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Dynamic Verdict Callout */}
+              <div className="mt-4 pt-3.5 border-t border-neutral-100">
+                {isAllReady ? (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50 border border-emerald-300 p-3.5 text-xs sm:text-sm text-emerald-950">
+                    <div className="flex items-center gap-2.5">
+                      <CheckCircle2 className="w-5 h-5 text-[#006A4E] shrink-0" />
+                      <span className="font-bold">
+                        {lang === 'bn'
+                          ? 'অভিনন্দন! আবেদনের জন্য সকল কাগজপত্র প্রস্তুত। আপনি এখনই অনলাইনে আবেদন করতে পারেন।'
+                          : 'All required documents are prepared! You are fully set to begin your application.'}
+                      </span>
+                    </div>
+                    {user ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowAppModal(true)}
+                        className="win-press shrink-0 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors"
+                      >
+                        {lang === 'bn' ? 'আবেদন শুরু করুন' : 'Start Application'}
+                      </button>
+                    ) : (
+                      <Link
+                        href="/login"
+                        className="win-press shrink-0 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors"
+                      >
+                        {lang === 'bn' ? 'লগইন করে আবেদন' : 'Login to Apply'}
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-amber-50/70 border border-amber-300 p-3 text-xs text-amber-950">
+                    <div className="flex items-start sm:items-center gap-2 min-w-0">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 sm:mt-0" />
+                      <div className="min-w-0">
+                        <span className="font-bold">
+                          {lang === 'bn'
+                            ? `এখনও ${formatNumber(pendingDocsCount, lang)}টি কাগজ প্রস্তুত করা বাকি:`
+                            : `${pendingDocsCount} documents still pending:`}
+                        </span>{' '}
+                        <span className="text-amber-900 font-medium">
+                          {service.required_docs
+                            ?.filter((_, idx) => !checkedDocs[idx])
+                            .map((d) => (lang === 'bn' ? d.name_bn : (d.name_en || d.name_bn)))
+                            .join(', ')}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDocFilter('pending')}
+                      className="win-press text-amber-900 font-bold underline hover:text-amber-950 shrink-0 text-left sm:text-right"
+                    >
+                      {lang === 'bn' ? 'শুধু বাকিগুলো ফিল্টার করুন →' : 'Filter pending only →'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ─── FILTER TABS & INSTRUCTION BAR ──────────────────────────────── */}
+          {totalDocs > 0 && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
+              <div className="relative inline-flex items-center border border-neutral-300 bg-white p-0.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setDocFilter('all')}
+                  className={cn(
+                    'relative px-3.5 py-1.5 font-semibold transition-colors z-10',
+                    docFilter === 'all' ? 'text-white' : 'text-neutral-700 hover:text-neutral-900'
+                  )}
+                >
+                  {docFilter === 'all' && (
+                    <motion.div
+                      layoutId="docFilterGlider"
+                      className="absolute inset-0 bg-[#006A4E]"
+                      transition={WIN10_INDICATOR_SPRING}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {lang === 'bn' ? 'সবগুলো' : 'All'} ({formatNumber(totalDocs, lang)})
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDocFilter('pending')}
+                  className={cn(
+                    'relative px-3.5 py-1.5 font-semibold transition-colors z-10',
+                    docFilter === 'pending' ? 'text-white' : 'text-neutral-700 hover:text-neutral-900'
+                  )}
+                >
+                  {docFilter === 'pending' && (
+                    <motion.div
+                      layoutId="docFilterGlider"
+                      className="absolute inset-0 bg-amber-600"
+                      transition={WIN10_INDICATOR_SPRING}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {lang === 'bn' ? 'বাকি আছে' : 'Pending'} ({formatNumber(pendingDocsCount, lang)})
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDocFilter('ready')}
+                  className={cn(
+                    'relative px-3.5 py-1.5 font-semibold transition-colors z-10',
+                    docFilter === 'ready' ? 'text-white' : 'text-neutral-700 hover:text-neutral-900'
+                  )}
+                >
+                  {docFilter === 'ready' && (
+                    <motion.div
+                      layoutId="docFilterGlider"
+                      className="absolute inset-0 bg-[#006A4E]"
+                      transition={WIN10_INDICATOR_SPRING}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {lang === 'bn' ? 'প্রস্তুত' : 'Ready'} ({formatNumber(completedDocsCount, lang)})
+                  </span>
+                </button>
+              </div>
+
+              <span className="text-[11px] font-mono text-neutral-500">
+                {lang === 'bn'
+                  ? 'প্রতিটি কার্ডে ক্লিক করে অবস্থা যাচাই ও পরিবর্তন করতে পারেন'
+                  : 'Click any card below to review details and toggle state'}
+              </span>
+            </div>
+          )}
+
+          {/* ─── 2-COLUMN RESPONSIVE DETAILED TILE GRID ────────────────────── */}
+          {filteredDocs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {filteredDocs.map(({ doc, idx }) => {
                 const isChecked = !!checkedDocs[idx]
                 const copyConfig = getCopyTypeConfig(doc.copy_type)
                 const docTitle = lang === 'bn' ? doc.name_bn : (doc.name_en || doc.name_bn)
                 const docSubtitle = lang === 'bn' ? doc.name_en : doc.name_bn
+                const isInVault = checkDocInLocker(doc)
 
                 return (
                   <div
                     key={idx}
                     onClick={() => toggleDoc(idx)}
                     className={cn(
-                      'p-4 sm:p-5 transition-colors duration-150 cursor-pointer flex items-start gap-3.5 select-none',
-                      isChecked ? 'bg-neutral-50' : 'hover:bg-neutral-50/70'
+                      'win-tile win-press p-4 border transition-all duration-150 cursor-pointer select-none rounded-none flex flex-col justify-between gap-3',
+                      isChecked
+                        ? 'bg-neutral-50/80 border-emerald-300 border-l-4 border-l-[#006A4E]'
+                        : 'bg-white border-neutral-200 hover:border-neutral-400 border-l-4 border-l-neutral-300'
                     )}
                   >
-                    {/* Square Checkbox (Flat Windows 10 style) */}
-                    <button
-                      type="button"
-                      className={cn(
-                        'w-5 h-5 border flex items-center justify-center shrink-0 mt-0.5 rounded-none transition-colors',
-                        isChecked ? 'bg-[#006A4E] border-[#006A4E] text-white' : 'border-neutral-400 bg-white hover:border-[#006A4E]'
-                      )}
-                      aria-label="Toggle document ready"
-                    >
-                      {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                    </button>
-
-                    {/* Document Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <h3
+                    <div>
+                      {/* Top Checkbox + Title Row */}
+                      <div className="flex items-start gap-2.5">
+                        <button
+                          type="button"
                           className={cn(
-                            'text-base sm:text-lg font-bold leading-snug transition-colors',
-                            isChecked ? 'line-through text-neutral-400' : 'text-neutral-900'
+                            'w-5 h-5 border flex items-center justify-center shrink-0 mt-0.5 rounded-none transition-colors',
+                            isChecked
+                              ? 'bg-[#006A4E] border-[#006A4E] text-white'
+                              : 'border-neutral-400 bg-white hover:border-[#006A4E]'
                           )}
+                          aria-label="Toggle document ready"
                         >
-                          {docTitle}
-                        </h3>
+                          {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        </button>
 
-                        {/* Status Tag */}
-                        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
-                          {userDocs.some((ud) => {
-                            if (doc.name_bn.includes('পরিচয়পত্র') || doc.name_bn.includes('NID')) {
-                              return ud.doc_type === 'nid_front' || ud.doc_type === 'nid_back'
-                            }
-                            if (doc.name_bn.includes('জন্ম নিবন্ধন') || doc.name_en?.toLowerCase().includes('birth')) {
-                              return ud.doc_type === 'birth_certificate'
-                            }
-                            if (doc.name_bn.includes('ছবি') || doc.name_en?.toLowerCase().includes('photo')) {
-                              return ud.doc_type === 'photo'
-                            }
-                            if (doc.name_bn.includes('টিআইএন') || doc.name_bn.includes('TIN')) {
-                              return ud.doc_type === 'tin_certificate'
-                            }
-                            if (doc.name_bn.includes('ট্রেড লাইসেন্স')) {
-                              return ud.doc_type === 'trade_license'
-                            }
-                            return false
-                          }) && (
-                            <span className="text-[11px] font-mono font-bold px-2 py-0.5 bg-emerald-50 text-[#006A4E] border border-emerald-300 rounded-none inline-flex items-center gap-1">
-                              <Check className="w-3 h-3 text-[#006A4E]" />
-                              <span>{lang === 'bn' ? 'লকারে প্রস্তুত' : 'In Vault'}</span>
-                            </span>
+                        <div className="min-w-0 flex-1">
+                          <h3
+                            className={cn(
+                              'text-sm sm:text-base font-bold leading-snug transition-colors',
+                              isChecked ? 'line-through text-neutral-400' : 'text-neutral-900'
+                            )}
+                          >
+                            {docTitle}
+                          </h3>
+                          {docSubtitle && docSubtitle !== docTitle && (
+                            <p className="text-[11px] text-neutral-500 font-medium mt-0.5 truncate">
+                              {docSubtitle}
+                            </p>
                           )}
-                          <span className={cn('text-xs px-2 py-0.5 font-mono uppercase tracking-wider rounded-none', copyConfig.style)}>
-                            {copyConfig.label}
-                          </span>
                         </div>
                       </div>
 
-                      {docSubtitle && docSubtitle !== docTitle && (
-                        <p className="text-xs text-neutral-500 font-medium mt-0.5">
-                          {docSubtitle}
-                        </p>
-                      )}
+                      {/* Badges Row */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2.5 ml-7">
+                        <span className={cn('text-[10px] font-mono px-2 py-0.5 rounded-none', copyConfig.style)}>
+                          {copyConfig.label}
+                        </span>
+                        {isInVault && (
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-emerald-50 text-[#006A4E] border border-emerald-300 rounded-none inline-flex items-center gap-1">
+                            <Check className="w-2.5 h-2.5 text-[#006A4E]" />
+                            <span>{lang === 'bn' ? 'লকারে বিদ্যমান' : 'In Vault'}</span>
+                          </span>
+                        )}
+                      </div>
 
-                      {/* Instruction Note */}
+                      {/* Instruction Note if any */}
                       {doc.note_bn && (
-                        <div className="mt-2.5 border-l-3 border-amber-500 bg-amber-50/60 p-2.5 text-xs text-amber-950 leading-relaxed rounded-none">
-                          <strong className="font-bold">
-                            {lang === 'bn' ? 'নির্দেশনা:' : 'Note:'}
-                          </strong>{' '}
-                          {doc.note_bn}
+                        <div className="mt-2.5 ml-7 border-l-2 border-amber-500 bg-amber-50/70 p-2 text-[11px] text-amber-950 leading-relaxed rounded-none">
+                          <strong className="font-bold">{lang === 'bn' ? 'নির্দেশনা:' : 'Note:'}</strong> {doc.note_bn}
                         </div>
                       )}
                     </div>
+
+                    {/* Micro Status Footer */}
+                    <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-500 ml-7">
+                      <span className={cn('font-semibold', isChecked ? 'text-[#006A4E]' : 'text-neutral-500')}>
+                        {isChecked
+                          ? lang === 'bn'
+                            ? '✓ সংগৃহীত ও প্রস্তুত'
+                            : '✓ Ready & collected'
+                          : lang === 'bn'
+                          ? '○ সংগ্রহ করা প্রয়োজন'
+                          : '○ Needs preparation'}
+                      </span>
+                      <span className="text-neutral-400 font-mono text-[10px]">
+                        {lang === 'bn' ? 'ক্লিক করে বদলান' : 'Click to toggle'}
+                      </span>
+                    </div>
                   </div>
                 )
-              })
-            ) : (
-              <div className="p-6 text-center text-neutral-500 text-sm">
-                {lang === 'bn'
-                  ? 'এই সেবার জন্য কোনো নির্দিষ্ট কাগজপত্রের আবশ্যকতা উল্লেখ নেই।'
-                  : 'No specific documents are required for this service.'}
-              </div>
-            )}
-          </div>
+              })}
+            </div>
+          ) : (
+            <div className="border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-500 text-xs">
+              {docFilter === 'pending'
+                ? lang === 'bn'
+                  ? '✓ অভিনন্দন! কোনো কাগজপত্র বাকি নেই। সবগুলো প্রস্তুত!'
+                  : '✓ All required documents are ready! None are pending.'
+                : lang === 'bn'
+                ? 'এখনও কোনো কাগজপত্র প্রস্তুত চিহ্নিত করা হয়নি।'
+                : 'No documents have been marked as ready yet.'}
+            </div>
+          )}
 
           {/* Smart Document Locker Callout */}
           <div className="mt-7 border border-[#006A4E] bg-[#004D38] text-white p-6 rounded-none shadow-xs">
@@ -806,7 +1120,7 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
         </section>
       </main>
 
-      {/* ─── PERSISTENT ACTION BAR (Flat Windows 10 style) ─────────────────── */}
+      {/* ─── PERSISTENT ACTION BAR (Flat Windows 10 style with Readiness HUD) ─── */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-neutral-200 bg-white/95 backdrop-blur-md p-3 sm:p-3.5 z-40 shadow-md">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <div className="min-w-0">
@@ -822,6 +1136,35 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            {/* Live Document Readiness HUD Pill */}
+            {totalDocs > 0 && (
+              <a
+                href="#documents"
+                className={cn(
+                  'hidden sm:inline-flex items-center gap-2 px-3 py-1.5 border text-xs font-mono transition-colors win-press',
+                  isAllReady
+                    ? 'bg-emerald-50 border-[#006A4E] text-[#006A4E]'
+                    : 'bg-amber-50 border-amber-300 text-amber-900 hover:border-amber-400'
+                )}
+                title={lang === 'bn' ? 'কাগজপত্রের চেকলিস্টে যান' : 'Jump to document checklist'}
+              >
+                <span className="font-bold">
+                  {isAllReady
+                    ? lang === 'bn'
+                      ? '✓ শতভাগ প্রস্তুত'
+                      : '✓ 100% Ready'
+                    : lang === 'bn'
+                    ? `কাগজপত্র: ${formatNumber(completedDocsCount, lang)}/${formatNumber(totalDocs, lang)}`
+                    : `Docs: ${completedDocsCount}/${totalDocs}`}
+                </span>
+                {!isAllReady && (
+                  <span className="px-1.5 py-0.5 bg-amber-200 text-amber-950 font-bold text-[10px]">
+                    {lang === 'bn' ? `${formatNumber(pendingDocsCount, lang)}টি বাকি` : `${pendingDocsCount} left`}
+                  </span>
+                )}
+              </a>
+            )}
+
             {service.official_url && service.official_url !== '#' && (
               <a
                 href={service.official_url}
@@ -856,15 +1199,17 @@ export default function ServiceDetailContent({ slug }: { slug: string }) {
       </div>
 
       {/* Guided Application Preparation Wizard Modal */}
-      {showAppModal && user && (
-        <ApplicationModal
-          service={service}
-          user={user}
-          userDocs={userDocs}
-          lang={lang}
-          onClose={() => setShowAppModal(false)}
-        />
-      )}
+      <AnimatePresence>
+        {showAppModal && user && (
+          <ApplicationModal
+            service={service}
+            user={user}
+            userDocs={userDocs}
+            lang={lang}
+            onClose={() => setShowAppModal(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -2,9 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { Home, Search, FolderLock, BellRing, UserCheck } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { cn } from '@/lib/utils'
+import { WIN10_INDICATOR_SPRING } from '@/lib/motion'
 
 export default function MobileNav() {
   const pathname = usePathname()
@@ -61,7 +63,7 @@ export default function MobileNav() {
       className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-neutral-200 lg:hidden shadow-sm pb-safe rounded-none"
       aria-label="Mobile Bottom Navigation"
     >
-      <div className="flex items-center h-15 divide-x divide-neutral-100">
+      <div className="flex items-center h-15 divide-x divide-neutral-100 relative">
         {tabs.map((tab) => {
           const Icon = tab.icon
           return (
@@ -69,14 +71,28 @@ export default function MobileNav() {
               key={tab.key}
               href={tab.href}
               className={cn(
-                'flex flex-1 flex-col items-center justify-center gap-1 min-h-[48px] py-1 transition-colors border-t-2',
+                'relative flex flex-1 flex-col items-center justify-center gap-1 min-h-[48px] py-1 transition-colors overflow-hidden win-press',
                 tab.active
-                  ? 'text-[#006A4E] bg-neutral-50/80 font-bold border-t-[#006A4E]'
-                  : 'text-neutral-600 hover:text-neutral-900 font-medium border-t-transparent'
+                  ? 'text-[#006A4E] bg-neutral-50/80 font-bold'
+                  : 'text-neutral-600 hover:text-neutral-900 font-medium'
               )}
             >
+              {/* Windows 10 Smooth Active Top Accent Glider */}
+              {tab.active && (
+                <motion.div
+                  layoutId="mobile-bottom-nav-active-bar"
+                  className="absolute top-0 left-0 right-0 h-[3px] bg-[#006A4E]"
+                  transition={WIN10_INDICATOR_SPRING}
+                />
+              )}
+
               <div className="relative">
-                <Icon className={cn('w-4.5 h-4.5 shrink-0', tab.active ? 'text-[#006A4E] stroke-[2.5]' : 'text-neutral-400')} />
+                <Icon
+                  className={cn(
+                    'w-4.5 h-4.5 shrink-0 transition-colors',
+                    tab.active ? 'text-[#006A4E] stroke-[2.5]' : 'text-neutral-400'
+                  )}
+                />
               </div>
               <span className="text-[11px] leading-tight truncate px-0.5">
                 {lang === 'bn' ? tab.labelBn : tab.labelEn}

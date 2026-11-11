@@ -98,19 +98,19 @@ export default function ProfileSettings({
             <input
               type="text"
               readOnly
-              value={user.phone || '+8801700000000'}
+              value={user.phone || '+8801712345678'}
               className="w-full h-10 px-3 border border-neutral-200 bg-neutral-100 font-mono text-xs sm:text-sm font-semibold text-neutral-600 cursor-not-allowed rounded-none"
             />
           </div>
 
           <div>
             <label className="block text-xs font-mono font-bold text-neutral-600 uppercase mb-1">
-              {lang === 'bn' ? 'ইমেইল (ঐচ্ছিক)' : 'Email (Optional)'}
+              {lang === 'bn' ? 'ইমেইল ঠিকানা' : 'Email Address'}
             </label>
             <input
               type="email"
               readOnly
-              value={user.email || 'not-provided@dishari.bd'}
+              value={user.email || 'citizen@dishari.bd'}
               className="w-full h-10 px-3 border border-neutral-200 bg-neutral-100 font-mono text-xs sm:text-sm font-semibold text-neutral-600 cursor-not-allowed rounded-none"
             />
           </div>
@@ -159,7 +159,7 @@ export default function ProfileSettings({
         <div className="pt-3 flex items-center justify-between">
           <button
             type="submit"
-            className="min-h-[40px] px-6 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider rounded-none transition-colors cursor-pointer"
+            className="min-h-[40px] px-6 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider rounded-none transition-colors cursor-pointer win-btn"
           >
             {lang === 'bn' ? 'তথ্য হালনাগাদ সংরক্ষণ' : 'Save Changes'}
           </button>
@@ -167,7 +167,7 @@ export default function ProfileSettings({
           <button
             type="button"
             onClick={onLogout}
-            className="min-h-[40px] px-4 border border-red-200 hover:border-red-300 bg-white hover:bg-red-50 text-[#C8102E] font-semibold text-xs uppercase flex items-center gap-1.5 rounded-none transition-colors"
+            className="min-h-[40px] px-4 border border-red-200 hover:border-red-300 bg-white hover:bg-red-50 text-[#C8102E] font-semibold text-xs uppercase flex items-center gap-1.5 rounded-none transition-colors win-press"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>{lang === 'bn' ? 'লগআউট' : 'Log Out'}</span>

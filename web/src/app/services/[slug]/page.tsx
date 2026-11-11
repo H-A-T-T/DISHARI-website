@@ -11,6 +11,17 @@ export const metadata: Metadata = {
 
 export async function generateStaticParams() {
   const services = await fetchAllServices()
+  if (!services || services.length === 0) {
+    return [
+      { slug: 'passport' },
+      { slug: 'nid-correction' },
+      { slug: 'birth-registration' },
+      { slug: 'widow-allowance' },
+      { slug: 'scholarship' },
+      { slug: 'trade-license' },
+      { slug: 'tax-return' },
+    ]
+  }
   return services.map((s) => ({ slug: s.slug }))
 }
 

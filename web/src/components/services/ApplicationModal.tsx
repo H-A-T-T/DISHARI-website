@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   ShieldCheck,
   CheckCircle2,
@@ -16,6 +17,11 @@ import {
 } from 'lucide-react'
 import type { Service, CitizenDocument, CitizenApplication } from '@/types'
 import { createApplication, type UserProfile } from '@/lib/api'
+import {
+  win10DialogBackdropMotion,
+  win10DialogMotion,
+  win10DrillInMotion,
+} from '@/lib/motion'
 
 interface ApplicationModalProps {
   service: Service
@@ -111,10 +117,10 @@ export default function ApplicationModal({
           <link href="https://fonts.maateen.me/kalpurush/font.css" rel="stylesheet">
           <style>
             @page { size: A4; margin: 15mm; }
-            body { font-family: 'Kalpurush', 'Times New Roman', serif; color: #18181b; line-height: 1.5; padding: 10px; }
+            body { font-family: 'Kalpurush', 'Times New Roman', serif; color: #18181b; line-height: 1.5; padding: 10px; background: #ffffff; }
             .docket-container { border: 1px solid #18181b; padding: 24px; max-width: 800px; margin: 0 auto; }
             .header-table { width: 100%; border-bottom: 2px solid #006A4E; padding-bottom: 12px; margin-bottom: 18px; }
-            .govt-title { font-size: 18px; font-weight: bold; text-transform: uppercase; color: #006A4E; }
+            .govt-title { font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #006A4E; }
             .docket-badge { font-family: monospace; font-size: 15px; font-weight: bold; background: #f4f4f5; border: 1px solid #18181b; padding: 4px 10px; display: inline-block; }
             .section-heading { font-size: 13px; font-weight: bold; background: #f4f4f5; border-left: 4px solid #006A4E; padding: 4px 8px; margin: 16px 0 10px 0; text-transform: uppercase; }
             .data-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
@@ -184,9 +190,25 @@ export default function ApplicationModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-xs">
-      {/* Windows 10 Boxy Paper Modal Container */}
-      <div className="border border-neutral-300 bg-white max-w-xl w-full p-6 sm:p-7 shadow-2xl rounded-none max-h-[92vh] overflow-y-auto animate-in fade-in-50 duration-150 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Windows 10 Acrylic Backdrop */}
+      <motion.div
+        variants={win10DialogBackdropMotion}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs"
+        onClick={onClose}
+      />
+
+      {/* Windows 10 ContentDialog Container */}
+      <motion.div
+        variants={win10DialogMotion}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="relative z-10 border border-neutral-300 bg-white max-w-xl w-full p-6 sm:p-7 shadow-2xl rounded-none max-h-[92vh] overflow-y-auto"
+      >
         {/* Top 3px Bangladesh Green Accent Strip */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-[#006A4E]" />
 
@@ -203,7 +225,7 @@ export default function ApplicationModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-100 text-neutral-600 rounded-none transition-colors"
+            className="p-1.5 border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-100 text-neutral-600 rounded-none transition-colors win-press"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -217,170 +239,197 @@ export default function ApplicationModal({
           </div>
         )}
 
-        {/* STEP 1: PREPARATION & AUDIT OR STEP 2: DOCKET READY */}
-        {!createdApp ? (
-          <div className="space-y-5">
-            {/* Citizen Info Snapshot */}
-            <div className="p-3.5 border border-neutral-200 bg-neutral-50 rounded-none">
-              <span className="font-mono text-xs font-bold text-neutral-500 uppercase block mb-1.5">
-                {lang === 'bn' ? 'আবেদনকারী নাগরিকের তথ্য:' : 'Applicant Citizen Profile:'}
-              </span>
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-neutral-900">
-                <span>{user.full_name}</span>
-                <span className="font-mono text-neutral-600">{user.phone}</span>
-                <span className="font-mono text-[#006A4E] bg-emerald-50 px-2 py-0.5 border border-emerald-200 rounded-none">
-                  {user.citizen_id}
+        {/* STEP 1: PREPARATION & AUDIT OR STEP 2: DOCKET READY with Windows 10 Drill-In Navigation */}
+        <AnimatePresence mode="wait">
+          {!createdApp ? (
+            <motion.div
+              key="step-prep"
+              variants={win10DrillInMotion}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="space-y-5"
+            >
+              {/* Citizen Info Snapshot */}
+              <div className="p-3.5 border border-neutral-200 bg-neutral-50 rounded-none">
+                <span className="font-mono text-xs font-bold text-neutral-500 uppercase block mb-1.5">
+                  {lang === 'bn' ? 'আবেদনকারী নাগরিকের তথ্য:' : 'Applicant Citizen Profile:'}
                 </span>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-neutral-900">
+                  <span>{user.full_name}</span>
+                  <span className="font-mono text-neutral-600">{user.phone}</span>
+                  <span className="font-mono text-[#006A4E] bg-emerald-50 px-2 py-0.5 border border-emerald-200 rounded-none">
+                    {user.citizen_id}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Document Locker Match Audit */}
-            <div>
-              <span className="font-mono text-xs font-bold text-neutral-700 uppercase block mb-2">
-                {lang === 'bn' ? 'প্রয়োজনীয় কাগজপত্রের লকার নিরীক্ষা:' : 'Document Locker Readiness Audit:'}
-              </span>
-              <div className="border border-neutral-200 divide-y divide-neutral-200 bg-white rounded-none">
-                {service.required_docs.map((doc, idx) => {
-                  const isAttached = attachedDocNames.includes(doc.name_bn)
-                  return (
-                    <div key={idx} className="p-3 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-neutral-400 shrink-0" />
-                        <span className="font-bold text-neutral-900">
-                          {lang === 'bn' ? doc.name_bn : doc.name_en || doc.name_bn}
-                        </span>
-                      </div>
-                      <span
-                        className={`font-mono text-[11px] font-bold px-2 py-0.5 border rounded-none ${
-                          isAttached
-                            ? 'bg-emerald-50 text-[#006A4E] border-emerald-300'
-                            : 'bg-amber-50 text-amber-800 border-amber-300'
+              {/* Document Locker Match Audit */}
+              <div>
+                <span className="font-mono text-xs font-bold text-neutral-700 uppercase block mb-2">
+                  {lang === 'bn' ? 'প্রয়োজনীয় কাগজপত্রের লকার নিরীক্ষা:' : 'Document Locker Readiness Audit:'}
+                </span>
+                <div className="space-y-2">
+                  {service.required_docs.map((doc, idx) => {
+                    const isMatched = attachedDocNames.includes(doc.name_bn)
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`p-3 border flex items-center justify-between gap-3 rounded-none transition-colors ${
+                          isMatched
+                            ? 'border-emerald-200 bg-emerald-50/50'
+                            : 'border-neutral-200 bg-white'
                         }`}
                       >
-                        {isAttached ? (
-                          <span className="inline-flex items-center gap-1">
-                            <Check className="w-3 h-3 text-[#006A4E]" />
-                            <span>{lang === 'bn' ? 'লকারে প্রস্তুত' : 'In Locker'}</span>
-                          </span>
-                        ) : (
-                          <span>{lang === 'bn' ? 'ম্যানুয়াল লাগবে' : 'Manual Carry'}</span>
-                        )}
-                      </span>
-                    </div>
-                  )
-                })}
+                        <div className="flex items-center gap-2.5">
+                          {isMatched ? (
+                            <Check className="w-4 h-4 text-[#006A4E] shrink-0" />
+                          ) : (
+                            <div className="w-4 h-4 border border-neutral-400 rounded-none shrink-0" />
+                          )}
+                          <div>
+                            <span className="text-xs font-bold text-neutral-900 block">
+                              {lang === 'bn' ? doc.name_bn : doc.name_en || doc.name_bn}
+                            </span>
+                            <span className="text-[10px] text-neutral-500 font-mono block">
+                              {isMatched
+                                ? lang === 'bn'
+                                  ? '✓ ডিজিটাল লকারে সংরক্ষিত'
+                                  : '✓ Attached from locker'
+                                : lang === 'bn'
+                                ? 'ম্যানুয়াল সংযুক্তির প্রয়োজন'
+                                : 'Manual submission required'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <span
+                          className={`font-mono text-[10px] font-bold px-2 py-0.5 border rounded-none ${
+                            isMatched
+                              ? 'bg-[#006A4E] text-white border-[#006A4E]'
+                              : 'bg-neutral-100 text-neutral-700 border-neutral-300'
+                          }`}
+                        >
+                          {isMatched ? 'ATTACHED' : 'PENDING'}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
 
-            {/* Application Instructions */}
-            <div className="p-3.5 border border-neutral-200 bg-neutral-50 text-xs text-neutral-700 leading-relaxed space-y-1 rounded-none">
-              <div>
-                <strong className="text-neutral-900 font-bold">
-                  {lang === 'bn' ? 'সরকারি ফি:' : 'Official Fee:'}
-                </strong>{' '}
-                {service.fee}
+              {/* Official Processing Facts Notice */}
+              <div className="p-3 border border-neutral-200 bg-neutral-100/70 text-xs space-y-1">
+                <div className="flex justify-between text-neutral-600 font-mono">
+                  <span>{lang === 'bn' ? 'নির্ধারিত সরকারি ফি:' : 'Official Fee:'}</span>
+                  <strong className="text-neutral-900">
+                    {service.fee === 'বিনামূল্যে'
+                      ? lang === 'bn'
+                        ? 'বিনামূল্যে'
+                        : 'Free'
+                      : `৳${service.fee}`}
+                  </strong>
+                </div>
+                <div className="flex justify-between text-neutral-600 font-mono">
+                  <span>{lang === 'bn' ? 'অনুমোদিত সময়সীমা:' : 'Approved Time:'}</span>
+                  <strong className="text-neutral-900">{service.processing_time_bn}</strong>
+                </div>
               </div>
-              <div>
-                <strong className="text-neutral-900 font-bold">
-                  {lang === 'bn' ? 'প্রক্রিয়াকরণ সময়:' : 'Processing Time:'}
-                </strong>{' '}
-                {service.processing_time_bn}
-              </div>
-              <div>
-                <strong className="text-neutral-900 font-bold">
-                  {lang === 'bn' ? 'জমাদানের স্থান:' : 'Submission Office:'}
-                </strong>{' '}
-                {service.apply_location_bn}
-              </div>
-            </div>
 
-            {/* Action CTA */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full sm:w-auto min-h-[44px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-semibold text-xs uppercase rounded-none transition-colors"
-              >
-                {lang === 'bn' ? 'বাতিল' : 'Cancel'}
-              </button>
-
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={handleGenerateDocket}
-                className="w-full sm:w-auto min-h-[44px] px-6 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>
-                  {isSubmitting
-                    ? lang === 'bn'
-                      ? 'ডকেট প্রস্তুত হচ্ছে...'
-                      : 'Preparing Docket...'
-                    : lang === 'bn'
-                    ? 'আবেদন ডকেট তৈরি করুন'
-                    : 'Generate Application Docket'}
-                </span>
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* SUCCESS SCREEN */
-          <div className="space-y-6 text-center py-4">
-            <div className="w-14 h-14 mx-auto border border-emerald-300 bg-emerald-50 flex items-center justify-center rounded-none">
-              <CheckCircle2 className="w-8 h-8 text-[#006A4E]" />
-            </div>
-
-            <div>
-              <span className="font-mono text-xs font-bold text-[#006A4E] uppercase tracking-widest block mb-1">
-                {lang === 'bn' ? 'আবেদন ডকেট সফলভাবে প্রস্তুত' : 'Application Docket Ready'}
-              </span>
-              <h4 className="text-2xl font-bold text-neutral-900">
-                {lang === 'bn' ? 'আপনার আবেদন প্রস্তুত হয়েছে' : 'Docket Created Successfully'}
-              </h4>
-              <div className="mt-3 inline-block font-mono text-sm font-bold bg-neutral-100 border border-neutral-300 px-4 py-1.5 rounded-none">
-                DOCKET ID: {createdApp.docket_id}
-              </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-neutral-600 max-w-md mx-auto leading-relaxed">
-              {lang === 'bn'
-                ? 'আপনার প্রয়োজনীয় তথ্য ও লকারের নথিপত্র দিয়ে কার্যপত্র সংরক্ষণ করা হয়েছে। এটি আপনার ড্যাশবোর্ডে "আমার আবেদনসমূহ" বিভাগে যুক্ত হয়েছে।'
-                : 'Your prefilled citizen docket has been logged and stored under your dashboard applications.'}
-            </p>
-
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => handlePrint(createdApp)}
-                className="w-full sm:w-auto min-h-[44px] px-5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer"
-              >
-                <Printer className="w-4 h-4" />
-                <span>{lang === 'bn' ? 'কাউন্টার ফরম প্রিন্ট' : 'Print Docket'}</span>
-              </button>
-
-              {service.official_url && service.official_url !== '#' && (
-                <a
-                  href={service.official_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto min-h-[44px] px-5 border border-neutral-800 bg-neutral-900 hover:bg-[#006A4E] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors"
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-neutral-200">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="min-h-[42px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-bold text-xs uppercase rounded-none win-press"
                 >
-                  <span>{lang === 'bn' ? 'সরকারি পোর্টালে যান' : 'Go to Official Portal'}</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
+                  {lang === 'bn' ? 'বাতিল' : 'Cancel'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGenerateDocket}
+                  disabled={isSubmitting}
+                  className="min-h-[42px] px-6 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center gap-2 rounded-none transition-colors disabled:opacity-50 cursor-pointer win-btn"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>
+                    {isSubmitting
+                      ? lang === 'bn'
+                        ? 'কার্যপত্র প্রস্তুত হচ্ছে...'
+                        : 'Generating Docket...'
+                      : lang === 'bn'
+                      ? 'কার্যপত্র (Docket) তৈরি করুন'
+                      : 'Generate Official Docket'}
+                  </span>
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="step-ready"
+              variants={win10DrillInMotion}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="py-5 text-center space-y-4"
+            >
+              <div className="w-16 h-16 mx-auto bg-emerald-50 border border-emerald-300 flex items-center justify-center rounded-none">
+                <CheckCircle2 className="w-8 h-8 text-[#006A4E]" />
+              </div>
 
-              <Link
-                href="/dashboard?tab=applications"
-                className="w-full sm:w-auto min-h-[44px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors"
-              >
-                <span>{lang === 'bn' ? 'ড্যাশবোর্ডে দেখুন' : 'View in Dashboard'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+              <div>
+                <span className="font-mono text-xs font-bold text-[#006A4E] uppercase tracking-widest block mb-1">
+                  {lang === 'bn' ? 'আবেদন ডকেট সফলভাবে প্রস্তুত' : 'Application Docket Ready'}
+                </span>
+                <h4 className="text-2xl font-bold text-neutral-900">
+                  {lang === 'bn' ? 'আপনার আবেদন প্রস্তুত হয়েছে' : 'Docket Created Successfully'}
+                </h4>
+                <div className="mt-3 inline-block font-mono text-sm font-bold bg-neutral-100 border border-neutral-300 px-4 py-1.5 rounded-none">
+                  DOCKET ID: {createdApp.docket_id}
+                </div>
+              </div>
+
+              <p className="text-xs sm:text-sm text-neutral-600 max-w-md mx-auto leading-relaxed">
+                {lang === 'bn'
+                  ? 'আপনার প্রয়োজনীয় তথ্য ও লকারের নথিপত্র দিয়ে কার্যপত্র সংরক্ষণ করা হয়েছে। এটি আপনার ড্যাশবোর্ডে "আমার আবেদনসমূহ" বিভাগে যুক্ত হয়েছে।'
+                  : 'Your prefilled citizen docket has been logged and stored under your dashboard applications.'}
+              </p>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => handlePrint(createdApp)}
+                  className="w-full sm:w-auto min-h-[44px] px-5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer win-btn"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>{lang === 'bn' ? 'কাউন্টার ফরম প্রিন্ট' : 'Print Docket'}</span>
+                </button>
+
+                {service.official_url && service.official_url !== '#' && (
+                  <a
+                    href={service.official_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto min-h-[44px] px-5 border border-neutral-800 bg-neutral-900 hover:bg-[#006A4E] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors win-btn"
+                  >
+                    <span>{lang === 'bn' ? 'সরকারি পোর্টালে যান' : 'Go to Official Portal'}</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+
+                <Link
+                  href="/dashboard?tab=applications"
+                  className="w-full sm:w-auto min-h-[44px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors win-press"
+                >
+                  <span>{lang === 'bn' ? 'ড্যাশবোর্ডে দেখুন' : 'View in Dashboard'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   )
 }

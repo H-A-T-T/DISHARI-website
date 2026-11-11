@@ -60,6 +60,9 @@
 :root {
   --background: #F5F6F8;
   --foreground: #18181B;
+  --ease-win10-entrance: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --ease-win10-exit: cubic-bezier(0.7, 0, 1, 0.5);
+  --ease-win10-standard: cubic-bezier(0.8, 0, 0.2, 1);
 }
 
 * {
@@ -111,16 +114,28 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 1px;
 }
 
-/* ── Windows 10 Tile & Flat Paper Utilities ────────────────────────────── */
+/* ── Windows 10 Fluent Micro-Interactions & Motion Utilities ──────────── */
+.win-press {
+  transition: transform 0.12s var(--ease-win10-entrance), background-color 0.15s var(--ease-win10-entrance), border-color 0.15s var(--ease-win10-entrance);
+}
+
+.win-press:active {
+  transform: scale(0.985);
+}
+
 .win-tile {
   background-color: #FFFFFF;
   border: 1px solid #E4E4E7;
-  transition: all 0.15s ease-in-out;
+  transition: transform 0.12s var(--ease-win10-entrance), border-color 0.16s var(--ease-win10-entrance), background-color 0.16s var(--ease-win10-entrance), box-shadow 0.16s var(--ease-win10-entrance);
 }
 
 .win-tile:hover {
   border-color: #006A4E;
   background-color: #FAFAFA;
+}
+
+.win-tile:active {
+  transform: scale(0.988);
 }
 
 .win-tile-active {
@@ -129,6 +144,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .win-tile-red {
   border-left: 4px solid #C8102E;
+}
+
+.win-btn {
+  transition: transform 0.12s var(--ease-win10-entrance), background-color 0.15s var(--ease-win10-entrance), border-color 0.15s var(--ease-win10-entrance);
+}
+
+.win-btn:active {
+  transform: scale(0.98);
 }
 
 /* ── Safe area insets for mobile edge devices ─────────────────────────── */

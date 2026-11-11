@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText,
   Upload,
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react'
 import type { CitizenDocument, DocType } from '@/types'
 import { uploadDocument, deleteDocument } from '@/lib/api'
+import { win10DialogBackdropMotion, win10DialogMotion } from '@/lib/motion'
 
 interface DocumentLockerProps {
   documents: CitizenDocument[]
@@ -174,7 +176,7 @@ export default function DocumentLocker({ documents, onRefresh, lang }: DocumentL
 
           <button
             onClick={() => setShowUploadModal(true)}
-            className="shrink-0 min-h-[42px] px-5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer"
+            className="shrink-0 min-h-[42px] px-5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer win-btn"
           >
             <Plus className="w-4 h-4" />
             <span>{lang === 'bn' ? 'নতুন নথি যোগ করুন' : 'Add New Document'}</span>
@@ -230,7 +232,7 @@ export default function DocumentLocker({ documents, onRefresh, lang }: DocumentL
             </p>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="min-h-[42px] px-5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider rounded-none cursor-pointer"
+              className="min-h-[42px] px-5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider rounded-none cursor-pointer win-btn"
             >
               {lang === 'bn' ? 'প্রথম নথি আপলোড করুন' : 'Upload First Document'}
             </button>
@@ -245,7 +247,7 @@ export default function DocumentLocker({ documents, onRefresh, lang }: DocumentL
               return (
                 <div
                   key={doc.id}
-                  className="border border-neutral-200 bg-white p-4.5 rounded-none shadow-xs flex flex-col justify-between hover:border-[#006A4E] transition-colors"
+                  className="win-tile p-4.5 rounded-none shadow-xs flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-3">
@@ -291,14 +293,14 @@ export default function DocumentLocker({ documents, onRefresh, lang }: DocumentL
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => setPreviewDoc(doc)}
-                        className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-neutral-600 hover:text-neutral-950 transition-colors rounded-none"
+                        className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-neutral-600 hover:text-neutral-950 transition-colors rounded-none win-press"
                         title={lang === 'bn' ? 'প্রিভিউ দেখুন' : 'Preview Document'}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(doc.id)}
-                        className="p-1.5 border border-neutral-200 hover:border-red-300 text-neutral-500 hover:text-[#C8102E] transition-colors rounded-none"
+                        className="p-1.5 border border-neutral-200 hover:border-red-300 text-neutral-500 hover:text-[#C8102E] transition-colors rounded-none win-press"
                         title={lang === 'bn' ? 'মুছে ফেলুন' : 'Delete Document'}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -312,148 +314,182 @@ export default function DocumentLocker({ documents, onRefresh, lang }: DocumentL
         )}
       </div>
 
-      {/* ─── Upload Modal ─────────────────────────────────────────────────── */}
-      {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-xs">
-          <div className="border border-neutral-300 bg-white max-w-lg w-full p-6 shadow-2xl rounded-none max-h-[90vh] overflow-y-auto animate-in fade-in-50 duration-150 relative">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#006A4E]" />
+      {/* ─── Upload Modal (Windows 10 ContentDialog) ─────────────────────────── */}
+      <AnimatePresence>
+        {showUploadModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              variants={win10DialogBackdropMotion}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs"
+              onClick={() => setShowUploadModal(false)}
+            />
 
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-neutral-200 pt-1">
-              <h3 className="font-bold text-base text-neutral-900">
-                {lang === 'bn' ? 'লকারে নতুন নথি সংরক্ষণ করুন' : 'Save Document to Personal Locker'}
-              </h3>
-              <button
-                onClick={() => setShowUploadModal(false)}
-                className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-neutral-600 rounded-none"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            <motion.div
+              variants={win10DialogMotion}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="relative z-10 border border-neutral-300 bg-white max-w-lg w-full p-6 shadow-2xl rounded-none max-h-[90vh] overflow-y-auto"
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-[#006A4E]" />
 
-            {uploadError && (
-              <div className="mb-4 p-3 border border-red-300 bg-red-50 text-[#C8102E] text-xs font-semibold flex items-center gap-2 rounded-none">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{uploadError}</span>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-mono font-bold text-neutral-700 uppercase mb-1.5">
-                  {lang === 'bn' ? 'নথির ধরন নির্বাচন করুন:' : 'Select Document Type:'}
-                </label>
-                <select
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value as DocType)}
-                  className="w-full h-10 px-3 border border-neutral-300 bg-white font-semibold text-xs sm:text-sm text-neutral-900 focus:outline-none rounded-none"
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-neutral-200 pt-1">
+                <h3 className="font-bold text-base text-neutral-900">
+                  {lang === 'bn' ? 'লকারে নতুন নথি সংরক্ষণ করুন' : 'Save Document to Personal Locker'}
+                </h3>
+                <button
+                  onClick={() => setShowUploadModal(false)}
+                  className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-neutral-600 rounded-none win-press"
                 >
-                  {DOC_TYPES.map((t) => (
-                    <option key={t.type} value={t.type}>
-                      {lang === 'bn' ? t.nameBn : t.nameEn} {t.required ? '*' : ''}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-neutral-500 mt-1">
-                  {lang === 'bn'
-                    ? DOC_TYPES.find((t) => t.type === selectedType)?.descBn
-                    : DOC_TYPES.find((t) => t.type === selectedType)?.descEn}
-                </p>
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
-              <div className="mt-4">
-                <label className="block text-xs font-mono font-bold text-neutral-700 uppercase mb-1.5">
-                  {lang === 'bn' ? 'ফাইল নির্বাচন (JPG, PNG, PDF):' : 'Select File (JPG, PNG, PDF):'}
-                </label>
-                <label className="border-2 border-dashed border-neutral-300 hover:border-[#006A4E] hover:bg-neutral-50 p-6 flex flex-col items-center justify-center cursor-pointer transition-colors text-center rounded-none">
-                  <Upload className="w-7 h-7 text-neutral-400 mb-2" />
-                  <span className="font-bold text-sm text-neutral-900">
-                    {isUploading
-                      ? lang === 'bn'
-                        ? 'আপলোড হচ্ছে...'
-                        : 'Uploading...'
-                      : lang === 'bn'
-                      ? 'ফাইল বেছে নিতে ক্লিক করুন'
-                      : 'Click to choose file'}
-                  </span>
-                  <span className="text-xs text-neutral-500 mt-1">সর্বোচ্চ আকার ২০ মেগাবাইট (২০ MB)</span>
-                  <input
-                    type="file"
-                    accept="image/*,application/pdf"
-                    disabled={isUploading}
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
-
-            <div className="mt-5 pt-3.5 border-t border-neutral-100 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowUploadModal(false)}
-                className="min-h-[40px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-semibold text-xs uppercase rounded-none"
-              >
-                {lang === 'bn' ? 'বাতিল' : 'Cancel'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Preview Modal ────────────────────────────────────────────────── */}
-      {previewDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-xs">
-          <div className="border border-neutral-300 bg-white max-w-2xl w-full p-6 shadow-2xl rounded-none max-h-[90vh] flex flex-col relative">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#006A4E]" />
-
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-200 pt-1">
-              <div>
-                <h3 className="font-bold text-base text-neutral-900">{previewDoc.file_name}</h3>
-                <span className="text-xs font-mono text-neutral-500">
-                  {lang === 'bn' ? 'আপলোড তারিখ:' : 'Uploaded:'} {new Date(previewDoc.uploaded_at).toLocaleDateString()}
-                </span>
-              </div>
-              <button
-                onClick={() => setPreviewDoc(null)}
-                className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-neutral-600 rounded-none"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="py-6 flex-1 overflow-auto flex items-center justify-center bg-neutral-50 border border-neutral-200 my-4 rounded-none">
-              {previewDoc.file_data?.startsWith('data:image') ? (
-                <img
-                  src={previewDoc.file_data}
-                  alt={previewDoc.file_name}
-                  className="max-h-[50vh] max-w-full object-contain"
-                />
-              ) : (
-                <div className="text-center p-8">
-                  <FileText className="w-14 h-14 text-neutral-400 mx-auto mb-2" />
-                  <p className="font-bold text-neutral-800">{previewDoc.file_name}</p>
-                  <p className="text-xs text-neutral-500 mt-1">
-                    {lang === 'bn' ? 'নথিটি সুরক্ষিত লকারে এনক্রিপ্ট করে সংরক্ষিত।' : 'Document encrypted and saved in personal vault.'}
-                  </p>
+              {uploadError && (
+                <div className="mb-4 p-3 border border-red-300 bg-red-50 text-[#C8102E] text-xs font-semibold flex items-center gap-2 rounded-none">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{uploadError}</span>
                 </div>
               )}
-            </div>
 
-            <div className="flex justify-between items-center pt-2">
-              <span className="font-mono text-xs text-[#006A4E] font-bold inline-flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-[#006A4E]" />
-                <span>{lang === 'bn' ? 'নাগরিক সেবা ফর্মের জন্য অনুমোদিত' : 'Authorized for citizen service forms'}</span>
-              </span>
-              <button
-                onClick={() => setPreviewDoc(null)}
-                className="min-h-[38px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-semibold text-xs uppercase rounded-none"
-              >
-                {lang === 'bn' ? 'বন্ধ করুন' : 'Close'}
-              </button>
-            </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mono font-bold text-neutral-700 uppercase mb-1.5">
+                    {lang === 'bn' ? 'নথির ধরন নির্বাচন করুন:' : 'Select Document Type:'}
+                  </label>
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value as DocType)}
+                    className="w-full h-10 px-3 border border-neutral-300 bg-white font-semibold text-xs sm:text-sm text-neutral-900 focus:outline-none rounded-none"
+                  >
+                    {DOC_TYPES.map((t) => (
+                      <option key={t.type} value={t.type}>
+                        {lang === 'bn' ? t.nameBn : t.nameEn} {t.required ? '*' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    {lang === 'bn'
+                      ? DOC_TYPES.find((t) => t.type === selectedType)?.descBn
+                      : DOC_TYPES.find((t) => t.type === selectedType)?.descEn}
+                  </p>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-xs font-mono font-bold text-neutral-700 uppercase mb-1.5">
+                    {lang === 'bn' ? 'ফাইল নির্বাচন (JPG, PNG, PDF):' : 'Select File (JPG, PNG, PDF):'}
+                  </label>
+                  <label className="border-2 border-dashed border-neutral-300 hover:border-[#006A4E] hover:bg-neutral-50 p-6 flex flex-col items-center justify-center cursor-pointer transition-colors text-center rounded-none win-press">
+                    <Upload className="w-7 h-7 text-neutral-400 mb-2" />
+                    <span className="font-bold text-sm text-neutral-900">
+                      {isUploading
+                        ? lang === 'bn'
+                          ? 'আপলোড হচ্ছে...'
+                          : 'Uploading...'
+                        : lang === 'bn'
+                        ? 'ফাইল বেছে নিতে ক্লিক করুন'
+                        : 'Click to choose file'}
+                    </span>
+                    <span className="text-xs text-neutral-500 mt-1">সর্বোচ্চ আকার ২০ মেগাবাইট (২০ MB)</span>
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      disabled={isUploading}
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-3.5 border-t border-neutral-100 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowUploadModal(false)}
+                  className="min-h-[40px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-semibold text-xs uppercase rounded-none win-press"
+                >
+                  {lang === 'bn' ? 'বাতিল' : 'Cancel'}
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* ─── Preview Modal (Windows 10 ContentDialog) ─────────────────────────── */}
+      <AnimatePresence>
+        {previewDoc && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              variants={win10DialogBackdropMotion}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs"
+              onClick={() => setPreviewDoc(null)}
+            />
+
+            <motion.div
+              variants={win10DialogMotion}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="relative z-10 border border-neutral-300 bg-white max-w-2xl w-full p-6 shadow-2xl rounded-none max-h-[90vh] flex flex-col"
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-[#006A4E]" />
+
+              <div className="flex items-center justify-between pb-3 border-b border-neutral-200 pt-1">
+                <div>
+                  <h3 className="font-bold text-base text-neutral-900">{previewDoc.file_name}</h3>
+                  <span className="text-xs font-mono text-neutral-500">
+                    {lang === 'bn' ? 'আপলোড তারিখ:' : 'Uploaded:'} {new Date(previewDoc.uploaded_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setPreviewDoc(null)}
+                  className="p-1.5 border border-neutral-200 hover:border-neutral-900 text-neutral-600 rounded-none win-press"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="py-6 flex-1 overflow-auto flex items-center justify-center bg-neutral-50 border border-neutral-200 my-4 rounded-none">
+                {previewDoc.file_data?.startsWith('data:image') ? (
+                  <img
+                    src={previewDoc.file_data}
+                    alt={previewDoc.file_name}
+                    className="max-h-[50vh] max-w-full object-contain"
+                  />
+                ) : (
+                  <div className="text-center p-8">
+                    <FileText className="w-14 h-14 text-neutral-400 mx-auto mb-2" />
+                    <p className="font-bold text-neutral-800">{previewDoc.file_name}</p>
+                    <p className="text-xs text-neutral-500 mt-1">
+                      {lang === 'bn' ? 'নথিটি সুরক্ষিত লকারে এনক্রিপ্ট করে সংরক্ষিত।' : 'Document encrypted and saved in personal vault.'}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center pt-2">
+                <span className="font-mono text-xs text-[#006A4E] font-bold inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#006A4E]" />
+                  <span>{lang === 'bn' ? 'নাগরিক সেবা ফর্মের জন্য অনুমোদিত' : 'Authorized for citizen service forms'}</span>
+                </span>
+                <button
+                  onClick={() => setPreviewDoc(null)}
+                  className="min-h-[38px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-semibold text-xs uppercase rounded-none win-press"
+                >
+                  {lang === 'bn' ? 'বন্ধ করুন' : 'Close'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

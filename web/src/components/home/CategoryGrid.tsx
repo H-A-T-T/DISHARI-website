@@ -57,7 +57,7 @@ export function CategoryGrid() {
           </div>
           <Link
             href="/services"
-            className="text-xs font-semibold text-[#006A4E] hover:underline flex items-center gap-1 self-start sm:self-auto"
+            className="text-xs font-semibold text-[#006A4E] hover:underline flex items-center gap-1 self-start sm:self-auto win-press"
           >
             <span>{t('sections', 'viewAll', lang)}</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -76,7 +76,7 @@ export function CategoryGrid() {
               <Link
                 key={slug}
                 href={`/services?category=${slug}`}
-                className="bg-white border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 p-4 transition-colors group flex items-start gap-3.5 rounded-none border-l-3 border-l-transparent hover:border-l-[#006A4E]"
+                className="win-tile p-4 group flex items-start gap-3.5 rounded-none border-l-3 border-l-transparent hover:border-l-[#006A4E]"
               >
                 {/* Crisp Icon */}
                 <div className="mt-0.5 shrink-0">
@@ -88,12 +88,10 @@ export function CategoryGrid() {
                   <h3 className="font-bold text-sm sm:text-base text-neutral-900 group-hover:text-[#006A4E] transition-colors leading-snug truncate">
                     {primaryName}
                   </h3>
-                  <p className="text-[11px] text-neutral-400 font-mono mt-0.5 truncate">
+                  <p className="text-xs text-neutral-400 font-medium truncate mt-0.5">
                     {secondaryName}
                   </p>
                 </div>
-
-                <ChevronRight className="w-4 h-4 text-neutral-300 group-hover:text-[#006A4E] group-hover:translate-x-0.5 transition-all shrink-0 self-center" />
               </Link>
             )
           })}

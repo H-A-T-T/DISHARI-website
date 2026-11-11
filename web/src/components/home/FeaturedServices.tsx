@@ -103,7 +103,7 @@ export function FeaturedServices() {
           </div>
           <Link
             href="/services"
-            className="text-xs font-semibold text-[#006A4E] hover:underline flex items-center gap-1 self-start sm:self-auto"
+            className="text-xs font-semibold text-[#006A4E] hover:underline flex items-center gap-1 self-start sm:self-auto win-press"
           >
             <span>{t('sections', 'viewAll', lang)}</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -112,9 +112,9 @@ export function FeaturedServices() {
 
         {/* Loading state */}
         {loading && (
-          <div className="flex items-center justify-center py-12 gap-3 text-neutral-500 font-semibold">
-            <Loader2 className="w-5 h-5 animate-spin text-[#006A4E]" />
-            <span className="text-sm">{t('sections', 'loadingServices', lang)}</span>
+          <div className="flex items-center justify-center py-16 gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-[#006A4E]" />
+            <p className="text-sm font-semibold text-neutral-700">{t('servicesPage', 'loading', lang)}</p>
           </div>
         )}
 
@@ -137,7 +137,7 @@ export function FeaturedServices() {
                 <Link
                   key={service.slug}
                   href={`/services/${service.slug}`}
-                  className="p-3.5 sm:p-4 hover:bg-neutral-50 transition-colors group flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-l-3 border-l-transparent hover:border-l-[#006A4E]"
+                  className="p-3.5 sm:p-4 hover:bg-neutral-50 transition-colors group flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-l-3 border-l-transparent hover:border-l-[#006A4E] win-press"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="shrink-0">

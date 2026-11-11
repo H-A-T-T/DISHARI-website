@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Home,
   FileText,
@@ -30,6 +31,7 @@ import DocumentLocker from '@/components/dashboard/DocumentLocker'
 import ApplicationsList from '@/components/dashboard/ApplicationsList'
 import DeadlinesView from '@/components/dashboard/DeadlinesView'
 import ProfileSettings from '@/components/dashboard/ProfileSettings'
+import { WIN10_INDICATOR_SPRING, win10TabMotion } from '@/lib/motion'
 
 type DashboardTab = 'home' | 'locker' | 'applications' | 'deadlines' | 'settings'
 
@@ -158,7 +160,7 @@ function DashboardInner() {
           <div className="mt-6 space-y-2.5">
             <Link
               href="/login"
-              className="w-full min-h-[44px] border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors"
+              className="w-full min-h-[44px] border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors win-press"
             >
               <span>{lang === 'bn' ? 'লগইন করুন' : 'Log In to Account'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -166,7 +168,7 @@ function DashboardInner() {
 
             <Link
               href="/register"
-              className="w-full min-h-[44px] border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center rounded-none transition-colors"
+              className="w-full min-h-[44px] border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center rounded-none transition-colors win-press"
             >
               {lang === 'bn' ? 'নতুন অ্যাকাউন্ট নিবন্ধন করুন' : 'Create Free Account'}
             </Link>
@@ -175,7 +177,7 @@ function DashboardInner() {
             <div className="pt-3 border-t border-neutral-200">
               <button
                 onClick={handleDemoLogin}
-                className="w-full min-h-[40px] border border-dashed border-neutral-400 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 font-semibold text-xs inline-flex items-center justify-center gap-1.5 rounded-none cursor-pointer"
+                className="w-full min-h-[40px] border border-dashed border-neutral-400 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 font-semibold text-xs inline-flex items-center justify-center gap-1.5 rounded-none cursor-pointer win-press"
               >
                 <UserCheck className="w-4 h-4 text-[#006A4E]" />
                 <span>{lang === 'bn' ? 'ডেমো নাগরিক হিসেবে প্রবেশ করুন (১-ক্লিক)' : 'Enter as Demo Citizen (1-Click)'}</span>
@@ -269,8 +271,8 @@ function DashboardInner() {
                 <p className="font-mono text-xs text-neutral-500 truncate">{user?.phone}</p>
               </div>
 
-              {/* Sidebar Navigation Links (Windows 10 flat list) */}
-              <nav className="space-y-1" aria-label="Dashboard Sidebar">
+              {/* Sidebar Navigation Links (Windows 10 Fluent Tab List with Gliding Indicator) */}
+              <nav className="space-y-1 relative" aria-label="Dashboard Sidebar">
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const isActive = activeTab === item.id
@@ -279,20 +281,38 @@ function DashboardInner() {
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
                       className={cn(
-                        'w-full flex items-center justify-between px-3 py-2.5 text-xs font-semibold transition-all text-left min-h-[40px] rounded-none cursor-pointer',
+                        'relative w-full flex items-center justify-between px-3 py-2.5 text-xs font-semibold text-left min-h-[40px] rounded-none cursor-pointer overflow-hidden win-press select-none',
                         isActive
-                          ? 'border-l-4 border-l-[#006A4E] bg-neutral-100 text-[#006A4E] font-bold'
-                          : 'border-l-4 border-l-transparent hover:bg-neutral-50 text-neutral-700 hover:text-neutral-950'
+                          ? 'text-[#006A4E] font-bold'
+                          : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-50/80 transition-colors'
                       )}
                     >
-                      <div className="flex items-center gap-2.5 truncate">
-                        <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-[#006A4E]' : 'text-neutral-400')} />
+                      {/* Windows 10 Smooth Active Sidebar Background Glider */}
+                      {isActive && (
+                        <motion.div
+                          layoutId="dashboard-sidebar-active-bg"
+                          className="absolute inset-0 bg-neutral-100"
+                          transition={WIN10_INDICATOR_SPRING}
+                        />
+                      )}
+
+                      {/* Windows 10 Smooth Active Accent Indicator Bar */}
+                      {isActive && (
+                        <motion.div
+                          layoutId="dashboard-sidebar-active-bar"
+                          className="absolute left-0 top-0 bottom-0 w-1 bg-[#006A4E]"
+                          transition={WIN10_INDICATOR_SPRING}
+                        />
+                      )}
+
+                      <div className="relative z-10 flex items-center gap-2.5 truncate">
+                        <Icon className={cn('w-4 h-4 shrink-0 transition-colors', isActive ? 'text-[#006A4E]' : 'text-neutral-400')} />
                         <span className="truncate">{lang === 'bn' ? item.labelBn : item.labelEn}</span>
                       </div>
                       {item.badge !== undefined && (
                         <span
                           className={cn(
-                            'text-[10px] font-mono px-1.5 py-0.2 font-bold shrink-0 rounded-none',
+                            'relative z-10 text-[10px] font-mono px-1.5 py-0.2 font-bold shrink-0 rounded-none transition-colors',
                             isActive ? 'bg-[#006A4E] text-white' : 'bg-neutral-200 text-neutral-700'
                           )}
                         >
@@ -307,7 +327,7 @@ function DashboardInner() {
               <div className="pt-3.5 mt-3.5 border-t border-neutral-100">
                 <button
                   onClick={handleLogout}
-                  className="w-full min-h-[36px] px-3 border border-neutral-200 hover:border-red-300 bg-white hover:bg-red-50 text-neutral-600 hover:text-[#C8102E] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors rounded-none cursor-pointer"
+                  className="w-full min-h-[36px] px-3 border border-neutral-200 hover:border-red-300 bg-white hover:bg-red-50 text-neutral-600 hover:text-[#C8102E] text-xs font-semibold flex items-center justify-center gap-1.5 rounded-none cursor-pointer win-press"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>{lang === 'bn' ? 'লগআউট' : 'Log Out'}</span>
@@ -328,7 +348,7 @@ function DashboardInner() {
             </div>
           </aside>
 
-          {/* Mobile Tab Scroller */}
+          {/* Mobile Tab Scroller (Smooth Sliding Indicator) */}
           <div className="lg:hidden col-span-1 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none flex gap-2">
             {navItems.map((item) => {
               const Icon = item.icon
@@ -337,188 +357,202 @@ function DashboardInner() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={cn(
-                    'shrink-0 flex items-center gap-2 px-3.5 py-2 text-xs font-semibold min-h-[44px] rounded-none border',
-                    isActive
-                      ? 'bg-[#006A4E] text-white border-[#006A4E]'
-                      : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
-                  )}
+                  className="relative shrink-0 flex items-center gap-2 px-3.5 py-2 text-xs font-semibold min-h-[44px] rounded-none border border-neutral-300 overflow-hidden cursor-pointer win-press"
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{lang === 'bn' ? item.labelBn : item.labelEn}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="dashboard-mobile-tab-pill"
+                      className="absolute inset-0 bg-[#006A4E]"
+                      transition={WIN10_INDICATOR_SPRING}
+                    />
+                  )}
+                  <span className={cn('relative z-10 flex items-center gap-2 transition-colors', isActive ? 'text-white' : 'text-neutral-700')}>
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span>{lang === 'bn' ? item.labelBn : item.labelEn}</span>
+                  </span>
                 </button>
               )
             })}
           </div>
 
-          {/* Right Main Content Stage */}
-          <main className="lg:col-span-3">
-            {/* 1. OVERVIEW / HOME TAB */}
-            {activeTab === 'home' && (
-              <div className="space-y-5">
-                {/* Civic Greeting Banner — Windows 10 Flat Card */}
-                <div className="border border-neutral-200 bg-white p-6 sm:p-7 rounded-none shadow-xs border-l-4 border-l-[#006A4E]">
-                  <span className="font-mono text-xs text-[#006A4E] font-bold uppercase tracking-wider block mb-1">
-                    {t('dashboard', 'badge', lang)}
-                  </span>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">
-                    {lang === 'bn' ? 'সুপ্রভাত' : 'Welcome'}, {user?.full_name || t('dashboard', 'citizen', lang)}
-                  </h1>
-                  <p className="text-neutral-600 mt-1.5 text-xs sm:text-sm leading-relaxed">
-                    {t('dashboard', 'subtitle', lang)}
-                  </p>
-                </div>
-
-                {/* 2 Big Action Cards (Document Locker + Active Applications) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {/* Document Locker Quick Card */}
-                  <div className="border border-neutral-200 bg-white p-5 rounded-none shadow-xs flex flex-col justify-between hover:border-[#006A4E] transition-colors">
-                    <div>
-                      <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 border border-neutral-200 bg-emerald-50 flex items-center justify-center rounded-none">
-                            <FolderLock className="w-4 h-4 text-[#006A4E]" />
-                          </div>
-                          <h3 className="font-bold text-sm sm:text-base text-neutral-900">
-                            {lang === 'bn' ? 'আমার নথিপত্র' : 'My Documents'}
-                          </h3>
-                        </div>
-                        <span className="font-mono text-xs font-semibold text-[#006A4E] bg-emerald-50 px-2 py-0.5 border border-emerald-200 rounded-none">
-                          {documents.length} {lang === 'bn' ? 'টি ফাইল' : 'files'}
-                        </span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
-                        {lang === 'bn'
-                          ? 'পাসপোর্ট, এনআইডি ও জন্ম সনদ আপনার সুরক্ষিত ডিজিটাল লকারে সংরক্ষণ করে রাখুন।'
-                          : 'Store your National ID, Birth Certificate, and Passport photos in your encrypted locker.'}
+          {/* Right Main Content Stage with Windows 10 Pivot / Entrance Animations */}
+          <main className="lg:col-span-3 min-w-0">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={activeTab}
+                variants={win10TabMotion}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                {/* 1. OVERVIEW / HOME TAB */}
+                {activeTab === 'home' && (
+                  <div className="space-y-5">
+                    {/* Civic Greeting Banner — Windows 10 Flat Card */}
+                    <div className="border border-neutral-200 bg-white p-6 sm:p-7 rounded-none shadow-xs border-l-4 border-l-[#006A4E]">
+                      <span className="font-mono text-xs text-[#006A4E] font-bold uppercase tracking-wider block mb-1">
+                        {t('dashboard', 'badge', lang)}
+                      </span>
+                      <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">
+                        {lang === 'bn' ? 'সুপ্রভাত' : 'Welcome'}, {user?.full_name || t('dashboard', 'citizen', lang)}
+                      </h1>
+                      <p className="text-neutral-600 mt-1.5 text-xs sm:text-sm leading-relaxed">
+                        {t('dashboard', 'subtitle', lang)}
                       </p>
                     </div>
 
-                    <button
-                      onClick={() => setActiveTab('locker')}
-                      className="mt-5 w-full min-h-[42px] border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer"
-                    >
-                      <FolderLock className="w-4 h-4" />
-                      <span>{lang === 'bn' ? 'লকার খুলুন ও নথি দেখুন' : 'Open Document Locker'}</span>
-                    </button>
-                  </div>
-
-                  {/* Applications Quick Card */}
-                  <div className="border border-neutral-200 bg-white p-5 rounded-none shadow-xs flex flex-col justify-between hover:border-[#006A4E] transition-colors">
-                    <div>
-                      <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 border border-neutral-200 bg-purple-50 flex items-center justify-center rounded-none">
-                            <ClipboardList className="w-4 h-4 text-purple-700" />
+                    {/* 2 Big Action Cards (Document Locker + Active Applications) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      {/* Document Locker Quick Card */}
+                      <div className="win-tile p-5 rounded-none shadow-xs flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 border border-neutral-200 bg-emerald-50 flex items-center justify-center rounded-none">
+                                <FolderLock className="w-4 h-4 text-[#006A4E]" />
+                              </div>
+                              <h3 className="font-bold text-sm sm:text-base text-neutral-900">
+                                {lang === 'bn' ? 'আমার নথিপত্র' : 'My Documents'}
+                              </h3>
+                            </div>
+                            <span className="font-mono text-xs font-semibold text-[#006A4E] bg-emerald-50 px-2 py-0.5 border border-emerald-200 rounded-none">
+                              {documents.length} {lang === 'bn' ? 'টি ফাইল' : 'files'}
+                            </span>
                           </div>
-                          <h3 className="font-bold text-sm sm:text-base text-neutral-900">
-                            {lang === 'bn' ? 'চলমান আবেদনসমূহ' : 'Active Applications'}
-                          </h3>
+                          <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
+                            {lang === 'bn'
+                              ? 'পাসপোর্ট, এনআইডি ও জন্ম সনদ আপনার সুরক্ষিত ডিজিটাল লকারে সংরক্ষণ করে রাখুন।'
+                              : 'Store your National ID, Birth Certificate, and Passport photos in your encrypted locker.'}
+                          </p>
                         </div>
-                        <span className="font-mono text-xs font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 border border-neutral-200 rounded-none">
-                          {applications.length} {lang === 'bn' ? 'টি আবেদন' : 'dockets'}
-                        </span>
+
+                        <button
+                          onClick={() => setActiveTab('locker')}
+                          className="mt-5 w-full min-h-[42px] border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer win-press"
+                        >
+                          <FolderLock className="w-4 h-4" />
+                          <span>{lang === 'bn' ? 'লকার খুলুন ও নথি দেখুন' : 'Open Document Locker'}</span>
+                        </button>
                       </div>
-                      <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
-                        {lang === 'bn'
-                          ? 'সরকারি সেবার জন্য প্রস্তুতকৃত সকল কার্যপত্র ও পোর্টাল ট্র্যাকিং তথ্য এখানে প্রদর্শিত হয়।'
-                          : 'Track your government application dockets and direct portal submissions.'}
-                      </p>
+
+                      {/* Applications Quick Card */}
+                      <div className="win-tile p-5 rounded-none shadow-xs flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 border border-neutral-200 bg-purple-50 flex items-center justify-center rounded-none">
+                                <ClipboardList className="w-4 h-4 text-purple-700" />
+                              </div>
+                              <h3 className="font-bold text-sm sm:text-base text-neutral-900">
+                                {lang === 'bn' ? 'চলমান আবেদনসমূহ' : 'Active Applications'}
+                              </h3>
+                            </div>
+                            <span className="font-mono text-xs font-semibold text-neutral-600 bg-neutral-100 px-2 py-0.5 border border-neutral-200 rounded-none">
+                              {applications.length} {lang === 'bn' ? 'টি আবেদন' : 'dockets'}
+                            </span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
+                            {lang === 'bn'
+                              ? 'সরকারি সেবার জন্য প্রস্তুতকৃত সকল কার্যপত্র ও পোর্টাল ট্র্যাকিং তথ্য এখানে প্রদর্শিত হয়।'
+                              : 'Track your government application dockets and direct portal submissions.'}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => setActiveTab('applications')}
+                          className="mt-5 w-full min-h-[42px] border border-neutral-800 bg-neutral-900 hover:bg-[#006A4E] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer win-press"
+                        >
+                          <ClipboardList className="w-4 h-4" />
+                          <span>{lang === 'bn' ? 'আবেদন তালিকা দেখুন' : 'View Applications'}</span>
+                        </button>
+                      </div>
                     </div>
 
-                    <button
-                      onClick={() => setActiveTab('applications')}
-                      className="mt-5 w-full min-h-[42px] border border-neutral-800 bg-neutral-900 hover:bg-[#006A4E] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors cursor-pointer"
-                    >
-                      <ClipboardList className="w-4 h-4" />
-                      <span>{lang === 'bn' ? 'আবেদন তালিকা দেখুন' : 'View Applications'}</span>
-                    </button>
-                  </div>
-                </div>
+                    {/* Deadlines Alert Strip */}
+                    <div className="border border-amber-300 bg-amber-50/60 p-5 rounded-none shadow-xs border-l-4 border-l-amber-500 win-press">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <BellRing className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                          <div>
+                            <h4 className="font-bold text-sm sm:text-base text-neutral-900">
+                              {lang === 'bn' ? 'আসন্ন আয়কর ও সরকারি সময়সীমা' : 'Upcoming Tax & Government Deadlines'}
+                            </h4>
+                            <p className="text-xs text-neutral-600 mt-0.5">
+                              {lang === 'bn'
+                                ? 'ব্যক্তিশ্রেণীর আয়কর রিটার্ন জমা দেওয়ার জাতীয় সময়সীমা: ৩০ নভেম্বর ২০২৬।'
+                                : 'Annual Individual Income Tax filing deadline: November 30, 2026.'}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setActiveTab('deadlines')}
+                          className="shrink-0 min-h-[38px] px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-semibold text-xs uppercase rounded-none transition-colors cursor-pointer win-press"
+                        >
+                          {lang === 'bn' ? 'সব সময়সীমা দেখুন' : 'View All Deadlines'}
+                        </button>
+                      </div>
+                    </div>
 
-                {/* Deadlines Alert Strip */}
-                <div className="border border-amber-300 bg-amber-50/60 p-5 rounded-none shadow-xs border-l-4 border-l-amber-500">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <BellRing className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                    {/* Browse Services CTA */}
+                    <div className="border border-neutral-200 bg-white p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-none shadow-xs">
                       <div>
                         <h4 className="font-bold text-sm sm:text-base text-neutral-900">
-                          {lang === 'bn' ? 'আসন্ন আয়কর ও সরকারি সময়সীমা' : 'Upcoming Tax & Government Deadlines'}
+                          {lang === 'bn' ? 'কোন সরকারি সেবাটি আপনার প্রয়োজন?' : 'Which government service do you need?'}
                         </h4>
-                        <p className="text-xs text-neutral-600 mt-0.5">
+                        <p className="text-xs text-neutral-500 mt-0.5">
                           {lang === 'bn'
-                            ? 'ব্যক্তিশ্রেণীর আয়কর রিটার্ন জমা দেওয়ার জাতীয় সময়সীমা: ৩০ নভেম্বর ২০২৬।'
-                            : 'Annual Individual Income Tax filing deadline: November 30, 2026.'}
+                            ? 'পাসপোর্ট, এনআইডি সংশোধন, ভূমি নামজারি ও ভাতাসহ সকল সেবার সঠিক নিয়ম ও ফি জেনে নিন।'
+                            : 'Explore gazette requirements, official fees, and step-by-step procedures for 15+ citizen services.'}
                         </p>
                       </div>
+                      <Link
+                        href="/services"
+                        className="shrink-0 min-h-[42px] px-5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors win-press"
+                      >
+                        <span>{lang === 'bn' ? 'সকল সেবা ডিরেক্টরি' : 'All Services'}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
                     </div>
-                    <button
-                      onClick={() => setActiveTab('deadlines')}
-                      className="shrink-0 min-h-[38px] px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-semibold text-xs uppercase rounded-none transition-colors cursor-pointer"
-                    >
-                      {lang === 'bn' ? 'সব সময়সীমা দেখুন' : 'View All Deadlines'}
-                    </button>
                   </div>
-                </div>
+                )}
 
-                {/* Browse Services CTA */}
-                <div className="border border-neutral-200 bg-white p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-none shadow-xs">
-                  <div>
-                    <h4 className="font-bold text-sm sm:text-base text-neutral-900">
-                      {lang === 'bn' ? 'কোন সরকারি সেবাটি আপনার প্রয়োজন?' : 'Which government service do you need?'}
-                    </h4>
-                    <p className="text-xs text-neutral-500 mt-0.5">
-                      {lang === 'bn'
-                        ? 'পাসপোর্ট, এনআইডি সংশোধন, ভূমি নামজারি ও ভাতাসহ সকল সেবার সঠিক নিয়ম ও ফি জেনে নিন।'
-                        : 'Explore gazette requirements, official fees, and step-by-step procedures for 15+ citizen services.'}
-                    </p>
-                  </div>
-                  <Link
-                    href="/services"
-                    className="shrink-0 min-h-[42px] px-5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 rounded-none transition-colors"
-                  >
-                    <span>{lang === 'bn' ? 'সকল সেবা ডিরেক্টরি' : 'All Services'}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            )}
+                {/* 2. DOCUMENT LOCKER TAB */}
+                {activeTab === 'locker' && (
+                  <DocumentLocker
+                    documents={documents}
+                    onRefresh={loadDashboardData}
+                    lang={lang}
+                  />
+                )}
 
-            {/* 2. DOCUMENT LOCKER TAB */}
-            {activeTab === 'locker' && (
-              <DocumentLocker
-                documents={documents}
-                onRefresh={loadDashboardData}
-                lang={lang}
-              />
-            )}
+                {/* 3. APPLICATIONS TAB */}
+                {activeTab === 'applications' && (
+                  <ApplicationsList
+                    applications={applications}
+                    lang={lang}
+                  />
+                )}
 
-            {/* 3. APPLICATIONS TAB */}
-            {activeTab === 'applications' && (
-              <ApplicationsList
-                applications={applications}
-                lang={lang}
-              />
-            )}
+                {/* 4. DEADLINES TAB */}
+                {activeTab === 'deadlines' && (
+                  <DeadlinesView
+                    deadlines={deadlines}
+                    lang={lang}
+                  />
+                )}
 
-            {/* 4. DEADLINES TAB */}
-            {activeTab === 'deadlines' && (
-              <DeadlinesView
-                deadlines={deadlines}
-                lang={lang}
-              />
-            )}
-
-            {/* 5. SETTINGS TAB */}
-            {activeTab === 'settings' && user && (
-              <ProfileSettings
-                user={user}
-                citizenId={citizenId}
-                lang={lang}
-                setLang={setLang}
-                onLogout={handleLogout}
-              />
-            )}
+                {/* 5. SETTINGS TAB */}
+                {activeTab === 'settings' && user && (
+                  <ProfileSettings
+                    user={user}
+                    citizenId={citizenId}
+                    lang={lang}
+                    setLang={setLang}
+                    onLogout={handleLogout}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </main>
         </div>
       </div>

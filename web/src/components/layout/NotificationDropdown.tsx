@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 import { BellRing, Calendar, ArrowRight, Check, X, ShieldAlert } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
+import { win10FlyoutMotion } from '@/lib/motion'
 
 export interface CitizenNotification {
   id: string
@@ -99,7 +101,7 @@ export default function NotificationDropdown() {
       {/* Bell Button (Windows 10 flat tile) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative min-w-[38px] min-h-[38px] border border-neutral-300 bg-white hover:bg-neutral-100 flex items-center justify-center text-neutral-800 rounded-none transition-colors cursor-pointer"
+        className="relative min-w-[38px] min-h-[38px] border border-neutral-300 bg-white hover:bg-neutral-100 flex items-center justify-center text-neutral-800 rounded-none transition-colors cursor-pointer win-press"
         aria-label="Citizen notifications and alerts"
         aria-expanded={isOpen}
       >
@@ -111,112 +113,120 @@ export default function NotificationDropdown() {
         )}
       </button>
 
-      {/* Dropdown Panel — Flat Boxy Windows 10 Action Center style */}
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-neutral-300 shadow-xl z-50 overflow-hidden animate-in fade-in-50 duration-150 rounded-none">
-          {/* Top 2px Bangladesh Green Accent Strip */}
-          <div className="h-0.5 bg-[#006A4E] w-full" />
+      {/* Dropdown Panel — Windows 10 Flyout Animation */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            variants={win10FlyoutMotion}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-neutral-300 shadow-xl z-50 overflow-hidden rounded-none origin-top-right"
+          >
+            {/* Top 2px Bangladesh Green Accent Strip */}
+            <div className="h-0.5 bg-[#006A4E] w-full" />
 
-          {/* Header */}
-          <div className="p-3 bg-neutral-50 border-b border-neutral-200 flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-xs sm:text-sm text-neutral-900">
-                {lang === 'bn' ? 'নাগরিক নোটিফিকেশন ও অ্যালার্ট' : 'Citizen Alerts & Deadlines'}
-              </h3>
-              <span className="text-[11px] font-mono text-neutral-500">
-                {unreadCount > 0
-                  ? lang === 'bn'
-                    ? `${unreadCount}টি নতুন নোটিফিকেশন`
-                    : `${unreadCount} new alerts`
-                  : lang === 'bn'
-                  ? 'সকল নোটিফিকেশন পঠিত'
-                  : 'All notifications caught up'}
-              </span>
+            {/* Header */}
+            <div className="p-3 bg-neutral-50 border-b border-neutral-200 flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-xs sm:text-sm text-neutral-900">
+                  {lang === 'bn' ? 'নাগরিক নোটিফিকেশন ও অ্যালার্ট' : 'Citizen Alerts & Deadlines'}
+                </h3>
+                <span className="text-[11px] font-mono text-neutral-500">
+                  {unreadCount > 0
+                    ? lang === 'bn'
+                      ? `${unreadCount}টি নতুন নোটিফিকেশন`
+                      : `${unreadCount} new alerts`
+                    : lang === 'bn'
+                    ? 'সকল নোটিফিকেশন পঠিত'
+                    : 'All notifications caught up'}
+                </span>
+              </div>
+
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllRead}
+                  className="text-xs font-semibold text-[#006A4E] hover:underline flex items-center gap-1 cursor-pointer win-press"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{lang === 'bn' ? 'সব পঠিত' : 'Mark read'}</span>
+                </button>
+              )}
             </div>
 
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllRead}
-                className="text-xs font-semibold text-[#006A4E] hover:underline flex items-center gap-1 cursor-pointer"
+            {/* Alert List */}
+            <div className="max-h-80 overflow-y-auto divide-y divide-neutral-100">
+              {DEFAULT_NOTIFICATIONS.map((item) => {
+                const isRead = readIds.includes(item.id)
+                const title = lang === 'bn' ? item.titleBn : item.titleEn
+                const desc = lang === 'bn' ? item.descBn : item.descEn
+
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => markSingleRead(item.id)}
+                    className={`p-3.5 hover:bg-neutral-50 transition-colors border-l-3 cursor-pointer win-press ${
+                      item.urgency === 'high' ? 'border-l-[#C8102E]' : 'border-l-[#006A4E]'
+                    } ${isRead ? 'opacity-70 bg-white' : 'bg-neutral-50/50'}`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span
+                        className={`text-[10px] font-mono font-bold px-1.5 py-0.5 border rounded-none ${
+                          item.urgency === 'high'
+                            ? 'bg-red-50 text-[#C8102E] border-red-200'
+                            : 'bg-emerald-50 text-[#006A4E] border-emerald-200'
+                        }`}
+                      >
+                        {item.urgency === 'high'
+                          ? lang === 'bn'
+                            ? 'জরুরি ডেডলাইন'
+                            : 'High Priority'
+                          : lang === 'bn'
+                          ? 'সময়সীমা'
+                          : 'Notice'}
+                      </span>
+                      <span className="text-[11px] font-mono text-neutral-500 font-medium flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-neutral-400" />
+                        <span>{item.deadline}</span>
+                      </span>
+                    </div>
+
+                    <h4 className="font-bold text-xs sm:text-sm text-neutral-900 mt-1 leading-snug">
+                      {title}
+                    </h4>
+                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed">{desc}</p>
+
+                    <div className="mt-2 pt-2 border-t border-neutral-100 flex items-center justify-between">
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          markSingleRead(item.id)
+                          setIsOpen(false)
+                        }}
+                        className="text-xs font-semibold text-[#006A4E] hover:text-[#004D38] inline-flex items-center gap-1 win-press"
+                      >
+                        <span>{lang === 'bn' ? 'সেবা ও নিয়মাবলী দেখুন' : 'View Service Guide'}</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="p-2.5 bg-neutral-100 border-t border-neutral-200 text-center">
+              <Link
+                href="/dashboard?tab=deadlines"
+                onClick={() => setIsOpen(false)}
+                className="text-xs font-bold text-neutral-800 hover:text-[#006A4E] win-press inline-block"
               >
-                <Check className="w-3.5 h-3.5" />
-                <span>{lang === 'bn' ? 'সব পঠিত' : 'Mark read'}</span>
-              </button>
-            )}
-          </div>
-
-          {/* Alert List */}
-          <div className="max-h-80 overflow-y-auto divide-y divide-neutral-100">
-            {DEFAULT_NOTIFICATIONS.map((item) => {
-              const isRead = readIds.includes(item.id)
-              const title = lang === 'bn' ? item.titleBn : item.titleEn
-              const desc = lang === 'bn' ? item.descBn : item.descEn
-
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => markSingleRead(item.id)}
-                  className={`p-3.5 hover:bg-neutral-50 transition-colors border-l-3 ${
-                    item.urgency === 'high' ? 'border-l-[#C8102E]' : 'border-l-[#006A4E]'
-                  } ${isRead ? 'opacity-70 bg-white' : 'bg-neutral-50/50'}`}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <span
-                      className={`text-[10px] font-mono font-bold px-1.5 py-0.5 border rounded-none ${
-                        item.urgency === 'high'
-                          ? 'bg-red-50 text-[#C8102E] border-red-200'
-                          : 'bg-emerald-50 text-[#006A4E] border-emerald-200'
-                      }`}
-                    >
-                      {item.urgency === 'high'
-                        ? lang === 'bn'
-                          ? 'জরুরি ডেডলাইন'
-                          : 'High Priority'
-                        : lang === 'bn'
-                        ? 'সময়সীমা'
-                        : 'Notice'}
-                    </span>
-                    <span className="text-[11px] font-mono text-neutral-500 font-medium flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-neutral-400" />
-                      <span>{item.deadline}</span>
-                    </span>
-                  </div>
-
-                  <h4 className="font-bold text-xs sm:text-sm text-neutral-900 mt-1 leading-snug">
-                    {title}
-                  </h4>
-                  <p className="text-xs text-neutral-600 mt-1 leading-relaxed">{desc}</p>
-
-                  <div className="mt-2 pt-2 border-t border-neutral-100 flex items-center justify-between">
-                    <Link
-                      href={item.href}
-                      onClick={() => {
-                        markSingleRead(item.id)
-                        setIsOpen(false)
-                      }}
-                      className="text-xs font-semibold text-[#006A4E] hover:text-[#004D38] inline-flex items-center gap-1"
-                    >
-                      <span>{lang === 'bn' ? 'সেবা ও নিয়মাবলী দেখুন' : 'View Service Guide'}</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Footer */}
-          <div className="p-2.5 bg-neutral-100 border-t border-neutral-200 text-center">
-            <Link
-              href="/dashboard?tab=deadlines"
-              onClick={() => setIsOpen(false)}
-              className="text-xs font-bold text-neutral-800 hover:text-[#006A4E]"
-            >
-              {lang === 'bn' ? 'সব ডেডলাইন ও সুযোগ রাডার দেখুন →' : 'View Full Deadlines Radar →'}
-            </Link>
-          </div>
-        </div>
-      )}
+                {lang === 'bn' ? 'সব ডেডলাইন ও সুযোগ রাডার দেখুন →' : 'View Full Deadlines Radar →'}
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

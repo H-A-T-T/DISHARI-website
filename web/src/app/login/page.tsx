@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { DishariLogo } from '@/components/shared/DishariLogo'
 import { Eye, EyeOff, Phone, Mail, ShieldCheck, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { t } from '@/lib/translations'
 import { loginUser } from '@/lib/api'
+import { WIN10_INDICATOR_SPRING, win10TabMotion } from '@/lib/motion'
 
 export default function LoginPage() {
   const { lang } = useLanguage()
@@ -68,7 +70,7 @@ export default function LoginPage() {
         <div className="absolute top-0 left-0 right-0 h-1 bg-[#C8102E]" />
 
         <div>
-          <Link href="/" className="inline-block group mb-4">
+          <Link href="/" className="inline-block group mb-4 win-press">
             <DishariLogo
               theme="dark"
               lang={lang}
@@ -98,35 +100,21 @@ export default function LoginPage() {
           <p className="text-emerald-100 text-xs sm:text-sm leading-relaxed italic">
             "{t('auth', 'testimonialText', lang)}"
           </p>
-          <p className="text-emerald-300/80 text-xs mt-2.5 font-semibold">
-            — {t('auth', 'testimonialAuthor', lang)}
-          </p>
-        </div>
-
-        {/* Bottom gazette note */}
-        <div className="font-mono text-xs text-emerald-200/70 font-medium">
-          {t('auth', 'gazetteNote', lang)}
+          <div className="mt-3 pt-2.5 border-t border-[#004D38] text-xs font-mono text-emerald-300">
+            {t('auth', 'testimonialAuthor', lang)}
+          </div>
         </div>
       </div>
 
-      {/* ─── Right Form Panel — Flat Windows 10 Paper Surface ─────────────── */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12 sm:px-8">
-        <div className="w-full max-w-md bg-white border border-neutral-200 p-7 sm:p-8 rounded-none shadow-xs">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-6">
-            <Link href="/" className="inline-block">
-              <DishariLogo
-                theme="light"
-                lang={lang}
-                className="h-8 w-auto"
-              />
-            </Link>
-          </div>
-
-          <div className="border-b border-neutral-200 pb-3 mb-5">
-            <span className="font-mono text-xs font-bold text-[#006A4E] uppercase tracking-wider block mb-1">
-              {t('auth', 'leftBadge', lang)}
-            </span>
+      {/* ─── Right Form Panel ──────────────────────────────────────────────── */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 lg:p-16">
+        <div className="w-full max-w-md border border-neutral-200 bg-white p-7 sm:p-9 rounded-none shadow-xs">
+          {/* Form Header */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 text-xs font-mono text-[#006A4E] font-bold uppercase tracking-wider mb-1">
+              <ShieldCheck className="w-4 h-4" />
+              <span>{lang === 'bn' ? 'সুরক্ষিত নাগরিক লগইন' : 'Secure Citizen Login'}</span>
+            </div>
             <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">
               {t('auth', 'loginHeader', lang)}
             </h2>
@@ -142,139 +130,170 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Mode Toggle — Windows 10 Flat Segmented Control */}
-          <div className="grid grid-cols-2 border border-neutral-300 bg-neutral-100 p-0.5 mb-5 rounded-none">
+          {/* Mode Toggle — Windows 10 Smooth Segmented Control */}
+          <div className="grid grid-cols-2 border border-neutral-300 bg-neutral-100 p-0.5 mb-5 rounded-none relative">
             <button
               type="button"
               onClick={() => {
                 setMode('phone')
                 setError(null)
               }}
-              className={`flex items-center justify-center gap-1.5 py-2 text-xs font-bold transition-colors cursor-pointer rounded-none ${
-                mode === 'phone'
-                  ? 'bg-[#006A4E] text-white'
-                  : 'text-neutral-700 hover:text-neutral-950'
+              className={`relative flex items-center justify-center gap-1.5 py-2 text-xs font-bold transition-colors cursor-pointer rounded-none select-none overflow-hidden win-press ${
+                mode === 'phone' ? 'text-white' : 'text-neutral-700 hover:text-neutral-950'
               }`}
             >
-              <Phone className="w-3.5 h-3.5" />
-              <span>{t('auth', 'tabPhone', lang)}</span>
+              {mode === 'phone' && (
+                <motion.div
+                  layoutId="login-mode-pill"
+                  className="absolute inset-0 bg-[#006A4E]"
+                  transition={WIN10_INDICATOR_SPRING}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5" />
+                <span>{t('auth', 'tabPhone', lang)}</span>
+              </span>
             </button>
+
             <button
               type="button"
               onClick={() => {
                 setMode('email')
                 setError(null)
               }}
-              className={`flex items-center justify-center gap-1.5 py-2 text-xs font-bold transition-colors cursor-pointer rounded-none ${
-                mode === 'email'
-                  ? 'bg-[#006A4E] text-white'
-                  : 'text-neutral-700 hover:text-neutral-950'
+              className={`relative flex items-center justify-center gap-1.5 py-2 text-xs font-bold transition-colors cursor-pointer rounded-none select-none overflow-hidden win-press ${
+                mode === 'email' ? 'text-white' : 'text-neutral-700 hover:text-neutral-950'
               }`}
             >
-              <Mail className="w-3.5 h-3.5" />
-              <span>{t('auth', 'tabEmail', lang)}</span>
+              {mode === 'email' && (
+                <motion.div
+                  layoutId="login-mode-pill"
+                  className="absolute inset-0 bg-[#006A4E]"
+                  transition={WIN10_INDICATOR_SPRING}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5" />
+                <span>{t('auth', 'tabEmail', lang)}</span>
+              </span>
             </button>
           </div>
 
-          {/* Form */}
+          {/* Form with Windows 10 Smooth Tab Transition */}
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {mode === 'phone' ? (
-              <>
-                <div>
-                  <label className="block text-xs font-mono font-bold uppercase tracking-wider text-neutral-700 mb-1">
-                    {t('auth', 'phoneLabel', lang)} <span className="text-[#C8102E]">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder={t('auth', 'phonePlaceholder', lang)}
-                    className="h-11 w-full border border-neutral-300 bg-white px-3.5 text-sm font-medium focus:border-[#006A4E] outline-none transition-colors placeholder:text-neutral-400 font-mono rounded-none"
-                  />
-                  <p className="text-xs text-neutral-500 mt-1 font-mono">
-                    {lang === 'bn'
-                      ? 'আমরা আপনার নম্বরে একটি গোপন ওটিপি (OTP) পাঠাব।'
-                      : 'We will send a confidential one-time password (OTP) to your phone.'}
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] disabled:bg-neutral-400 text-white h-11 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-none"
+            <AnimatePresence mode="wait">
+              {mode === 'phone' ? (
+                <motion.div
+                  key="phone-mode"
+                  variants={win10TabMotion}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="space-y-4"
                 >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <span>{t('auth', 'otpBtn', lang)}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </>
-            ) : (
-              <>
-                <div>
-                  <label className="block text-xs font-mono font-bold uppercase tracking-wider text-neutral-700 mb-1">
-                    {t('auth', 'emailLabel', lang)} <span className="text-[#C8102E]">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t('auth', 'emailPlaceholder', lang)}
-                    className="h-11 w-full border border-neutral-300 bg-white px-3.5 text-sm font-medium focus:border-[#006A4E] outline-none transition-colors placeholder:text-neutral-400 rounded-none"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-700">
-                      {t('auth', 'passwordLabel', lang)} <span className="text-[#C8102E]">*</span>
+                  <div>
+                    <label className="block text-xs font-mono font-bold uppercase tracking-wider text-neutral-700 mb-1">
+                      {t('auth', 'phoneLabel', lang)} <span className="text-[#C8102E]">*</span>
                     </label>
-                    <button type="button" className="text-xs text-[#006A4E] font-semibold hover:underline cursor-pointer">
-                      {t('auth', 'forgotPassword', lang)}
-                    </button>
-                  </div>
-                  <div className="relative">
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type="tel"
                       required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={t('auth', 'passwordPlaceholder', lang)}
-                      className="h-11 w-full border border-neutral-300 bg-white px-3.5 pr-11 text-sm font-medium focus:border-[#006A4E] outline-none transition-colors placeholder:text-neutral-400 rounded-none"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder={t('auth', 'phonePlaceholder', lang)}
+                      className="h-11 w-full border border-neutral-300 bg-white px-3.5 text-sm font-medium focus:border-[#006A4E] outline-none transition-colors placeholder:text-neutral-400 font-mono rounded-none"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
-                      aria-label="Toggle password visibility"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                    <p className="text-xs text-neutral-500 mt-1 font-mono">
+                      {lang === 'bn'
+                        ? 'আমরা আপনার নম্বরে একটি গোপন ওটিপি (OTP) পাঠাব।'
+                        : 'We will send a confidential one-time password (OTP) to your phone.'}
+                    </p>
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] disabled:bg-neutral-400 text-white h-11 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-none"
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] disabled:bg-neutral-400 text-white h-11 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-none win-btn"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <span>{t('auth', 'otpBtn', lang)}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="email-mode"
+                  variants={win10TabMotion}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="space-y-4"
                 >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <span>{t('auth', 'loginBtn', lang)}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </>
-            )}
+                  <div>
+                    <label className="block text-xs font-mono font-bold uppercase tracking-wider text-neutral-700 mb-1">
+                      {t('auth', 'emailLabel', lang)} <span className="text-[#C8102E]">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={t('auth', 'emailPlaceholder', lang)}
+                      className="h-11 w-full border border-neutral-300 bg-white px-3.5 text-sm font-medium focus:border-[#006A4E] outline-none transition-colors placeholder:text-neutral-400 rounded-none"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-700">
+                        {t('auth', 'passwordLabel', lang)} <span className="text-[#C8102E]">*</span>
+                      </label>
+                      <button type="button" className="text-xs text-[#006A4E] font-semibold hover:underline cursor-pointer win-press">
+                        {t('auth', 'forgotPassword', lang)}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder={t('auth', 'passwordPlaceholder', lang)}
+                        className="h-11 w-full border border-neutral-300 bg-white px-3.5 pr-11 text-sm font-medium focus:border-[#006A4E] outline-none transition-colors placeholder:text-neutral-400 rounded-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer win-press"
+                        aria-label="Toggle password visibility"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] disabled:bg-neutral-400 text-white h-11 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-none win-btn"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <span>{t('auth', 'loginBtn', lang)}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </form>
 
           {/* Footer Navigation */}
@@ -282,7 +301,7 @@ export default function LoginPage() {
             <span>{t('auth', 'noAccount', lang)} </span>
             <Link
               href="/register"
-              className="text-[#006A4E] font-bold hover:underline transition-colors ml-1"
+              className="text-[#006A4E] font-bold hover:underline transition-colors ml-1 win-press"
             >
               {t('auth', 'registerLink', lang)}
             </Link>
