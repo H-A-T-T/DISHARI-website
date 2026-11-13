@@ -45,6 +45,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/opportunities"
+                  className="text-emerald-100 hover:text-white font-medium transition-colors"
+                >
+                  {lang === 'bn' ? 'সরকারি সুযোগ ও সহায়তা' : 'Government Opportunities'}
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/about"
                   className="text-emerald-100 hover:text-white font-medium transition-colors"
                 >

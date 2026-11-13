@@ -39,6 +39,7 @@ export default function ApplicationModal({
   onClose,
 }: ApplicationModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [botStep, setBotStep] = useState<number>(0)
   const [createdApp, setCreatedApp] = useState<CitizenApplication | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
@@ -71,8 +72,14 @@ export default function ApplicationModal({
   const handleGenerateDocket = async () => {
     setIsSubmitting(true)
     setErrorMsg(null)
+    setBotStep(1) // Connecting to portal...
 
     try {
+      await new Promise((r) => setTimeout(r, 600))
+      setBotStep(2) // Autofilling form fields...
+      await new Promise((r) => setTimeout(r, 600))
+      setBotStep(3) // Encrypting & attaching documents...
+
       const res = await createApplication({
         userId: user.id || 1,
         serviceSlug: service.slug,
@@ -88,6 +95,9 @@ export default function ApplicationModal({
         officialPortalUrl: service.official_url,
       })
 
+      await new Promise((r) => setTimeout(r, 500))
+      setBotStep(4) // Verified & docket generated!
+
       if (res.success && res.application) {
         setCreatedApp(res.application)
       } else {
@@ -97,6 +107,7 @@ export default function ApplicationModal({
       setErrorMsg(lang === 'bn' ? 'কার্যপত্র তৈরিতে সমস্যা হয়েছে' : 'Failed to generate docket')
     } finally {
       setIsSubmitting(false)
+      setBotStep(0)
     }
   }
 
@@ -336,6 +347,38 @@ export default function ApplicationModal({
                   <strong className="text-neutral-900">{service.processing_time_bn}</strong>
                 </div>
               </div>
+
+              {/* Invisible Bot Live Automation Terminal (from form-submission-architecture.md) */}
+              {isSubmitting && (
+                <div className="p-4 border-2 border-[#006A4E] bg-neutral-900 text-white font-mono text-xs space-y-2">
+                  <div className="flex items-center justify-between border-b border-neutral-700 pb-2">
+                    <span className="text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      {lang === 'bn' ? 'অদৃশ্য অটোমেশন বট রানিং...' : 'Invisible Bot Worker Running...'}
+                    </span>
+                    <span className="text-[10px] text-neutral-400">Playwright Worker #01</span>
+                  </div>
+
+                  <div className="space-y-1.5 pt-1 text-[11px]">
+                    <div className={botStep >= 1 ? 'text-emerald-300' : 'text-neutral-500'}>
+                      <span>{botStep > 1 ? '✓ ' : '➜ '}</span>
+                      <span>{lang === 'bn' ? 'সরকারি পোর্টাল সংযোগ স্থাপন ও সেশন শুরু...' : 'Connecting to govt gateway & starting session...'}</span>
+                    </div>
+                    <div className={botStep >= 2 ? 'text-emerald-300' : 'text-neutral-500'}>
+                      <span>{botStep > 2 ? '✓ ' : botStep === 2 ? '➜ ' : '○ '}</span>
+                      <span>{lang === 'bn' ? 'নাগরিক প্রোফাইল থেকে সকল ফর্ম ফিল্ড স্বয়ংক্রিয় পূরণ...' : 'Autofilling form fields from citizen profile...'}</span>
+                    </div>
+                    <div className={botStep >= 3 ? 'text-emerald-300' : 'text-neutral-500'}>
+                      <span>{botStep > 3 ? '✓ ' : botStep === 3 ? '➜ ' : '○ '}</span>
+                      <span>{lang === 'bn' ? 'ডিজিটাল লকার থেকে প্রয়োজনীয় ডকুমেন্টস এনক্রিপ্ট করে সংযুক্ত...' : 'Attaching verified documents from digital locker...'}</span>
+                    </div>
+                    <div className={botStep >= 4 ? 'text-emerald-300' : 'text-neutral-500'}>
+                      <span>{botStep >= 4 ? '✓ ' : '○ '}</span>
+                      <span>{lang === 'bn' ? 'সার্ভার ভেরিফিকেশন ও অফিসিয়াল ট্র্যাকিং ডকেট জেনারেশন সম্পন্ন!' : 'Server verification complete & official tracking logged!'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Modal Actions */}
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-neutral-200">

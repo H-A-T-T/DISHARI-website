@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -87,11 +88,30 @@ function formatProcessingTime(time: string, lang: 'bn' | 'en'): string {
 const categoryKeys = Object.keys(CATEGORY_META) as ServiceCategory[]
 
 export default function ServicesPage() {
+  return (
+    <Suspense fallback={null}>
+      <ServicesPageInner />
+    </Suspense>
+  )
+}
+
+function ServicesPageInner() {
   const { lang } = useLanguage()
+  const searchParams = useSearchParams()
   const [allServices, setAllServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeCategory, setActiveCategory] = useState<ServiceCategory | null>(null)
+  const [activeCategory, setActiveCategory] = useState<ServiceCategory | null>(() => {
+    return null // initialized in effect below
+  })
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Read URL params on mount / param change
+  useEffect(() => {
+    const q = searchParams.get('q') ?? ''
+    const cat = searchParams.get('category') as ServiceCategory | null
+    if (q) setSearchQuery(q)
+    if (cat && Object.keys(CATEGORY_META).includes(cat)) setActiveCategory(cat)
+  }, [searchParams])
 
   const popularSearches = useMemo(() => {
     return lang === 'bn'

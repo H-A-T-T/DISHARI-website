@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLanguage } from '@/lib/language-context'
 
 interface DishariLogoProps extends React.SVGProps<SVGSVGElement> {
@@ -15,6 +15,12 @@ export function DishariLogo({
   lang: propLang,
   ...props
 }: DishariLogoProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   let contextLang: 'bn' | 'en' = 'bn'
   try {
     const ctx = useLanguage()
@@ -23,7 +29,9 @@ export function DishariLogo({
     // Outside provider fallback
   }
 
-  const activeLang = propLang || contextLang || 'bn'
+  // During SSR and initial client hydration, default to 'bn' to guarantee matching the server-rendered HTML.
+  // After hydration completes on client, use the active selected language.
+  const activeLang = mounted ? (propLang || contextLang || 'bn') : 'bn'
   const isDark = theme === 'dark'
   const titleColor = isDark ? '#FFFFFF' : '#064E3B'
   const subtitleColor = isDark ? '#34D399' : '#059669'
@@ -39,6 +47,7 @@ export function DishariLogo({
       viewBox="8 8 444 168"
       className={className}
       fill="none"
+      suppressHydrationWarning
       {...props}
     >
       <defs>
@@ -141,7 +150,7 @@ export function DishariLogo({
       </g>
 
       {/* ─── TYPOGRAPHY SECTION ─── */}
-      <g transform="translate(186, 0)">
+      <g transform="translate(186, 0)" suppressHydrationWarning>
         {activeLang === 'bn' ? (
           <>
             {/* Title: দিশারী */}
@@ -153,6 +162,7 @@ export function DishariLogo({
               fontWeight="800"
               fill={titleColor}
               letterSpacing="0.5"
+              suppressHydrationWarning
             >
               দিশারী
             </text>
@@ -175,6 +185,7 @@ export function DishariLogo({
               fontWeight="600"
               fill={subtitleColor}
               letterSpacing="0.5"
+              suppressHydrationWarning
             >
               ডিজিটাল নাগরিক সহায়ক
             </text>
@@ -190,6 +201,7 @@ export function DishariLogo({
               fontWeight="900"
               fill={titleColor}
               letterSpacing="2"
+              suppressHydrationWarning
             >
               DISHARI
             </text>
@@ -212,6 +224,7 @@ export function DishariLogo({
               fontWeight="700"
               fill={subtitleColor}
               letterSpacing="1"
+              suppressHydrationWarning
             >
               DIGITAL CITIZEN ASSISTANT
             </text>

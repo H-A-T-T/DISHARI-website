@@ -96,6 +96,13 @@ export const translations = {
     free: { bn: '১০০% বিনামূল্যে', en: '100% Free' },
   },
   servicesPage: {
+    pageTitle: { bn: 'সকল সরকারি সেবা', en: 'All Government Services' },
+    pageSubtitle: {
+      bn: 'কোন কাগজ লাগবে? সরকারি ফি কত? কোথায় যেতে হবে? প্রতিটি সেবার পূর্ণাঙ্গ তথ্য জানুন কোনো দালাল ছাড়াই।',
+      en: 'What documents, fees & offices? Get complete info for every service — no middlemen.',
+    },
+    officialCatalog: { bn: 'অফিসিয়াল নাগরিক ক্যাটালগ', en: 'Official Citizen Catalog' },
+    resetFilter: { bn: 'ফিল্টার সাফ করুন', en: 'Reset Filter' },
     govtStamp: { bn: 'গণপ্রজাতন্ত্রী বাংলাদেশ সরকার', en: 'Government of Bangladesh' },
     guideYear: { bn: 'নাগরিক সেবা নির্দেশিকা ২০২৬', en: 'Citizen Services Guide 2026' },
     gazetteUpdated: {

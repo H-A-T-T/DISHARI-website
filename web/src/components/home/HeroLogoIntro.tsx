@@ -1,11 +1,17 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLanguage } from '@/lib/language-context'
 
 export function HeroLogoIntro() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { lang } = useLanguage()
-  const isBn = lang === 'bn'
+  const isBn = mounted ? (lang === 'bn') : true
 
   return (
     <div className="w-full flex items-center justify-center lg:justify-end select-none">
@@ -269,6 +275,7 @@ export function HeroLogoIntro() {
           className="w-full h-auto overflow-visible"
           fill="none"
           aria-label="Dishari Official Animated Logo"
+          suppressHydrationWarning
         >
           <defs>
             {/* Emerald Gradient (Bangladesh Forest Green) */}
@@ -426,7 +433,7 @@ export function HeroLogoIntro() {
           </g>
 
           {/* ─── TYPOGRAPHY SECTION (KALPURUSH) ─── */}
-          <g transform="translate(186, 0)">
+          <g transform="translate(186, 0)" suppressHydrationWarning>
             {isBn ? (
               <>
                 {/* Title: দিশারী (Kalpurush font) */}

@@ -6,9 +6,13 @@ import {
   X,
   Send,
   Mic,
+  MicOff,
   GripHorizontal,
   User,
-  Info
+  Info,
+  Volume2,
+  VolumeX,
+  Sparkles
 } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { WIN10_EASE_ENTRANCE, win10DialogMotion } from '@/lib/motion'
@@ -21,6 +25,12 @@ interface Message {
 }
 
 export function JonobondhuChat() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { lang } = useLanguage()
   const isBn = lang === 'bn'
 
@@ -39,7 +49,10 @@ export function JonobondhuChat() {
   // Chat message state
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
+  const [isListening, setIsListening] = useState(false)
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const recognitionRef = useRef<any>(null)
 
   // Bubble DOM ref
   const bubbleRef = useRef<HTMLDivElement>(null)
@@ -300,7 +313,76 @@ export function JonobondhuChat() {
     setIsDraggingWindow(false)
   }
 
-  // ─── CHAT ENGINE: SEND & AUTOMATED CIVIC RESPONSE ───
+  // ─── BANGLA SPEECH-TO-TEXT & TEXT-TO-SPEECH VOICE ASSISTANT ───
+  const toggleListening = () => {
+    if (isListening) {
+      try {
+        recognitionRef.current?.stop()
+      } catch {}
+      setIsListening(false)
+      return
+    }
+
+    if (typeof window === 'undefined') return
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+
+    if (!SpeechRecognition) {
+      alert(
+        isBn
+          ? 'আপনার ব্রাউজারে ভয়েস রিকগনিশন সুবিধা উপলব্ধ নেই। দয়া করে Google Chrome ব্যবহার করুন।'
+          : 'Speech recognition is not supported in this browser. Please use Google Chrome.'
+      )
+      return
+    }
+
+    try {
+      const rec = new SpeechRecognition()
+      rec.lang = isBn ? 'bn-BD' : 'en-US'
+      rec.continuous = false
+      rec.interimResults = false
+
+      rec.onstart = () => setIsListening(true)
+      rec.onend = () => setIsListening(false)
+      rec.onerror = () => setIsListening(false)
+
+      rec.onresult = (event: any) => {
+        const transcript = event.results?.[0]?.[0]?.transcript
+        if (transcript) {
+          setInput(transcript)
+          handleSendMessage(transcript)
+        }
+      }
+
+      recognitionRef.current = rec
+      rec.start()
+    } catch {
+      setIsListening(false)
+    }
+  }
+
+  const speakText = (text: string, msgId: string) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return
+
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel()
+      setSpeakingMsgId(null)
+      return
+    }
+
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = isBn ? 'bn-BD' : 'en-US'
+    utterance.rate = 0.95
+
+    utterance.onend = () => setSpeakingMsgId(null)
+    utterance.onerror = () => setSpeakingMsgId(null)
+
+    setSpeakingMsgId(msgId)
+    window.speechSynthesis.speak(utterance)
+  }
+
+  // ─── CHAT ENGINE: SEND & AUTOMATED CIVIC KNOWLEDGE RESPONSE ───
   const handleSendMessage = useCallback(
     (textOverride?: string) => {
       const text = (textOverride || input).trim()
@@ -326,10 +408,18 @@ export function JonobondhuChat() {
         let reply = ''
         const lower = text.toLowerCase()
 
-        if (lower.includes('পাসপোর্ট') || lower.includes('passport')) {
+        if (lower.includes('ইনভ্যালিড') || lower.includes('invalid') || (lower.includes('পাসপোর্ট') && lower.includes('ভুল'))) {
+          reply = isBn
+            ? 'পাসপোর্ট আবেদনে ইনভ্যালিড দেখানোর প্রধান কারণ: ১) NID ও জন্মনিবন্ধনের নামের ইংরেজি বানানে অমিল, ২) ১৭ ডিজিটের অনলাইন ডিজিটাল সনদের স্থানে পুরাতন হাতে লেখা নম্বর প্রদান। epassport.gov.bd-তে ডাটা মিলিয়ে পুনরায় যাচাই করুন।'
+            : 'Invalid passport errors usually happen when: 1) English name spelling does not match Smart NID, or 2) old manual certificate number is used instead of 17-digit online birth record.'
+        } else if (lower.includes('পাসপোর্ট') || lower.includes('passport')) {
           reply = isBn
             ? 'ই-পাসপোর্ট পেতে মূল জাতীয় পরিচয়পত্র (NID) অথবা অনলাইন জন্ম নিবন্ধন (১৭ ডিজিট) প্রয়োজন। ৪৮ পৃষ্ঠার ৫ বছর মেয়াদের সাধারণ ফি ৪,০২৫ টাকা এবং জরুরি ফি ৬,৩২৫ টাকা (ভ্যাটসহ)।'
             : 'For E-Passport, you need your original Smart NID or 17-digit verified Birth Certificate. Regular fee for 48 pages (5 yrs) is 4,025 BDT, and express fee is 6,325 BDT.'
+        } else if (lower.includes('বাবা') || lower.includes('বাবার') || lower.includes('মৃত্যু') || lower.includes('ওয়ারিশ') || lower.includes('জমির কাগজ') || lower.includes('খতিয়ান')) {
+          reply = isBn
+            ? 'পিতার মৃত্যুর পর ওয়ারিশি জমি বৈধ করতে: ১) ইউনিয়ন/পৌরসভা থেকে ওয়ারিশান ও মৃত্যু সনদ সংগ্রহ করুন, ২) পিতার ক্রয় দলিল ও পূর্ববর্তী খতিয়ান যোগাড় করুন, ৩) mutation.land.gov.bd-তে ই-নামজারি আবেদন করুন। মোট সরকারি ফি ১,১৭০ টাকা। কোনো দালাল ছাড়াই অনলাইনে ট্র্যাক করা যায়।'
+            : 'To regularize inherited land: obtain succession certificate & death cert from Union/City council, collect father\'s deed/khatian, and file e-mutation at mutation.land.gov.bd. Total govt fee 1,170 BDT.'
         } else if (lower.includes('nid') || lower.includes('পরিচয়পত্র') || lower.includes('সংশোধন')) {
           reply = isBn
             ? 'NID কার্ডে নাম বা জন্মতারিখ সংশোধনের জন্য এসএসসি/সমমান সনদ, জন্ম নিবন্ধন সনদ এবং মা-বাবার NID কপি নির্বাচন কমিশনের পোর্টালে (services.nidw.gov.bd) জমা দিন। প্রথম আবেদনের সরকারি ফি ৩৪৫ টাকা।'
@@ -338,14 +428,38 @@ export function JonobondhuChat() {
           reply = isBn
             ? 'ই-নামজারি আবেদন ভূমি মন্ত্রণালয়ের mutation.land.gov.bd থেকে করা যায়। মোট সরকারি ফি ১,১৭০ টাকা (কোর্ট ফি ২০ + নোটিশ জারি ৫০ + রেকর্ড সংশোধন ১,০০০ + ডিসিআর ১০০ টাকা)। কোনো অতিরিক্ত খরচ নেই।'
             : 'E-Mutation can be filed at mutation.land.gov.bd. Total government fee is 1,170 BDT. The legal delivery limit is 28 working days.'
-        } else if (lower.includes('ভাতা') || lower.includes('বিধবা') || lower.includes('allowance')) {
+        } else if (lower.includes('বিধবা') || lower.includes('স্বামী') || lower.includes('মেম্বার') || lower.includes('দালাল')) {
           reply = isBn
-            ? 'বিধবা ও স্বামী নিগৃহীতা ভাতা সমাজসেবা অধিদপ্তরের মাধ্যমে পরিচালিত হয়। সরকারিভাবে কোনো ফি নেওয়া হয় না (বিনামূল্যে)। ইউনিয়ন পরিষদ বা ওয়ার্ড কার্যালয়ে NID ও ছবিসহ আবেদন করা যায়।'
-            : 'Widow Allowance is free of government charge. Eligible citizens can apply at Union Council or Ward offices with NID and passport photo.'
-        } else if (lower.includes('ট্রেড') || lower.includes('trade') || lower.includes('লাইসেন্স')) {
+            ? 'বিধবা ও স্বামী নিগৃহীতা ভাতা সম্পূর্ণ বিনামূল্যে সরকার প্রদান করে। মেম্বার বা দালালকে কোনো টাকা দেওয়া দণ্ডনীয় অপরাধ। ভাতা প্রতি মাসে সরাসরি বিকাশ/নগদে (G2P) পৌঁছে যাবে। ইউনিয়ন পরিষদ বা সমাজসেবা অফিসে যোগাযোগ করুন। দালাল উৎপাত করলে সরাসরি ১০৬ নম্বরে জানান।'
+            : 'Widow Allowance is 100% free with no middleman fees. Monthly ৳850 is sent directly to mobile banking accounts (G2P). If someone demands a bribe, report directly to Anti-Corruption Hotline 106.'
+        } else if (lower.includes('ভাতা') || lower.includes('বয়স্ক') || lower.includes('প্রতিবন্ধী') || lower.includes('allowance')) {
           reply = isBn
-            ? 'ব্যবসার ই-ট্রেড লাইসেন্স আপনার সংশ্লিষ্ট সিটি কর্পোরেশন বা ইউনিয়ন পরিষদ কার্যালয় থেকে সংগ্রহ করতে পারেন। ভাড়ার চুক্তিপত্র ও ছবি প্রয়োজন হয়।'
-            : 'E-Trade License requires business rental agreement, TIN certificate, and photo. Issued by local municipality or union council.'
+            ? 'বয়স্ক ও প্রতিবন্ধী ভাতা সমাজসেবা অধিদপ্তরের মাধ্যমে পরিচালিত হয়। সরকারিভাবে কোনো ফি নেওয়া হয় না (বিনামূল্যে)। ইউনিয়ন পরিষদ বা ওয়ার্ড কার্যালয়ে NID ও ছবিসহ আবেদন করা যায়।'
+            : 'Old age & disability allowances are free of government charge. Eligible citizens can apply at Union Council or Ward offices with NID and passport photo.'
+        } else if (lower.includes('বেকার') || lower.includes('চাকরি') || lower.includes('ডিগ্রী') || lower.includes('যুব') || lower.includes('প্রশিক্ষণ')) {
+          reply = isBn
+            ? 'ডিগ্রী পাস বা বেকার যুবসমাজের জন্য যুব উন্নয়ন অধিদপ্তর (DYD) ৩-৬ মাসের বিনামূল্যে আইটি, গবাদিপশু ও কারিগরি প্রশিক্ষণ এবং ৫০,০০০ থেকে ২,০০,০০০ টাকা সহজ শর্তে আত্মকর্মসংস্থান ঋণ দেয়। বিস্তারিত জানতে দিশারীর "সরকারি সুযোগ" পাতা দেখুন।'
+            : 'For unemployed graduates, the Dept of Youth Development (DYD) provides free 3-6 months skill courses and soft loans from ৳50,000 to ৳2,00,000. Check Dishari\'s Opportunities Hub for details.'
+        } else if (lower.includes('উপবৃত্তি') || lower.includes('বৃত্তি') || lower.includes('স্কলারশিপ') || lower.includes('scholarship')) {
+          reply = isBn
+            ? 'প্রধানমন্ত্রীর শিক্ষা সহায়তা ট্রাস্ট (PMEAT) মাধ্যমিক ও উচ্চ মাধ্যমিক অসচ্ছল মেধাবী শিক্ষার্থীদের বার্ষিক ৫,০০০-১০,০০০ টাকা উপবৃত্তি দেয়। শিক্ষাপ্রতিষ্ঠানের প্রত্যয়নপত্র নিয়ে pmeat.gov.bd-তে আবেদন করতে হয়।'
+            : 'PM Education Assistance Trust provides annual ৳5,000 - ৳10,000 stipends for secondary & higher secondary students. Apply via pmeat.gov.bd with institution head\'s endorsement.'
+        } else if (lower.includes('প্রবাসী') || lower.includes('সৌদি') || lower.includes('বিদেশ') || lower.includes('রেমিট্যান্স')) {
+          reply = isBn
+            ? 'প্রবাসী কর্মীদের জন্য প্রবাসী কল্যাণ ব্যাংক স্বল্প সুদে পুনর্বাসন ঋণ দেয়। এছাড়া ওয়েলফেয়ার কার্ডধারীদের জন্য বিমানবন্দর ওয়েলফেয়ার ডেস্ক ও ১০ লাখ টাকার দুর্ঘটনা বীমা সুবিধা রয়েছে। probashi.gov.bd দেখুন।'
+            : 'Probashi Kallyan Bank offers returnee rehabilitation loans. BMET cardholders receive airport welfare desk assistance and ৳10 lakh insurance coverage.'
+        } else if (lower.includes('মারমা') || lower.includes('নৃগোষ্ঠী') || lower.includes('উপজাতি') || lower.includes('পার্বত্য')) {
+          reply = isBn
+            ? 'ক্ষুদ্র নৃগোষ্ঠীর জন্য পার্বত্য চট্টগ্রাম বিষয়ক মন্ত্রণালয় এবং প্রধানমন্ত্রীর কার্যালয়ের বিশেষ উন্নয়ন অনুদান ও শিক্ষা কোটা চালু রয়েছে। বিস্তারিত দিশারীর "সুযোগ" পাতায় পাবেন।'
+            : 'Special education grants and enterprise funds are available for ethnic minority citizens via the Ministry of CHT Affairs and Prime Minister\'s Office.'
+        } else if (lower.includes('ট্রেড') || lower.includes('trade') || lower.includes('ব্যবসা') || lower.includes('উদ্যোক্তা')) {
+          reply = isBn
+            ? 'ব্যবসার জন্য স্থানীয় ইউনিয়ন বা পৌরসভা থেকে ই-ট্রেড লাইসেন্স সংগ্রহ করুন। এরপর এসএমই ফাউন্ডেশন ও বিসিক থেকে ৪% হ্রাসকৃত সুদে কুটির শিল্প ঋণ নেওয়া যায়।'
+            : 'Obtain an E-Trade License from local union/municipality. Then apply for 4% concessional cottage enterprise loans via SME Foundation and BSCIC.'
+        } else if (lower.includes('ডেডলাইন') || lower.includes('শেষ তারিখ') || lower.includes('ক্যালেন্ডার')) {
+          reply = isBn
+            ? 'গুরুত্বপূর্ণ ডেডলাইন: আয়কর রিটার্ন জমা ৩০ নভেম্বর ২০২৬, উপবৃত্তি আবেদন ১৫ ডিসেম্বর ২০২৬। দিশারীর "ডেডলাইন" মেনুতে প্রতিটি সরকারি সেবার সময়সীমা ও কাউন্টডাউন দেখতে পাবেন।'
+            : 'Key Deadlines: Tax return filing Nov 30, PM scholarship application Dec 15. Check Dishari\'s Deadlines view for live alerts.'
         } else {
           reply = isBn
             ? 'আপনার প্রশ্নের জন্য ধন্যবাদ। দিশারীর সকল সেবা ডিরেক্টরি ব্রাউজ করে সরকারি ফি, প্রয়োজনীয় কাগজপত্রের তালিকা ও অফিসিয়াল পোর্টাল লিংক দেখে নিতে পারেন।'
@@ -375,17 +489,21 @@ export function JonobondhuChat() {
     }
   }
 
-  // Pre-prepared civic guidance prompt chips
+  // Pre-prepared civic guidance prompt chips based on statement.txt personas
   const quickPrompts = isBn
     ? [
-        'ই-পাসপোর্ট করতে কী কাগজপত্র লাগে?',
-        'NID নাম সংশোধনের সরকারি ফি কত?',
-        'ভূমি নামজারি করতে মোট কত টাকা লাগে?',
+        'বাবার মৃত্যুর পর জমির নামজারি কীভাবে করব?',
+        'বিধবা ভাতার নিয়ম ও কোনো দালাল ফি লাগে কি?',
+        'ডিগ্রি পাসের পর সরকারি যুব প্রশিক্ষণ ও ঋণ',
+        'ই-পাসপোর্টের প্রয়োজনীয় কাগজ ও সরকারি ফি কত?',
+        'উপবৃত্তি পাওয়ার অনলাইন আবেদন প্রক্রিয়া কী?',
       ]
     : [
-        'Documents required for E-Passport?',
-        'Official fee for NID correction?',
-        'Total fee for Land Mutation?',
+        'How to apply for land mutation after father’s death?',
+        'Is there any fee or middleman for Widow Allowance?',
+        'Govt youth skill training & loans for graduates?',
+        'Documents and official fee for E-Passport?',
+        'Online application process for student stipend?',
       ]
 
   // Dynamic positioning styles
@@ -410,6 +528,8 @@ export function JonobondhuChat() {
     height: `min(${WINDOW_HEIGHT}px, calc(100vh - 40px))`,
     zIndex: 99999,
   }
+
+  if (!mounted) return null
 
   return (
     <>
@@ -558,9 +678,35 @@ export function JonobondhuChat() {
                       >
                         {msg.text}
                       </div>
-                      <span className="text-[9px] font-mono text-neutral-400 block px-1">
-                        {msg.time}
-                      </span>
+                      <div className="flex items-center gap-2 px-1">
+                        <span className="text-[9px] font-mono text-neutral-400">
+                          {msg.time}
+                        </span>
+                        {isAi && (
+                          <button
+                            type="button"
+                            onClick={() => speakText(msg.text, msg.id)}
+                            className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 border cursor-pointer win-press transition-colors ${
+                              speakingMsgId === msg.id
+                                ? 'bg-emerald-100 text-[#006A4E] border-emerald-300 font-bold'
+                                : 'bg-neutral-50 text-neutral-500 hover:text-neutral-900 border-neutral-200'
+                            }`}
+                            title={speakingMsgId === msg.id ? (isBn ? 'থামুন' : 'Stop') : (isBn ? 'ভয়েসে শুনুন' : 'Listen')}
+                          >
+                            {speakingMsgId === msg.id ? (
+                              <>
+                                <VolumeX className="w-3 h-3 text-[#C8102E]" />
+                                <span>{isBn ? 'থামুন' : 'Stop'}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Volume2 className="w-3 h-3 text-[#006A4E]" />
+                                <span>{isBn ? 'ভয়েস শুনুন' : 'Listen'}</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {!isAi && (
@@ -608,14 +754,23 @@ export function JonobondhuChat() {
                   className="flex-1 h-9 bg-transparent text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none font-medium"
                 />
 
-                {/* Mic / Voice (UI only) */}
+                {/* Real Working Speech-to-Text Microphone Button */}
                 <button
                   type="button"
-                  className="p-1.5 text-neutral-400 hover:text-[#006A4E] transition-colors cursor-pointer rounded-none win-press"
-                  title={isBn ? 'ভয়েস প্রশ্ন (শীঘ্রই আসছে)' : 'Voice input (Coming soon)'}
-                  aria-label={isBn ? 'ভয়েস প্রশ্ন' : 'Voice input'}
+                  onClick={toggleListening}
+                  className={`p-1.5 transition-colors cursor-pointer rounded-none win-press ${
+                    isListening
+                      ? 'bg-rose-100 text-[#C8102E] animate-pulse border border-rose-300'
+                      : 'text-neutral-500 hover:text-[#006A4E]'
+                  }`}
+                  title={
+                    isListening
+                      ? (isBn ? 'শুনছি... কথা বলা শেষ করতে ক্লিক করুন' : 'Listening... click to stop')
+                      : (isBn ? 'বাংলায় ভয়েসে প্রশ্ন করুন (কথা বলুন)' : 'Ask via voice (Speak in Bangla)')
+                  }
+                  aria-label={isBn ? 'ভয়েস ইনপুট' : 'Voice input'}
                 >
-                  <Mic className="w-4 h-4" />
+                  {isListening ? <MicOff className="w-4 h-4 text-[#C8102E]" /> : <Mic className="w-4 h-4" />}
                 </button>
 
                 {/* Send Button */}

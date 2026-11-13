@@ -42,3 +42,4 @@ pnpm-debug.log*
 web/.eslintcache
 web/*.tsbuildinfo
 web/next-env.d.ts
+.neon

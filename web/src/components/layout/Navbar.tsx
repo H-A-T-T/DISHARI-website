@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   ShieldCheck,
   LogOut,
+  Sparkles,
 } from 'lucide-react'
 import NotificationDropdown from '@/components/layout/NotificationDropdown'
 import { WIN10_INDICATOR_SPRING, WIN10_EASE_ENTRANCE, WIN10_EASE_EXIT } from '@/lib/motion'
@@ -66,6 +67,7 @@ export default function Navbar() {
   }
 
   const isServicesActive = pathname === '/services' || pathname.startsWith('/services/')
+  const isOpportunitiesActive = pathname === '/opportunities'
   const isAboutActive = pathname === '/about'
   const isDashboardActive = pathname.startsWith('/dashboard')
 
@@ -103,6 +105,26 @@ export default function Navbar() {
             >
               <span>{t('nav', 'services', lang)}</span>
               {isServicesActive && (
+                <motion.div
+                  layoutId="navbar-active-nav-link"
+                  className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#006A4E]"
+                  transition={WIN10_INDICATOR_SPRING}
+                />
+              )}
+            </Link>
+
+            <Link
+              href="/opportunities"
+              className={cn(
+                'relative font-bold text-sm tracking-wide transition-colors py-2 flex items-center gap-1.5 win-press',
+                isOpportunitiesActive
+                  ? 'text-[#006A4E]'
+                  : 'text-neutral-700 hover:text-[#006A4E]'
+              )}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#006A4E]" />
+              <span>{lang === 'bn' ? 'সরকারি সুযোগ' : 'Opportunities'}</span>
+              {isOpportunitiesActive && (
                 <motion.div
                   layoutId="navbar-active-nav-link"
                   className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#006A4E]"
@@ -313,6 +335,20 @@ export default function Navbar() {
                     <FileText className="w-4 h-4 text-[#006A4E]" />
                   </div>
                   <span>{t('nav', 'services', lang)}</span>
+                </Link>
+
+                <Link
+                  href="/opportunities"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    'flex items-center gap-3.5 py-3.5 min-h-[48px] text-base font-bold transition-colors win-press',
+                    pathname === '/opportunities' ? 'text-[#006A4E]' : 'text-neutral-800 hover:text-[#006A4E]'
+                  )}
+                >
+                  <div className="w-8 h-8 border border-neutral-200 bg-neutral-50 flex items-center justify-center shrink-0 rounded-none">
+                    <Sparkles className="w-4 h-4 text-emerald-700" />
+                  </div>
+                  <span>{lang === 'bn' ? 'সরকারি সুযোগ ও সহায়তা' : 'Government Opportunities'}</span>
                 </Link>
 
                 <Link

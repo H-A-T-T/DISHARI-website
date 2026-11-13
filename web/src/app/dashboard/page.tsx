@@ -15,7 +15,8 @@ import {
   Lock,
   ArrowRight,
   LogOut,
-  UserCheck
+  UserCheck,
+  Sparkles
 } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { t } from '@/lib/translations'
@@ -31,9 +32,10 @@ import DocumentLocker from '@/components/dashboard/DocumentLocker'
 import ApplicationsList from '@/components/dashboard/ApplicationsList'
 import DeadlinesView from '@/components/dashboard/DeadlinesView'
 import ProfileSettings from '@/components/dashboard/ProfileSettings'
+import OpportunityFinder from '@/components/shared/OpportunityFinder'
 import { WIN10_INDICATOR_SPRING, win10TabMotion } from '@/lib/motion'
 
-type DashboardTab = 'home' | 'locker' | 'applications' | 'deadlines' | 'settings'
+type DashboardTab = 'home' | 'locker' | 'applications' | 'deadlines' | 'opportunities' | 'settings'
 
 function DashboardInner() {
   const { lang, setLang } = useLanguage()
@@ -42,7 +44,7 @@ function DashboardInner() {
 
   const [activeTab, setActiveTab] = useState<DashboardTab>(() => {
     const tabParam = searchParams.get('tab')
-    if (tabParam && ['home', 'locker', 'applications', 'deadlines', 'settings'].includes(tabParam)) {
+    if (tabParam && ['home', 'locker', 'applications', 'deadlines', 'opportunities', 'settings'].includes(tabParam)) {
       return tabParam as DashboardTab
     }
     return 'home'
@@ -61,7 +63,7 @@ function DashboardInner() {
   // Sync tab from URL query param if present
   useEffect(() => {
     const tabParam = searchParams.get('tab')
-    if (tabParam && ['home', 'locker', 'applications', 'deadlines', 'settings'].includes(tabParam)) {
+    if (tabParam && ['home', 'locker', 'applications', 'deadlines', 'opportunities', 'settings'].includes(tabParam)) {
       setActiveTab(tabParam as DashboardTab)
     }
   }, [searchParams])
@@ -217,6 +219,13 @@ function DashboardInner() {
       labelEn: 'Alerts & Deadlines',
       icon: BellRing,
       badge: deadlines.filter((d) => d.urgency === 'high').length > 0 ? '!' : undefined,
+    },
+    {
+      id: 'opportunities' as DashboardTab,
+      labelBn: 'সরকারি সুযোগ ও সহায়তা',
+      labelEn: 'Opportunities & Grants',
+      icon: Sparkles,
+      badge: 'New',
     },
     {
       id: 'settings' as DashboardTab,
@@ -541,7 +550,12 @@ function DashboardInner() {
                   />
                 )}
 
-                {/* 5. SETTINGS TAB */}
+                {/* 5. OPPORTUNITIES & ELIGIBILITY TAB */}
+                {activeTab === 'opportunities' && (
+                  <OpportunityFinder />
+                )}
+
+                {/* 6. SETTINGS TAB */}
                 {activeTab === 'settings' && user && (
                   <ProfileSettings
                     user={user}
