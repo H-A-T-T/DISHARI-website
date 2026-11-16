@@ -235,8 +235,8 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right Column: Seamless Animated Logo Intro */}
-          <div className="lg:col-span-5 w-full flex items-center justify-center lg:justify-end mt-4 lg:mt-0">
+          {/* Right Column: Seamless Animated Logo Intro (Hidden when no horizontal space) */}
+          <div className="hidden lg:flex lg:col-span-5 w-full items-center justify-end">
             <HeroLogoIntro />
           </div>
         </div>
