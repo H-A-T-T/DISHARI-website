@@ -262,16 +262,16 @@ export function HeroLogoIntro() {
               opacity: 0.75;
             }
             100% {
-              transform: translateX(450px);
+              transform: translateX(470px);
               opacity: 0;
             }
           }
         `}} />
 
-        {/* Seamless Animated Vector SVG (Exact viewBox 8 8 444 168 from DishariLogo) */}
+        {/* Seamless Animated Vector SVG (viewBox 8 8 460 168 from DishariLogo) */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="8 8 444 168"
+          viewBox="8 8 460 168"
           className="w-full h-auto overflow-visible"
           fill="none"
           aria-label="Dishari Official Animated Logo"
@@ -480,33 +480,33 @@ export function HeroLogoIntro() {
                   x="0"
                   y="106"
                   fontFamily="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif"
-                  fontSize="70"
-                  fontWeight="900"
+                  fontSize="56"
+                  fontWeight="800"
                   fill="#064E3B"
-                  letterSpacing="2"
+                  letterSpacing="1.5"
                   className="dishari-intro-title"
                 >
                   DISHARI
                 </text>
 
                 {/* Red & Green Accent Dots */}
-                <circle cx="250" cy="54" r="8.5" fill="url(#heroCrimsonGrad)" className="dishari-intro-dot-red" />
-                <circle cx="268" cy="54" r="5.5" fill="#10B981" className="dishari-intro-dot-green" />
+                <circle cx="236" cy="54" r="7.5" fill="url(#heroCrimsonGrad)" className="dishari-intro-dot-red" />
+                <circle cx="252" cy="54" r="5" fill="#10B981" className="dishari-intro-dot-green" />
 
                 {/* Tri-Color Divider Bars */}
-                <rect x="2" y="122" width="90" height="5.5" rx="2.75" fill="url(#heroEmeraldGrad)" className="dishari-intro-bar-1" />
-                <rect x="99" y="122" width="48" height="5.5" rx="2.75" fill="url(#heroMintGrad)" className="dishari-intro-bar-2" />
-                <rect x="154" y="122" width="38" height="5.5" rx="2.75" fill="url(#heroCrimsonGrad)" className="dishari-intro-bar-3" />
+                <rect x="2" y="122" width="85" height="5.5" rx="2.75" fill="url(#heroEmeraldGrad)" className="dishari-intro-bar-1" />
+                <rect x="94" y="122" width="45" height="5.5" rx="2.75" fill="url(#heroMintGrad)" className="dishari-intro-bar-2" />
+                <rect x="146" y="122" width="35" height="5.5" rx="2.75" fill="url(#heroCrimsonGrad)" className="dishari-intro-bar-3" />
 
                 {/* Tagline: DIGITAL CITIZEN ASSISTANT */}
                 <text
                   x="2"
-                  y="148"
+                  y="147"
                   fontFamily="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif"
-                  fontSize="16.5"
+                  fontSize="13"
                   fontWeight="700"
                   fill="#059669"
-                  letterSpacing="1"
+                  letterSpacing="0.8"
                   className="dishari-intro-subtitle"
                 >
                   DIGITAL CITIZEN ASSISTANT
