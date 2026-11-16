@@ -6,62 +6,90 @@ import { ShieldCheck, ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { t } from '@/lib/translations'
 
-const PERSONAS = [
+const CIVIC_SOLUTIONS = [
   {
     serialBn: '০১',
     serialEn: '01',
-    nameBn: 'রহিম মিয়া',
-    nameEn: 'Rahim Mia',
-    tagBn: 'ভূমি সেবা ও উত্তরাধিকার',
-    tagEn: 'Land Services & Inheritance',
-    locationBn: 'নেত্রকোনা',
-    locationEn: 'Netrokona',
-    storyBn:
-      'বাবার মৃত্যুর পর পৈতৃক জমির নামজারি ও খতিয়ান ঠিক করতে হবে। কিন্তু তহশিল অফিস আর ইউনিয়ন ডিজিটাল সেন্টারে কোন কাগজ লাগবে এবং সরকারি ফি কত—তা না জানায় বারবার দালালদের শরণাপন্ন হতে হচ্ছিল।',
-    storyEn:
-      'After his father passed away, Rahim needed to mutate ancestral land deeds. Unaware of the required documents and official government fees at the tahsil office, he fell victim to repeated broker exploitation.',
+    categoryBn: 'ভূমি সেবা ও উত্তরাধিকার',
+    categoryEn: 'Land Services & Inheritance',
+    scopeBn: 'ভূমি মন্ত্রণালয় · e-Mutation',
+    scopeEn: 'Ministry of Land · e-Mutation',
+    titleBn: 'পৈতৃক জমির নামজারি ও মধ্যস্বত্বভোগী সিন্ডিকেট নিরসন',
+    titleEn: 'Inherited Land Mutation & Eliminating Middlemen',
+    challengeBn:
+      'উত্তরাধিকার সূত্রে প্রাপ্ত জমির নামজারি করতে গিয়ে বহু নাগরিক সরকারি ফি (১,১৭০ টাকা) এবং প্রয়োজনীয় ওয়ারিশান ও পরচা দলিলের স্পষ্ট তালিকা না জানায় দালালদের হাতে অতিরিক্ত টাকা ও সময় হারান।',
+    challengeEn:
+      'When mutating inherited ancestral land, citizens unaware of the official government fee (1,170 BDT) and the checklist of succession deeds often lose significant time and money to brokers.',
+    solutionBn:
+      'দিশারী সরাসরি mutation.land.gov.bd-এর অনুমোদিত ফি, ডিসিআর ফি, কোর্ট ফি ও ওয়ারিশান সার্টিফিকেটের চেকলিস্ট তুলে ধরে এবং দালাল ছাড়াই অনলাইনে আবেদন ট্র্যাকিংয়ের পূর্ণাঙ্গ গাইডলাইন দেয়।',
+    solutionEn:
+      'Dishari provides the exact statutory fee breakdown (Court, Notice, Record Correction & DCR), a verified inheritance checklist, and step-by-step guidance for direct online submission.',
+    link: '/services/land-mutation',
+    linkTextBn: 'নামজারি নির্দেশিকা দেখুন',
+    linkTextEn: 'View Land Mutation Guide',
   },
   {
     serialBn: '০২',
     serialEn: '02',
-    nameBn: 'মোসাম্মৎ রাবেয়া',
-    nameEn: 'Mosammat Rabeya',
-    tagBn: 'শিক্ষা ও উপবৃত্তি',
-    tagEn: 'Education & Scholarship',
-    locationBn: 'কুড়িগ্রাম',
-    locationEn: 'Kurigram',
-    storyBn:
-      'মেধাবী ছাত্রী হিসেবে প্রধানমন্ত্রীর শিক্ষা সহায়তা ট্রাস্টের উপবৃত্তির জন্য আবেদন করতে চায়। কিন্তু কী কী প্রত্যয়ন লাগবে আর অনলাইন পোর্টালের আবেদনের শেষ সময় কখন—তা আগে থেকে নিশ্চিত হতে পারছিল না।',
-    storyEn:
-      'As a meritorious student, Rabeya wanted to apply for the Prime Minister’s Education Assistance Trust scholarship. She struggled to learn which testimonials were needed and the exact application deadline.',
+    categoryBn: 'পরিচয়পত্র ও শিক্ষা সহায়তা',
+    categoryEn: 'Identity & Educational Scholarships',
+    scopeBn: 'নির্বাচন কমিশন ও প্রধানমন্ত্রীর শিক্ষা সহায়তা ট্রাস্ট',
+    scopeEn: 'Election Commission & PM Education Trust',
+    titleBn: 'NID ভুল সংশোধন ও সময়মতো উপবৃত্তি আবেদন নিশ্চিতকরণ',
+    titleEn: 'NID Correction & Timely Scholarship Access',
+    challengeBn:
+      'NID ও জন্মনিবন্ধনের নামের বানানে অমিলের কারণে অসচ্ছল শিক্ষার্থীদের ব্যাংক হিসাব ও উপবৃত্তি আটকে যায়। কোন প্রত্যয়নটি অনলাইনে জমা দিতে হবে এবং আবেদনের শেষ সময় কখন—তা আগে থেকে জানা যায় না।',
+    challengeEn:
+      'Mismatches between NID and birth records often block students’ stipend accounts. Without knowing the required institutional endorsements or strict deadlines, students miss out on vital funding.',
+    solutionBn:
+      'দিশারী নির্বাচন কমিশনের services.nidw.gov.bd অনুযায়ী প্রমাণক দলিলের তালিকা (SSC, মা-বাবার NID) এবং প্রধানমন্ত্রীর শিক্ষা সহায়তা ট্রাস্টের (pmeat.gov.bd) ডেডলাইন অ্যালার্ট নোটিফিকেশন প্রদান করে।',
+    solutionEn:
+      'Dishari outlines the required legal evidentiary papers for NID changes and pushes automated deadline radar alerts for active secondary and higher secondary stipend cycles.',
+    link: '/services/scholarship',
+    linkTextBn: 'উপবৃত্তি নির্দেশিকা দেখুন',
+    linkTextEn: 'View Scholarship Guide',
   },
   {
     serialBn: '০৩',
     serialEn: '03',
-    nameBn: 'সবুজ আহমেদ',
-    nameEn: 'Sobuj Ahmed',
-    tagBn: 'ব্যবসা ও ট্রেড লাইসেন্স',
-    tagEn: 'Business & Trade License',
-    locationBn: 'বগুড়া',
-    locationEn: 'Bogra',
-    storyBn:
-      'নিজের তৈরি কুটির শিল্পজাত পণ্য অনলাইনে বিক্রির জন্য প্রথমবারের মতো ই-ট্রেড লাইসেন্স করতে চান। কিন্তু ইউনিয়ন পরিষদ নাকি পৌরসভায় যেতে হবে আর কত টাকা ফি লাগবে তা নিয়ে বিভ্রান্তিতে ছিলেন।',
-    storyEn:
-      'To sell his cottage crafts online, Sobuj needed an e-Trade License for the first time. He was confused about whether to go to the Union Council or the municipality and what the legal fee was.',
+    categoryBn: 'ব্যবসা ও ট্রেড লাইসেন্স',
+    categoryEn: 'Business Compliance & Trade Licenses',
+    scopeBn: 'স্থানীয় সরকার বিভাগ ও বিসিক',
+    scopeEn: 'Local Government Division & BSCIC',
+    titleBn: 'ক্ষুদ্র উদ্যোক্তাদের ই-ট্রেড লাইসেন্স ও আর্থিক অন্তর্ভুক্তি',
+    titleEn: 'Cottage Enterprise e-Trade Licensing & Compliance',
+    challengeBn:
+      'কুটির শিল্প বা অনলাইন উদ্যোক্তারা ব্যবসা শুরু করতে গিয়ে ইউনিয়ন পরিষদ নাকি পৌরসভায় যেতে হবে, বাণিজ্যিক হোল্ডিং লাগবে কি না এবং সরকারি লাইসেন্স ফি কত তা নিয়ে বিভ্রান্তিতে ভোগেন।',
+    challengeEn:
+      'Cottage and online entrepreneurs frequently struggle to identify whether their trade license should be issued by the Union Council or Municipality, leading to unauthorized processing surcharges.',
+    solutionBn:
+      'দিশারী ব্যবসার ধরন ও ভৌগোলিক অবস্থান অনুযায়ী সঠিক ই-ট্রেড লাইসেন্স ফি, ট্রেডমার্ক ও ব্যাংক একাউন্ট খোলার প্রয়োজনীয় কাগজের স্বয়ংক্রিয় চেকলিস্ট প্রদান করে।',
+    solutionEn:
+      'Dishari generates localized checklists and clear fee benchmarks for Union and Municipal e-Trade licenses, preparing entrepreneurs for formal commercial registration and SME loans.',
+    link: '/services/trade-license',
+    linkTextBn: 'ট্রেড লাইসেন্স নির্দেশিকা দেখুন',
+    linkTextEn: 'View Trade License Guide',
   },
   {
     serialBn: '০৪',
     serialEn: '04',
-    nameBn: 'ফারুক হোসেন',
-    nameEn: 'Faruk Hossain',
-    tagBn: 'প্রবাসী কল্যাণ ও স্মার্ট কার্ড',
-    tagEn: 'Expatriate Welfare & Smart Card',
-    locationBn: 'কুমিল্লা',
-    locationEn: 'Cumilla',
-    storyBn:
-      'সৌদি আরব যাওয়ার ভিসা পেয়েছেন। বিএমইটি (BMET) ইমিগ্রেশন ক্লিয়ারেন্স ও স্মার্ট কার্ডের জন্য বায়োমেট্রিক ও পিডিও সনদের কোনটির পর কোনটি লাগবে তা বুঝতে জেলা কর্মসংস্থান অফিসে ঘুরছিলেন।',
-    storyEn:
-      'Having secured a visa for Saudi Arabia, Faruk needed BMET clearance and a Smart Card. He spent days running around the district employment office trying to figure out the correct sequence of biometrics and PDO certificates.',
+    categoryBn: 'প্রবাসী কল্যাণ ও অভিবাসন সুরক্ষা',
+    categoryEn: 'Expatriate Welfare & Migration Safety',
+    scopeBn: 'প্রবাসী কল্যাণ মন্ত্রণালয় ও বিএমইটি',
+    scopeEn: 'Ministry of Expatriate Welfare & BMET',
+    titleBn: 'বিএমইটি স্মার্ট কার্ড ও প্রবাসী কর্মসংস্থান স্বচ্ছতা',
+    titleEn: 'BMET Smart Clearance & Remittance Protection',
+    challengeBn:
+      'বিদেশে গমনেচ্ছু শ্রমিকরা ভিসা পাওয়ার পর বিএমইটি ইমিগ্রেশন ক্লিয়ারেন্স, পিডিও ওরিয়েন্টেশন, বায়োমেট্রিক ও কল্যাণ তহবিলের সঠিক ক্রমধারা না বুঝে জেলা অফিসে দিনের পর দিন হয়রানির শিকার হন।',
+    challengeEn:
+      'Migrant workers with valid overseas visas often endure bureaucratic delays trying to navigate BMET biometrics, Pre-Departure Orientation (PDO), and mandatory migrant welfare insurance.',
+    solutionBn:
+      'দিশারী প্রবাসী কর্মীর জন্য বিএমইটি স্মার্ট কার্ড প্রাপ্তির ৫টি সুনির্দিষ্ট ধাপ, জেলা কর্মসংস্থান অফিসের ভূমিকা ও প্রবাসী কল্যাণ ব্যাংকের পুনর্বাসন ঋণ তথ্যের নির্ভরযোগ্য পথ দেখায়।',
+    solutionEn:
+      'Dishari maps the 5 sequential steps for BMET clearance, verified welfare desk services, and government-backed returnee rehabilitation credit programs.',
+    link: '/services/passport',
+    linkTextBn: 'পরিচয় ও পাসপোর্ট সেবা দেখুন',
+    linkTextEn: 'View Identity & Passport Services',
   },
 ]
 
@@ -165,11 +193,11 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ─── Case Dossiers ──────────────── */}
+        {/* ─── Real Civic Challenges & Systemic Solutions ──────────────── */}
         <section>
           <div className="border-b border-neutral-200 pb-2.5 mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
             <div>
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-neutral-500">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#006A4E]">
                 {t('aboutPage', 'caseStudiesTag', lang)}
               </span>
               <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">
@@ -182,38 +210,66 @@ export default function AboutPage() {
           </div>
 
           <div className="border border-neutral-200 divide-y divide-neutral-200 bg-white rounded-none shadow-xs">
-            {PERSONAS.map((persona) => {
-              const serial = lang === 'bn' ? persona.serialBn : persona.serialEn
-              const name = lang === 'bn' ? persona.nameBn : persona.nameEn
-              const tag = lang === 'bn' ? persona.tagBn : persona.tagEn
-              const location = lang === 'bn' ? persona.locationBn : persona.locationEn
-              const story = lang === 'bn' ? persona.storyBn : persona.storyEn
+            {CIVIC_SOLUTIONS.map((item) => {
+              const serial = lang === 'bn' ? item.serialBn : item.serialEn
+              const category = lang === 'bn' ? item.categoryBn : item.categoryEn
+              const scope = lang === 'bn' ? item.scopeBn : item.scopeEn
+              const title = lang === 'bn' ? item.titleBn : item.titleEn
+              const challenge = lang === 'bn' ? item.challengeBn : item.challengeEn
+              const solution = lang === 'bn' ? item.solutionBn : item.solutionEn
+              const linkText = lang === 'bn' ? item.linkTextBn : item.linkTextEn
 
               return (
-                <div key={persona.serialEn} className="p-4 sm:p-6 hover:bg-neutral-50/70 transition-colors">
-                  <div className="flex flex-col sm:flex-row sm:items-start gap-3.5 sm:gap-5">
+                <div key={item.serialEn} className="p-5 sm:p-6 hover:bg-neutral-50/70 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                     {/* Serial Flag */}
-                    <div className="font-mono text-base sm:text-lg font-bold text-[#006A4E] shrink-0 w-7">
+                    <div className="font-mono text-base sm:text-lg font-bold text-[#006A4E] shrink-0 w-8">
                       {serial}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
                         <span className="text-[11px] font-mono font-semibold text-neutral-800 uppercase bg-neutral-100 px-2 py-0.5 border border-neutral-200 rounded-none">
-                          {tag}
+                          {category}
                         </span>
-                        <span className="text-xs text-neutral-500 font-medium">
-                          {t('aboutPage', 'region', lang)} {location}
+                        <span className="text-xs text-neutral-500 font-medium font-mono">
+                          {scope}
                         </span>
                       </div>
 
-                      <h3 className="text-base sm:text-lg font-bold text-neutral-900">
-                        {name}
+                      <h3 className="text-base sm:text-lg font-bold text-neutral-900 mb-3">
+                        {title}
                       </h3>
 
-                      <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed mt-1.5">
-                        &ldquo;{story}&rdquo;
-                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mb-3.5">
+                        <div className="p-3 bg-rose-50/60 border border-rose-200 rounded-none">
+                          <span className="text-[11px] font-mono font-bold text-[#C8102E] block uppercase tracking-wide mb-1">
+                            {lang === 'bn' ? '⚠️ বিদ্যমান নাগরিক সংকট' : '⚠️ Administrative Challenge'}
+                          </span>
+                          <p className="text-xs text-neutral-700 leading-relaxed">
+                            {challenge}
+                          </p>
+                        </div>
+
+                        <div className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-none">
+                          <span className="text-[11px] font-mono font-bold text-[#006A4E] block uppercase tracking-wide mb-1">
+                            {lang === 'bn' ? '✓ দিশারীর স্থায়ী সমাধান' : '✓ Dishari Systemic Solution'}
+                          </span>
+                          <p className="text-xs text-neutral-700 leading-relaxed">
+                            {solution}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end">
+                        <Link
+                          href={item.link}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#006A4E] hover:text-[#004D38] border border-[#006A4E]/30 bg-white hover:bg-emerald-50/50 px-3 py-1.5 rounded-none win-press transition-colors"
+                        >
+                          <span>{linkText}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
