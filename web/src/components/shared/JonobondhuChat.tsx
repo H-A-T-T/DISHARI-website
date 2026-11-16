@@ -17,6 +17,9 @@ import {
   Navigation,
   ArrowRight,
   ExternalLink,
+  FileText,
+  Compass,
+  RotateCcw,
 } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { WIN10_EASE_ENTRANCE, win10DialogMotion } from '@/lib/motion'
@@ -339,17 +342,50 @@ export function JonobondhuChat() {
     currentY: number
   } | null>(null)
 
+  // Promo / First-time Greeting Screen State
+  const [showHeroGreeting, setShowHeroGreeting] = useState(false)
+  const [hasCheckedFirstOpen, setHasCheckedFirstOpen] = useState(false)
+
   // Dimensions
   const BUBBLE_SIZE = 64
-  const WINDOW_WIDTH = 380
-  const WINDOW_HEIGHT = 520
+  const WINDOW_WIDTH = 430
+  const WINDOW_HEIGHT = 600
   const EDGE_PADDING = 16
+
+  // Viewport calculation using clientWidth/Height to exclude Windows scrollbar for exact edge symmetry
+  const getViewportWidth = useCallback(() => {
+    if (typeof document !== 'undefined' && document.documentElement.clientWidth) {
+      return document.documentElement.clientWidth
+    }
+    return typeof window !== 'undefined' ? window.innerWidth : 1280
+  }, [])
+
+  const getViewportHeight = useCallback(() => {
+    if (typeof document !== 'undefined' && document.documentElement.clientHeight) {
+      return document.documentElement.clientHeight
+    }
+    return typeof window !== 'undefined' ? window.innerHeight : 800
+  }, [])
+
+  // Trigger mind-blowing greeting when opened for the first time
+  useEffect(() => {
+    if (isOpen && !hasCheckedFirstOpen) {
+      setHasCheckedFirstOpen(true)
+      const seen = typeof window !== 'undefined' ? sessionStorage.getItem('dishari_intro_seen_promo') : null
+      if (!seen) {
+        setShowHeroGreeting(true)
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('dishari_intro_seen_promo', 'true')
+        }
+      }
+    }
+  }, [isOpen, hasCheckedFirstOpen])
 
   // Initialize responsive default positions on mount
   useEffect(() => {
     const initPositions = () => {
-      const vw = window.innerWidth
-      const vh = window.innerHeight
+      const vw = getViewportWidth()
+      const vh = getViewportHeight()
 
       // Default: snapped to the right wall, middle-lower viewport
       const defBubbleX = Math.max(EDGE_PADDING, vw - BUBBLE_SIZE - EDGE_PADDING)
@@ -367,7 +403,7 @@ export function JonobondhuChat() {
     initPositions()
     window.addEventListener('resize', initPositions)
     return () => window.removeEventListener('resize', initPositions)
-  }, [])
+  }, [getViewportWidth, getViewportHeight])
 
   // Initial welcome message in selected language
   useEffect(() => {
@@ -458,8 +494,8 @@ export function JonobondhuChat() {
       drag.lastTime = now
     }
 
-    const vw = window.innerWidth
-    const vh = window.innerHeight
+    const vw = getViewportWidth()
+    const vh = getViewportHeight()
 
     // Bound position inside viewport with edge padding
     const rawX = drag.initialElemX + dx
@@ -493,8 +529,8 @@ export function JonobondhuChat() {
       return
     }
 
-    // SNAP TO CLOSEST SCREEN WALL (Horizontal magnet snap)
-    const vw = window.innerWidth
+    // SNAP TO CLOSEST SCREEN WALL (Horizontal magnet snap) - 100% Symmetrical
+    const vw = getViewportWidth()
     const midX = vw / 2
     let snapX = EDGE_PADDING
 
@@ -555,8 +591,8 @@ export function JonobondhuChat() {
     const dx = e.clientX - drag.startX
     const dy = e.clientY - drag.startY
 
-    const vw = window.innerWidth
-    const vh = window.innerHeight
+    const vw = getViewportWidth()
+    const vh = getViewportHeight()
     const wWidth = Math.min(WINDOW_WIDTH, vw - 24)
     const wHeight = Math.min(WINDOW_HEIGHT, vh - 40)
 
@@ -812,6 +848,51 @@ export function JonobondhuChat() {
         'Online application process for student stipend?',
       ]
 
+  // ─── PROMO HERO SHOWCASE CARDS ───
+  const introCards = [
+    {
+      title: isBn ? 'ই-পাসপোর্ট আবেদন' : 'E-Passport Application',
+      desc: isBn ? 'ফি হিসাব, প্রয়োজনীয় কাগজপত্র ও সরাসরি পেজে যান' : 'Fee calculation, papers & direct navigation',
+      prompt: isBn ? 'পাসপোর্ট আবেদন পাতায় নিয়ে যান' : 'Take me to passport application',
+      icon: <Navigation className="w-3.5 h-3.5" />,
+    },
+    {
+      title: isBn ? 'জমির ই-নামজারি' : 'Land Mutation (E-Namjari)',
+      desc: isBn ? 'বাবার মৃত্যুর পর ওয়ারিশি জমির রেকর্ড ও খতিয়ান' : 'Inheritance succession & mutation guide',
+      prompt: isBn ? 'বাবার মৃত্যুর পর জমির নামজারি কীভাবে করব?' : 'How to apply for land mutation after father’s death?',
+      icon: <FileText className="w-3.5 h-3.5" />,
+    },
+    {
+      title: isBn ? 'ডকুমেন্ট লকার' : 'Document Locker',
+      desc: isBn ? 'স্মার্ট এনআইডি ও জরুরি কাগজপত্র সংরক্ষণ' : 'Saved citizen documents & radar',
+      prompt: isBn ? 'আমার ডকুমেন্ট লকার দেখান' : 'Show me my document locker',
+      icon: <Compass className="w-3.5 h-3.5" />,
+    },
+    {
+      title: isBn ? 'ভয়েস সহায়ক' : 'Bangla Voice Assistant',
+      desc: isBn ? 'মাইক্রোফোনে ক্লিক করে মুখে কথা বলুন' : 'Speak naturally in Bangla or English',
+      prompt: '',
+      isVoice: true,
+      icon: <Mic className="w-3.5 h-3.5" />,
+    },
+  ]
+
+  const handleIntroCardClick = (promptText: string, isVoice = false) => {
+    setShowHeroGreeting(false)
+    if (isVoice) {
+      setTimeout(() => {
+        toggleListening()
+      }, 300)
+    } else if (promptText) {
+      setTimeout(() => {
+        handleSendMessage(promptText)
+      }, 100)
+    }
+  }
+
+  // Check if bubble is currently closer to left wall
+  const isSnappedLeft = (bubblePos?.x ?? 9999) < (getViewportWidth() / 2)
+
   // Dynamic positioning styles
   const bubbleStyle: React.CSSProperties = {
     position: 'fixed',
@@ -819,6 +900,8 @@ export function JonobondhuChat() {
     top: bubblePos ? `${bubblePos.y}px` : undefined,
     right: !bubblePos ? `${EDGE_PADDING}px` : undefined,
     bottom: !bubblePos ? '64px' : undefined,
+    width: `${BUBBLE_SIZE}px`,
+    height: `${BUBBLE_SIZE}px`,
     zIndex: 9999,
     touchAction: 'none',
     transition: isSnappingBubble ? 'left 0.28s cubic-bezier(0.1, 0.9, 0.2, 1), top 0.28s cubic-bezier(0.1, 0.9, 0.2, 1)' : 'none',
@@ -839,7 +922,7 @@ export function JonobondhuChat() {
 
   return (
     <>
-      {/* ─── MOVABLE FLOATING MESSENGER BUBBLE ─── */}
+      {/* ─── MOVABLE FLOATING MESSENGER BUBBLE (100% SYMMETRICAL) ─── */}
       {!isOpen && (
         <div
           ref={bubbleRef}
@@ -859,17 +942,21 @@ export function JonobondhuChat() {
           aria-label={isBn ? 'জনবন্ধু AI চ্যাট খুলুন' : 'Open Jonobondhu AI Chat'}
           title={isBn ? 'জনবন্ধু AI (টেনে সরানো যাবে)' : 'Jonobondhu AI (Movable)'}
         >
-          {/* Bubble Housing */}
-          <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full bg-white border-2 border-[#006A4E] shadow-none flex items-center justify-center overflow-visible pointer-events-none">
+          {/* Bubble Housing (Uniform 64px on both left and right edges) */}
+          <div className="relative w-16 h-16 rounded-full bg-white border-2 border-[#006A4E] shadow-lg flex items-center justify-center overflow-visible pointer-events-none">
             <img
               src="/icons/jonobondhu.svg"
               alt="Jonobondhu AI"
-              className="w-11 h-11 sm:w-12 sm:h-12 object-contain pointer-events-none select-none"
+              className="w-12 h-12 object-contain pointer-events-none select-none"
               draggable={false}
             />
 
-            {/* Flat Hover Tooltip */}
-            <div className="absolute right-full mr-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-neutral-900 text-white text-[11px] font-semibold tracking-wide whitespace-nowrap rounded-none opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity border border-neutral-700 shadow-none">
+            {/* Flat Hover Tooltip - Dynamic Side Awareness (Never goes offscreen) */}
+            <div
+              className={`absolute top-1/2 -translate-y-1/2 px-2.5 py-1 bg-neutral-900 text-white text-[11px] font-semibold tracking-wide whitespace-nowrap rounded-none opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity border border-neutral-700 shadow-none z-50 ${
+                isSnappedLeft ? 'left-full ml-3' : 'right-full mr-3'
+              }`}
+            >
               {isBn ? 'জনবন্ধু AI' : 'Jonobondhu AI'}
             </div>
           </div>
@@ -913,17 +1000,42 @@ export function JonobondhuChat() {
                 </div>
 
                 <div className="min-w-0">
-                  <h3 className="font-bold text-xs sm:text-sm text-neutral-900 leading-none truncate">
-                    {isBn ? 'জনবন্ধু AI' : 'Jonobondhu AI'}
-                  </h3>
-                  <span className="text-[10px] text-neutral-500 font-medium block mt-1 truncate">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-bold text-xs sm:text-sm text-neutral-900 leading-none truncate">
+                      {isBn ? 'জনবন্ধু AI' : 'Jonobondhu AI'}
+                    </h3>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                  </div>
+                  <span className="text-[10px] text-neutral-500 font-medium block mt-0.5 truncate">
                     {isBn ? 'নাগরিক সেবা সহায়ক' : 'Civic Service Assistant'}
                   </span>
                 </div>
               </div>
 
-              {/* Action Buttons: Drag indicator & Close Cross */}
+              {/* Action Buttons: Promo Replay, Drag indicator & Close Cross */}
               <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowHeroGreeting((prev) => !prev)
+                  }}
+                  className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold border transition-colors cursor-pointer rounded-none win-press ${
+                    showHeroGreeting
+                      ? 'bg-[#006A4E] text-white border-[#004D38]'
+                      : 'bg-emerald-50 text-[#006A4E] border-emerald-300 hover:bg-emerald-100'
+                  }`}
+                  title={isBn ? 'প্রমোশনাল ইন্ট্রো রি-প্লে (ভিডিও রেকর্ডিং এর জন্য)' : 'Replay Promo Intro (For video recording)'}
+                >
+                  <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                  <span className="hidden sm:inline font-mono">
+                    {showHeroGreeting
+                      ? (isBn ? 'চ্যাটে যান' : 'To Chat')
+                      : (isBn ? 'প্রমো ইন্ট্রো' : 'Promo Intro')}
+                  </span>
+                </button>
+
                 <span
                   className="p-1 text-neutral-400 hover:text-neutral-600 hidden sm:inline-block cursor-grab pointer-events-none"
                   title={isBn ? 'সরান' : 'Move'}
@@ -947,204 +1059,362 @@ export function JonobondhuChat() {
               </div>
             </div>
 
-            {/* ─── CONVERSATION SCROLL AREA ─── */}
-            <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-[#F5F6F8] text-xs">
-              {/* System Context Pill */}
-              <div className="flex items-center justify-center">
-                <div className="inline-flex items-center gap-1.5 bg-white border border-neutral-200 px-2.5 py-1 text-[10px] text-neutral-600 rounded-none font-mono">
-                  <Info className="w-3 h-3 text-[#006A4E] shrink-0" />
-                  <span>{isBn ? 'দিশারী স্মার্ট সেবা গাইডেন্স ইন্টারফেস' : 'Dishari Smart Civic Guidance Interface'}</span>
-                </div>
-              </div>
-
-              {/* Chat Messages with Windows 10 Entrance */}
-              {messages.map((msg) => {
-                const isAi = msg.sender === 'ai'
-                return (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.22, ease: WIN10_EASE_ENTRANCE }}
-                    className={`flex items-start gap-2 ${isAi ? 'justify-start' : 'justify-end'}`}
-                  >
-                    {isAi && (
-                      <div className="w-6 h-6 rounded-full bg-white border border-neutral-300 flex items-center justify-center shrink-0 mt-0.5">
-                        <img
-                          src="/icons/jonobondhu.svg"
-                          alt="AI"
-                          className="w-4 h-4 object-contain pointer-events-none"
-                        />
-                      </div>
-                    )}
-
-                    <div className={`max-w-[82%] space-y-1 ${isAi ? 'items-start' : 'items-end'}`}>
-                      <div
-                        className={`p-3 rounded-none leading-relaxed text-xs sm:text-[13px] ${
-                          isAi
-                            ? 'bg-white border border-neutral-200 text-neutral-900 border-l-3 border-l-[#006A4E]'
-                            : 'bg-[#006A4E] border border-[#004D38] text-white'
-                        }`}
-                      >
-                        {msg.text}
-                        {/* ─── NAVIGATION CARD ─── */}
-                        {msg.navCard && (
-                          <div className="mt-3 border border-[#006A4E] bg-[#F0FAF5] rounded-none overflow-hidden">
-                            {/* Card Header */}
-                            <div className="flex items-center gap-2 px-3 py-2 bg-[#006A4E] text-white">
-                              <Navigation className="w-3.5 h-3.5 shrink-0" />
-                              <span className="text-[11px] font-bold tracking-wide uppercase">
-                                {isBn ? 'ম্যানুয়াল পথ — পরবর্তীবার নিজে যেতে' : 'Manual Path — Find it yourself next time'}
-                              </span>
-                            </div>
-                            {/* Breadcrumb Steps */}
-                            <div className="px-3 py-2.5">
-                              <div className="flex items-center flex-wrap gap-1 text-[11px] font-medium text-neutral-700">
-                                {(isBn ? msg.navCard.breadcrumbBn : msg.navCard.breadcrumbEn)
-                                  .split('→')
-                                  .map((step, i, arr) => (
-                                    <React.Fragment key={i}>
-                                      <span className={`px-1.5 py-0.5 rounded-none border ${i === arr.length - 1 ? 'bg-[#006A4E] text-white border-[#004D38] font-bold' : 'bg-white border-neutral-300 text-neutral-600'}`}>
-                                        {step.trim()}
-                                      </span>
-                                      {i < arr.length - 1 && (
-                                        <ArrowRight className="w-3 h-3 text-neutral-400 shrink-0" />
-                                      )}
-                                    </React.Fragment>
-                                  ))}
-                              </div>
-                            </div>
-                            {/* Direct Link Button */}
-                            <div className="px-3 pb-2.5">
-                              <button
-                                type="button"
-                                onClick={() => router.push(msg.navCard!.url)}
-                                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#006A4E] border border-[#006A4E] px-2.5 py-1 hover:bg-[#006A4E] hover:text-white transition-colors cursor-pointer win-press"
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                                {isBn ? 'সরাসরি লিংকে যান' : 'Go there directly'}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 px-1">
-                        <span className="text-[9px] font-mono text-neutral-400">
-                          {msg.time}
-                        </span>
-                        {isAi && (
-                          <button
-                            type="button"
-                            onClick={() => speakText(msg.text, msg.id)}
-                            className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 border cursor-pointer win-press transition-colors ${
-                              speakingMsgId === msg.id
-                                ? 'bg-emerald-100 text-[#006A4E] border-emerald-300 font-bold'
-                                : 'bg-neutral-50 text-neutral-500 hover:text-neutral-900 border-neutral-200'
-                            }`}
-                            title={speakingMsgId === msg.id ? (isBn ? 'থামুন' : 'Stop') : (isBn ? 'ভয়েসে শুনুন' : 'Listen')}
-                          >
-                            {speakingMsgId === msg.id ? (
-                              <>
-                                <VolumeX className="w-3 h-3 text-[#C8102E]" />
-                                <span>{isBn ? 'থামুন' : 'Stop'}</span>
-                              </>
-                            ) : (
-                              <>
-                                <Volume2 className="w-3 h-3 text-[#006A4E]" />
-                                <span>{isBn ? 'ভয়েস শুনুন' : 'Listen'}</span>
-                              </>
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {!isAi && (
-                      <div className="w-6 h-6 bg-neutral-200 border border-neutral-300 flex items-center justify-center shrink-0 mt-0.5 text-neutral-700">
-                        <User className="w-3.5 h-3.5" />
-                      </div>
-                    )}
-                  </motion.div>
-                )
-              })}
-
-              {/* Suggestion Chips */}
-              {messages.length === 1 && (
-                <div className="pt-2">
-                  <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-wide block mb-1.5">
-                    {isBn ? 'সচরাচর জিজ্ঞাসিত প্রশ্ন:' : 'Frequent Questions:'}
-                  </span>
-                  <div className="flex flex-col gap-1.5">
-                    {quickPrompts.map((prompt, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleSendMessage(prompt)}
-                        className="text-left bg-white hover:bg-neutral-50 border border-neutral-200 hover:border-[#006A4E] text-neutral-800 text-[11px] p-2 transition-colors cursor-pointer rounded-none font-medium win-press"
-                      >
-                        {prompt}
-                      </button>
-                    ))}
+            {/* ─── CONDITIONAL VIEW: MIND-BLOWING PROMO GREETING VS CHAT ─── */}
+            {showHeroGreeting ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.25, ease: WIN10_EASE_ENTRANCE }}
+                className="flex-1 flex flex-col justify-between p-4 bg-gradient-to-b from-[#F0FDF4] via-white to-[#F8FAFC] overflow-y-auto"
+              >
+                {/* Top Civic Badge Header */}
+                <div className="flex items-center justify-between pb-2 border-b border-neutral-200 shrink-0">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#006A4E] text-white text-[10px] font-bold tracking-wider uppercase font-mono">
+                    <Sparkles className="w-3 h-3 text-amber-300 animate-spin" style={{ animationDuration: '4s' }} />
+                    <span>{isBn ? 'গণপ্রজাতন্ত্রী বাংলাদেশ' : 'Govt. of Bangladesh'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-700 font-semibold">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+                    <span>{isBn ? 'AI ইঞ্জিন সক্রিয়' : 'Civic AI Engine'}</span>
                   </div>
                 </div>
-              )}
 
-              <div ref={messagesEndRef} />
-            </div>
+                {/* Center Visual: Holographic Ripple & Waveform */}
+                <div className="my-auto py-2 text-center flex flex-col items-center">
+                  {/* Concentric Glow Hologram Ring */}
+                  <div className="relative flex items-center justify-center mb-3">
+                    <div
+                      className="absolute w-24 h-24 rounded-full bg-emerald-500/10 animate-ping"
+                      style={{ animationDuration: '3s' }}
+                    />
+                    <div className="absolute w-20 h-20 rounded-full border border-emerald-400/40 bg-gradient-to-tr from-emerald-100/60 to-rose-100/30 animate-pulse" />
 
-            {/* ─── INPUT TERMINAL FOOTER ─── */}
-            <div className="p-2.5 bg-white border-t border-neutral-200 shrink-0">
-              <div className="flex items-center gap-1.5 border border-neutral-300 bg-white px-2.5 py-1 focus-within:border-[#006A4E] transition-colors rounded-none">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={isBn ? 'কী সরকারি সেবা প্রয়োজন? লিখুন...' : 'Ask about government services...'}
-                  className="flex-1 h-9 bg-transparent text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none font-medium"
-                />
+                    {/* Central Mascot Bubble */}
+                    <div className="relative w-16 h-16 rounded-full bg-white border-2 border-[#006A4E] shadow-xl flex items-center justify-center z-10">
+                      <img
+                        src="/icons/jonobondhu.svg"
+                        alt="Jonobondhu AI"
+                        className="w-12 h-12 object-contain select-none"
+                        draggable={false}
+                      />
+                    </div>
+                  </div>
 
-                {/* Real Working Speech-to-Text Microphone Button */}
-                <button
-                  type="button"
-                  onClick={toggleListening}
-                  className={`p-1.5 transition-colors cursor-pointer rounded-none win-press ${
-                    isListening
-                      ? 'bg-rose-100 text-[#C8102E] animate-pulse border border-rose-300'
-                      : 'text-neutral-500 hover:text-[#006A4E]'
-                  }`}
-                  title={
-                    isListening
-                      ? (isBn ? 'শুনছি... কথা বলা শেষ করতে ক্লিক করুন' : 'Listening... click to stop')
-                      : (isBn ? 'বাংলায় ভয়েসে প্রশ্ন করুন (কথা বলুন)' : 'Ask via voice (Speak in Bangla)')
-                  }
-                  aria-label={isBn ? 'ভয়েস ইনপুট' : 'Voice input'}
-                >
-                  {isListening ? <MicOff className="w-4 h-4 text-[#C8102E]" /> : <Mic className="w-4 h-4" />}
-                </button>
+                  {/* Dynamic Soundwave Equalizer Bars */}
+                  <div className="flex items-center justify-center gap-1 mb-2.5 h-4">
+                    {[35, 75, 100, 55, 90, 45, 80].map((h, i) => (
+                      <motion.span
+                        key={i}
+                        className="w-1 bg-[#006A4E] rounded-full"
+                        animate={{
+                          height: [
+                            `${Math.max(4, h * 0.18)}px`,
+                            `${h * 0.15}px`,
+                            `${Math.max(4, h * 0.18)}px`,
+                          ],
+                        }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 0.85 + i * 0.1,
+                          ease: 'easeInOut',
+                          delay: i * 0.07,
+                        }}
+                      />
+                    ))}
+                  </div>
 
-                {/* Send Button */}
-                <button
-                  type="button"
-                  onClick={() => handleSendMessage()}
-                  disabled={!input.trim()}
-                  className={`w-8 h-8 flex items-center justify-center transition-colors rounded-none shrink-0 win-press ${
-                    input.trim()
-                      ? 'bg-[#006A4E] hover:bg-[#004D38] text-white cursor-pointer'
-                      : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                  }`}
-                  title={isBn ? 'বার্তা পাঠান' : 'Send message'}
-                  aria-label={isBn ? 'বার্তা পাঠান' : 'Send message'}
-                >
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                  {/* Hero Typography */}
+                  <motion.h2
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 }}
+                    className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight leading-tight"
+                  >
+                    {isBn ? 'স্বাগতম! আমি জনবন্ধু' : 'Welcome! I am Jonobondhu'}
+                  </motion.h2>
 
-              <div className="flex items-center justify-between text-[10px] text-neutral-400 mt-1.5 px-0.5">
-                <span>{isBn ? 'ইন্টারফেস সংস্করণ ১.০' : 'Interface v1.0'}</span>
-                <span>{isBn ? 'দিশারী জনবন্ধু সহায়ক' : 'Dishari Jonobondhu'}</span>
-              </div>
-            </div>
+                  <motion.p
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-xs font-semibold text-[#006A4E] mt-0.5"
+                  >
+                    {isBn ? 'আপনার ডিজিটাল নাগরিক সেবা নির্দেশক' : 'Your Smart Civic Service Navigator'}
+                  </motion.p>
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="text-[11px] text-neutral-600 mt-1 max-w-[340px] leading-relaxed"
+                  >
+                    {isBn
+                      ? 'যেকোনো সরকারি সেবা সহজে খুঁজে পেতে আমাকে বলুন, বাংলায় কথা বলুন অথবা নিচের সেবাগুলো বেছে নিন।'
+                      : 'Ask anything about citizen services, speak in natural Bangla/English, or tap an option below.'}
+                  </motion.p>
+                </div>
+
+                {/* 4 Interactive Feature Showcase Cards (2x2) */}
+                <div className="grid grid-cols-2 gap-2 my-2 shrink-0">
+                  {introCards.map((card, idx) => (
+                    <motion.button
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.18 + idx * 0.05 }}
+                      type="button"
+                      onClick={() => handleIntroCardClick(card.prompt, card.isVoice)}
+                      className="group relative p-2.5 text-left bg-white hover:bg-emerald-50/70 border border-neutral-300 hover:border-[#006A4E] transition-all cursor-pointer win-press rounded-none"
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="p-1 bg-emerald-100 text-[#006A4E] group-hover:bg-[#006A4E] group-hover:text-white transition-colors">
+                          {card.icon}
+                        </span>
+                        <span className="text-xs font-bold text-neutral-900 leading-tight">
+                          {card.title}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-neutral-500 line-clamp-2 leading-snug">
+                        {card.desc}
+                      </p>
+                    </motion.button>
+                  ))}
+                </div>
+
+                {/* CTA Bottom Bar */}
+                <div className="pt-2 border-t border-neutral-200 flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setShowHeroGreeting(false)}
+                    className="flex-1 py-2 px-3 bg-[#006A4E] hover:bg-[#004D38] text-white text-xs font-bold flex items-center justify-center gap-1.5 win-press transition-colors rounded-none shadow-sm cursor-pointer"
+                  >
+                    <span>{isBn ? 'কথোপকথন শুরু করুন' : 'Start Conversation'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleIntroCardClick('', true)}
+                    className="py-2 px-3 bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-300 text-xs font-semibold flex items-center gap-1 win-press transition-colors rounded-none cursor-pointer"
+                    title={isBn ? 'ভয়েস সহকারী চালু করুন' : 'Activate Voice Assistant'}
+                  >
+                    <Mic className="w-3.5 h-3.5 text-[#006A4E]" />
+                    <span>{isBn ? 'ভয়েস' : 'Voice'}</span>
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <>
+                {/* ─── CONVERSATION SCROLL AREA ─── */}
+                <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-[#F5F6F8] text-xs">
+                  {/* System Context Pill with Replay Intro trigger */}
+                  <div className="flex items-center justify-between gap-2 px-0.5">
+                    <div className="inline-flex items-center gap-1.5 bg-white border border-neutral-200 px-2.5 py-1 text-[10px] text-neutral-600 rounded-none font-mono">
+                      <Info className="w-3 h-3 text-[#006A4E] shrink-0" />
+                      <span>{isBn ? 'দিশারী স্মার্ট সেবা গাইডেন্স ইন্টারফেস' : 'Dishari Smart Civic Guidance Interface'}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowHeroGreeting(true)}
+                      className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-[#006A4E] hover:underline cursor-pointer"
+                    >
+                      <Sparkles className="w-3 h-3 text-amber-500" />
+                      <span>{isBn ? 'ইন্ট্রো' : 'Intro'}</span>
+                    </button>
+                  </div>
+
+                  {/* Chat Messages with Windows 10 Entrance */}
+                  {messages.map((msg) => {
+                    const isAi = msg.sender === 'ai'
+                    return (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.22, ease: WIN10_EASE_ENTRANCE }}
+                        className={`flex items-start gap-2 ${isAi ? 'justify-start' : 'justify-end'}`}
+                      >
+                        {isAi && (
+                          <div className="w-6 h-6 rounded-full bg-white border border-neutral-300 flex items-center justify-center shrink-0 mt-0.5">
+                            <img
+                              src="/icons/jonobondhu.svg"
+                              alt="AI"
+                              className="w-4 h-4 object-contain pointer-events-none"
+                            />
+                          </div>
+                        )}
+
+                        <div className={`max-w-[82%] space-y-1 ${isAi ? 'items-start' : 'items-end'}`}>
+                          <div
+                            className={`p-3 rounded-none leading-relaxed text-xs sm:text-[13px] ${
+                              isAi
+                                ? 'bg-white border border-neutral-200 text-neutral-900 border-l-3 border-l-[#006A4E]'
+                                : 'bg-[#006A4E] border border-[#004D38] text-white'
+                            }`}
+                          >
+                            {msg.text}
+                            {/* ─── NAVIGATION CARD ─── */}
+                            {msg.navCard && (
+                              <div className="mt-3 border border-[#006A4E] bg-[#F0FAF5] rounded-none overflow-hidden">
+                                {/* Card Header */}
+                                <div className="flex items-center gap-2 px-3 py-2 bg-[#006A4E] text-white">
+                                  <Navigation className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="text-[11px] font-bold tracking-wide uppercase">
+                                    {isBn ? 'ম্যানুয়াল পথ — পরবর্তীবার নিজে যেতে' : 'Manual Path — Find it yourself next time'}
+                                  </span>
+                                </div>
+                                {/* Breadcrumb Steps */}
+                                <div className="px-3 py-2.5">
+                                  <div className="flex items-center flex-wrap gap-1 text-[11px] font-medium text-neutral-700">
+                                    {(isBn ? msg.navCard.breadcrumbBn : msg.navCard.breadcrumbEn)
+                                      .split('→')
+                                      .map((step, i, arr) => (
+                                        <React.Fragment key={i}>
+                                          <span className={`px-1.5 py-0.5 rounded-none border ${i === arr.length - 1 ? 'bg-[#006A4E] text-white border-[#004D38] font-bold' : 'bg-white border-neutral-300 text-neutral-600'}`}>
+                                            {step.trim()}
+                                          </span>
+                                          {i < arr.length - 1 && (
+                                            <ArrowRight className="w-3 h-3 text-neutral-400 shrink-0" />
+                                          )}
+                                        </React.Fragment>
+                                      ))}
+                                  </div>
+                                </div>
+                                {/* Direct Link Button */}
+                                <div className="px-3 pb-2.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => router.push(msg.navCard!.url)}
+                                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#006A4E] border border-[#006A4E] px-2.5 py-1 hover:bg-[#006A4E] hover:text-white transition-colors cursor-pointer win-press"
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                    {isBn ? 'সরাসরি লিংকে যান' : 'Go there directly'}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 px-1">
+                            <span className="text-[9px] font-mono text-neutral-400">
+                              {msg.time}
+                            </span>
+                            {isAi && (
+                              <button
+                                type="button"
+                                onClick={() => speakText(msg.text, msg.id)}
+                                className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 border cursor-pointer win-press transition-colors ${
+                                  speakingMsgId === msg.id
+                                    ? 'bg-emerald-100 text-[#006A4E] border-emerald-300 font-bold'
+                                    : 'bg-neutral-50 text-neutral-500 hover:text-neutral-900 border-neutral-200'
+                                }`}
+                                title={speakingMsgId === msg.id ? (isBn ? 'থামুন' : 'Stop') : (isBn ? 'ভয়েসে শুনুন' : 'Listen')}
+                              >
+                                {speakingMsgId === msg.id ? (
+                                  <>
+                                    <VolumeX className="w-3 h-3 text-[#C8102E]" />
+                                    <span>{isBn ? 'থামুন' : 'Stop'}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Volume2 className="w-3 h-3 text-[#006A4E]" />
+                                    <span>{isBn ? 'ভয়েস শুনুন' : 'Listen'}</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {!isAi && (
+                          <div className="w-6 h-6 bg-neutral-200 border border-neutral-300 flex items-center justify-center shrink-0 mt-0.5 text-neutral-700">
+                            <User className="w-3.5 h-3.5" />
+                          </div>
+                        )}
+                      </motion.div>
+                    )
+                  })}
+
+                  {/* Suggestion Chips */}
+                  {messages.length === 1 && (
+                    <div className="pt-2">
+                      <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-wide block mb-1.5">
+                        {isBn ? 'সচরাচর জিজ্ঞাসিত প্রশ্ন:' : 'Frequent Questions:'}
+                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        {quickPrompts.map((prompt, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleSendMessage(prompt)}
+                            className="text-left bg-white hover:bg-neutral-50 border border-neutral-200 hover:border-[#006A4E] text-neutral-800 text-[11px] p-2 transition-colors cursor-pointer rounded-none font-medium win-press"
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* ─── INPUT TERMINAL FOOTER ─── */}
+                <div className="p-2.5 bg-white border-t border-neutral-200 shrink-0">
+                  <div className="flex items-center gap-1.5 border border-neutral-300 bg-white px-2.5 py-1 focus-within:border-[#006A4E] transition-colors rounded-none">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={isBn ? 'কী সরকারি সেবা প্রয়োজন? লিখুন...' : 'Ask about government services...'}
+                      className="flex-1 h-9 bg-transparent text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none font-medium"
+                    />
+
+                    {/* Real Working Speech-to-Text Microphone Button */}
+                    <button
+                      type="button"
+                      onClick={toggleListening}
+                      className={`p-1.5 transition-colors cursor-pointer rounded-none win-press ${
+                        isListening
+                          ? 'bg-rose-100 text-[#C8102E] animate-pulse border border-rose-300'
+                          : 'text-neutral-500 hover:text-[#006A4E]'
+                      }`}
+                      title={
+                        isListening
+                          ? (isBn ? 'শুনছি... কথা বলা শেষ করতে ক্লিক করুন' : 'Listening... click to stop')
+                          : (isBn ? 'বাংলায় ভয়েসে প্রশ্ন করুন (কথা বলুন)' : 'Ask via voice (Speak in Bangla)')
+                      }
+                      aria-label={isBn ? 'ভয়েস ইনপুট' : 'Voice input'}
+                    >
+                      {isListening ? <MicOff className="w-4 h-4 text-[#C8102E]" /> : <Mic className="w-4 h-4" />}
+                    </button>
+
+                    {/* Send Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleSendMessage()}
+                      disabled={!input.trim()}
+                      className={`w-8 h-8 flex items-center justify-center transition-colors rounded-none shrink-0 win-press ${
+                        input.trim()
+                          ? 'bg-[#006A4E] hover:bg-[#004D38] text-white cursor-pointer'
+                          : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                      }`}
+                      title={isBn ? 'বার্তা পাঠান' : 'Send message'}
+                      aria-label={isBn ? 'বার্তা পাঠান' : 'Send message'}
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] text-neutral-400 mt-1.5 px-0.5">
+                    <span>{isBn ? 'ইন্টারফেস সংস্করণ ২.০' : 'Interface v2.0'}</span>
+                    <span>{isBn ? 'দিশারী জনবন্ধু সহায়ক' : 'Dishari Jonobondhu'}</span>
+                  </div>
+                </div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
