@@ -190,10 +190,35 @@ function autoDetectDocType(meta?: Record<string, any> | null): DocType | null {
 export default function DocumentLocker({ documents, onRefresh, lang, user }: DocumentLockerProps) {
   const isBn = lang === 'bn'
 
-  // Local optimistic state synced with props
-  const [localDocs, setLocalDocs] = useState<CitizenDocument[]>(documents)
+  // Local optimistic state synced with props & persistent cache
+  const [localDocs, setLocalDocs] = useState<CitizenDocument[]>(() => {
+    if (documents && documents.length > 0) return documents
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('dishari_cached_docs')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        }
+      } catch {}
+    }
+    return []
+  })
+
   useEffect(() => {
-    setLocalDocs(documents)
+    if (documents && documents.length > 0) {
+      setLocalDocs(documents)
+    } else if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('dishari_cached_docs')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setLocalDocs(parsed)
+          }
+        }
+      } catch {}
+    }
   }, [documents])
 
   // File explorer controls
@@ -295,9 +320,23 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
 
   // Total storage in bytes
   const totalSizeBytes = useMemo(() => {
-    return localDocs.reduce((acc, d) => acc + (d.file_size || 0), 0)
+    return localDocs.reduce((acc, d) => acc + (Number(d.file_size) || 0), 0)
   }, [localDocs])
-  const totalSizeMB = (totalSizeBytes / (1024 * 1024)).toFixed(2)
+
+  const storageDisplayText = useMemo(() => {
+    if (totalSizeBytes === 0) return '0.00 MB / 100 MB'
+    const mb = totalSizeBytes / (1024 * 1024)
+    if (mb < 0.05) {
+      const kb = (totalSizeBytes / 1024).toFixed(1)
+      return `${kb} KB / 100 MB`
+    }
+    return `${mb.toFixed(2)} MB / 100 MB`
+  }, [totalSizeBytes])
+
+  const storagePercent = useMemo(() => {
+    if (totalSizeBytes === 0) return 0
+    return Math.min(100, Math.max(2, (totalSizeBytes / (100 * 1024 * 1024)) * 100))
+  }, [totalSizeBytes])
 
   const resetUploadState = () => {
     setStagedFile(null)
@@ -395,6 +434,13 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
 
       setLocalDocs((prev) => [newDoc, ...prev.filter((d) => d.id !== newDoc.id)])
       setInspectedDoc(newDoc)
+
+      // Auto-switch to folder containing this document
+      const targetCategory = DOC_TYPES.find((t) => t.type === targetDocType)?.category || 'vital'
+      if (activeFolder !== 'all' && activeFolder !== targetCategory) {
+        setActiveFolder(targetCategory)
+      }
+
       setShowUploadModal(false)
       resetUploadState()
       showToast(isBn ? 'নথি সফলভাবে লকারে সংরক্ষিত হয়েছে!' : 'Document successfully saved to vault!')
@@ -523,6 +569,16 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
             <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mt-0.5">
               {isBn ? 'ফাইল ও নথিপত্র ব্যবস্থাপনা' : 'Document Vault & Archive Manager'}
             </h2>
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <span className="font-mono text-xs text-neutral-700 bg-neutral-100 border border-neutral-200 px-2 py-0.5 inline-flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-[#006A4E]" />
+                <span className="font-bold">{localDocs.length}</span> {isBn ? 'টি নথি সংরক্ষিত' : 'files stored'}
+              </span>
+              <span className="font-mono text-xs text-neutral-600 bg-neutral-100 border border-neutral-200 px-2 py-0.5 inline-flex items-center gap-1.5">
+                <HardDrive className="w-3.5 h-3.5 text-neutral-500" />
+                <span>{storageDisplayText}</span>
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center flex-wrap gap-2">
@@ -673,12 +729,12 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
           <div className="pt-3 border-t border-neutral-200 text-xs">
             <div className="flex items-center justify-between text-[11px] font-mono text-neutral-600 mb-1">
               <span>{isBn ? 'ব্যবহৃত স্পেস:' : 'Space Used:'}</span>
-              <strong className="text-neutral-900">{totalSizeMB} MB / 100 MB</strong>
+              <strong className="text-neutral-900">{storageDisplayText}</strong>
             </div>
             <div className="w-full h-1.5 bg-neutral-200 rounded-none overflow-hidden">
               <div
-                className="h-full bg-[#006A4E] rounded-none"
-                style={{ width: `${Math.min(100, Math.max(5, (totalSizeBytes / (100 * 1024 * 1024)) * 100))}%` }}
+                className="h-full bg-[#006A4E] rounded-none transition-all duration-300"
+                style={{ width: `${storagePercent}%` }}
               />
             </div>
             <div className="mt-2 text-[10px] font-mono text-neutral-500 flex items-center gap-1">

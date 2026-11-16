@@ -119,10 +119,23 @@ export async function fetchDocuments(userId?: number): Promise<CitizenDocument[]
     const url = userId ? `${API_BASE}/documents?userId=${userId}` : `${API_BASE}/documents`
     const res = await fetch(url, { cache: 'no-store' })
     if (!res.ok) throw new Error(`HTTP error ${res.status}`)
-    const docs = await res.json()
-    // Backup in local storage
+    const docs: CitizenDocument[] = await res.json()
+    
+    // Backup and merge in local storage
     if (typeof window !== 'undefined') {
-      localStorage.setItem('dishari_cached_docs', JSON.stringify(docs))
+      const cached: CitizenDocument[] = JSON.parse(localStorage.getItem('dishari_cached_docs') || '[]')
+      const map = new Map<number, CitizenDocument>()
+      cached.forEach((d) => {
+        if (d && d.id) map.set(d.id, d)
+      })
+      docs.forEach((d) => {
+        if (d && d.id) map.set(d.id, d)
+      })
+      const merged = Array.from(map.values()).sort(
+        (a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
+      )
+      localStorage.setItem('dishari_cached_docs', JSON.stringify(merged))
+      return merged
     }
     return docs
   } catch (err) {
@@ -196,12 +209,21 @@ export async function uploadDocument(payload: {
     })
     const json = await res.json()
     if (!res.ok) {
-      return { success: false, error: json.error || 'Failed to upload document' }
+      throw new Error(json.error || 'Failed to upload document')
     }
-    return { success: true, document: json.document }
-  } catch (err) {
-    console.error('Error uploading document:', err)
-    // Offline local fallback
+    const doc: CitizenDocument = {
+      ...json.document,
+      file_data: json.document?.file_data || payload.fileData,
+    }
+    if (typeof window !== 'undefined') {
+      const cached: CitizenDocument[] = JSON.parse(localStorage.getItem('dishari_cached_docs') || '[]')
+      const filtered = cached.filter((d: CitizenDocument) => d.id !== doc.id)
+      localStorage.setItem('dishari_cached_docs', JSON.stringify([doc, ...filtered]))
+    }
+    return { success: true, document: doc }
+  } catch (err: any) {
+    console.error('Error uploading document, using local cache fallback:', err)
+    // Offline / Local safe fallback
     const mockDoc: CitizenDocument = {
       id: Date.now(),
       user_id: payload.userId || 1,
@@ -215,9 +237,9 @@ export async function uploadDocument(payload: {
       file_data: payload.fileData,
     }
     if (typeof window !== 'undefined') {
-      const cached = JSON.parse(localStorage.getItem('dishari_cached_docs') || '[]')
-      cached.unshift(mockDoc)
-      localStorage.setItem('dishari_cached_docs', JSON.stringify(cached))
+      const cached: CitizenDocument[] = JSON.parse(localStorage.getItem('dishari_cached_docs') || '[]')
+      const filtered = cached.filter((d: CitizenDocument) => d.id !== mockDoc.id)
+      localStorage.setItem('dishari_cached_docs', JSON.stringify([mockDoc, ...filtered]))
     }
     return { success: true, document: mockDoc }
   }

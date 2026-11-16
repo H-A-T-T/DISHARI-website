@@ -81,6 +81,15 @@ function DashboardInner() {
       } else {
         setIsLoggedIn(false)
       }
+
+      // Pre-hydrate documents from persistent cache immediately
+      const cachedDocs = localStorage.getItem('dishari_cached_docs')
+      if (cachedDocs) {
+        const parsed = JSON.parse(cachedDocs)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDocuments(parsed)
+        }
+      }
     } catch {
       setIsLoggedIn(false)
     } finally {
@@ -99,7 +108,24 @@ function DashboardInner() {
         fetchApplications(effectiveUserId),
         fetchDeadlines(),
       ])
-      setDocuments(docs)
+
+      // Retain cached docs if fetch is temporarily empty
+      if (docs && docs.length > 0) {
+        setDocuments(docs)
+      } else if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('dishari_cached_docs')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setDocuments(parsed)
+          } else {
+            setDocuments([])
+          }
+        } else {
+          setDocuments([])
+        }
+      }
+
       setApplications(apps)
       setDeadlines(dls)
     } finally {

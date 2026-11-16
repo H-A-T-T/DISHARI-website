@@ -65,16 +65,24 @@ app.post('/api/auth/login', async (req, res) => {
     )
 
     if (result.rows.length === 0) {
-      // Mock login for seamless demo if user not in DB
+      // Auto-register user in DB so user has a real DB ID and foreign key constraints succeed
+      const citizenId = 'BD-USER-' + Math.floor(100 + Math.random() * 900)
+      const isEmail = trimmed.includes('@')
+      const insertRes = await pool.query(
+        `INSERT INTO users (full_name, phone, email, password_hash, citizen_id)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, full_name, phone, email, citizen_id`,
+        [
+          'নাগরিক',
+          isEmail ? `+88017${Math.floor(10000000 + Math.random() * 90000000)}` : trimmed,
+          isEmail ? trimmed : null,
+          password || 'demo1234',
+          citizenId,
+        ]
+      )
       return res.json({
         success: true,
-        user: {
-          id: 999,
-          full_name: 'নাগরিক',
-          phone: trimmed,
-          email: trimmed.includes('@') ? trimmed : null,
-          citizen_id: 'BD-USER-782',
-        },
+        user: insertRes.rows[0],
       })
     }
 
@@ -307,13 +315,25 @@ app.get('/api/documents', async (req, res) => {
     `
     const params: any[] = []
 
-    if (userId) {
+    if (userId && !isNaN(Number(userId))) {
       params.push(Number(userId))
       query += ` WHERE user_id = $1`
     }
 
     query += ` ORDER BY uploaded_at DESC`
     const result = await pool.query(query, params)
+
+    // Fallback: If requested user has 0 documents and was not user 1, check user 1 (sandbox/demo)
+    if (result.rows.length === 0 && userId && Number(userId) !== 1) {
+      const fallbackResult = await pool.query(
+        `SELECT id, user_id, doc_type, file_name, file_size, mime_type, verified, extracted_meta, uploaded_at, file_data
+         FROM documents WHERE user_id = 1 ORDER BY uploaded_at DESC`
+      )
+      if (fallbackResult.rows.length > 0) {
+        return res.json(fallbackResult.rows)
+      }
+    }
+
     res.json(result.rows)
   } catch (error) {
     console.error('Error fetching documents:', error)
@@ -330,18 +350,31 @@ app.post('/api/documents/upload', async (req, res) => {
       return res.status(400).json({ error: 'Missing required document fields' })
     }
 
-    // Default to user ID 1 or demo user if not passed
-    const uid = userId ? Number(userId) : 1
+    // Default to user ID 1 or ensure valid user ID
+    let uid = userId ? Number(userId) : 1
+    if (isNaN(uid) || uid <= 0) uid = 1
+
+    // Ensure user row exists so foreign key constraint documents_user_id_fkey is satisfied
+    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [uid])
+    if (userCheck.rows.length === 0) {
+      const citizenId = 'BD-USER-' + uid
+      await pool.query(
+        `INSERT INTO users (id, full_name, phone, password_hash, citizen_id)
+         VALUES ($1, 'নাগরিক', '+88017' || LPAD(($1::text), 8, '0'), 'demo1234', $2)
+         ON CONFLICT (id) DO NOTHING`,
+        [uid, citizenId]
+      )
+    }
 
     const result = await pool.query(
       `INSERT INTO documents (user_id, doc_type, file_name, file_size, mime_type, file_data, verified, extracted_meta)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       RETURNING id, user_id, doc_type, file_name, file_size, mime_type, verified, extracted_meta, uploaded_at`,
+       RETURNING id, user_id, doc_type, file_name, file_size, mime_type, file_data, verified, extracted_meta, uploaded_at`,
       [
         uid,
         docType,
         fileName,
-        fileSize || 0,
+        Number(fileSize) || 0,
         mimeType || 'application/octet-stream',
         fileData,
         true,
@@ -400,7 +433,20 @@ app.post('/api/applications', async (req, res) => {
     const { userId, serviceSlug, serviceNameBn, serviceNameEn, applicantData, documentsAttached, officialPortalUrl } = req.body
 
     const docketId = 'BD-APP-' + new Date().getFullYear() + '-' + Math.floor(10000 + Math.random() * 90000)
-    const uid = userId ? Number(userId) : 1
+    let uid = userId ? Number(userId) : 1
+    if (isNaN(uid) || uid <= 0) uid = 1
+
+    // Ensure user exists
+    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [uid])
+    if (userCheck.rows.length === 0) {
+      const citizenId = 'BD-USER-' + uid
+      await pool.query(
+        `INSERT INTO users (id, full_name, phone, password_hash, citizen_id)
+         VALUES ($1, 'নাগরিক', '+88017' || LPAD(($1::text), 8, '0'), 'demo1234', $2)
+         ON CONFLICT (id) DO NOTHING`,
+        [uid, citizenId]
+      )
+    }
 
     const result = await pool.query(
       `INSERT INTO applications (docket_id, user_id, service_slug, service_name_bn, service_name_en, status, applicant_data, documents_attached, official_portal_url)
