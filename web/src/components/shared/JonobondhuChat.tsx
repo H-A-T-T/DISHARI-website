@@ -20,6 +20,8 @@ import {
   FileText,
   Compass,
   RotateCcw,
+  CheckCircle2,
+  Zap,
 } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { WIN10_EASE_ENTRANCE, WIN10_EASE_EXIT, win10DialogMotion } from '@/lib/motion'
@@ -348,6 +350,17 @@ export function JonobondhuChat() {
 
   // Floating Bubble visibility (synchronized with window morph animation)
   const [isBubbleVisible, setIsBubbleVisible] = useState(true)
+
+  // Autonomous AI Navigation HUD Overlay State (Promo Teleport Animation)
+  const [navTransition, setNavTransition] = useState<{
+    isActive: boolean
+    targetUrl: string
+    titleBn: string
+    titleEn: string
+    breadcrumbBn: string
+    breadcrumbEn: string
+    phase: 'locking' | 'warping' | 'arrived'
+  } | null>(null)
 
   // Dimensions
   const BUBBLE_SIZE = 64
@@ -730,8 +743,8 @@ export function JonobondhuChat() {
             id: `ai-nav-${Date.now()}`,
             sender: 'ai',
             text: isBn
-              ? `আপনাকে "${navMatch.titleBn}" পৃষ্ঠায় নিয়ে যাচ্ছি...`
-              : `Taking you to "${navMatch.titleEn}"...`,
+              ? `স্বয়ংক্রিয় নেভিগেশন সক্রিয়! আপনাকে "${navMatch.titleBn}" পৃষ্ঠায় নিয়ে যাচ্ছি...`
+              : `Autonomous navigation engaged! Taking you to "${navMatch.titleEn}"...`,
             time: new Date().toLocaleTimeString(isBn ? 'bn-BD' : 'en-US', {
               hour: '2-digit',
               minute: '2-digit',
@@ -741,11 +754,32 @@ export function JonobondhuChat() {
 
           setMessages((prev) => [...prev, aiMsg])
 
-          // Navigate after a brief moment so the user sees the message
+          // Trigger Autonomous Navigation HUD & Laser Sweep Overlay
+          setNavTransition({
+            isActive: true,
+            targetUrl: navMatch.url,
+            titleBn: navMatch.titleBn,
+            titleEn: navMatch.titleEn,
+            breadcrumbBn: navMatch.breadcrumbBn,
+            breadcrumbEn: navMatch.breadcrumbEn,
+            phase: 'warping',
+          })
+
+          // Execute client router navigation after dramatic scan/warp build-up
           setTimeout(() => {
             router.push(navMatch.url)
-          }, 700)
-        }, 380)
+
+            // Mark as successfully arrived
+            setTimeout(() => {
+              setNavTransition((prev) => (prev ? { ...prev, phase: 'arrived' } : null))
+
+              // Dismiss HUD after celebration
+              setTimeout(() => {
+                setNavTransition(null)
+              }, 1200)
+            }, 400)
+          }, 950)
+        }, 320)
         return
       }
 
@@ -974,6 +1008,122 @@ export function JonobondhuChat() {
 
   return (
     <>
+      {/* ─── AI AUTONOMOUS NAVIGATION HUD OVERLAY (PROMO TELEPORT) ─── */}
+      <AnimatePresence>
+        {navTransition?.isActive && (
+          <div className="fixed inset-0 pointer-events-none z-[999999] overflow-hidden flex flex-col justify-between">
+            {/* Ambient Darkened Backdrop with subtle glass tint */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-0 bg-neutral-950/30 backdrop-blur-[2px]"
+            />
+
+            {/* Sweeping Laser Scanner Beam (Full-Screen Sci-Fi Scan) */}
+            <motion.div
+              initial={{ top: '-10%', opacity: 0 }}
+              animate={{ top: '110%', opacity: [0, 1, 1, 0] }}
+              transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], repeat: 1, repeatDelay: 0.15 }}
+              className="absolute left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#00E599] to-transparent shadow-[0_0_24px_8px_rgba(0,229,153,0.8)]"
+            />
+
+            {/* Top Island AI HUD Banner */}
+            <div className="relative pt-6 w-full max-w-lg mx-auto px-4 z-10">
+              <motion.div
+                initial={{ opacity: 0, y: -28, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -24, scale: 0.94 }}
+                transition={{ duration: 0.32, ease: WIN10_EASE_ENTRANCE }}
+                className="w-full bg-neutral-900/95 border-2 border-[#006A4E] text-white p-4 shadow-2xl rounded-none backdrop-blur-md"
+              >
+                {/* Top Banner Status Bar */}
+                <div className="flex items-center justify-between border-b border-neutral-700/80 pb-2.5 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00E599]" />
+                    </span>
+                    <span className="font-mono text-[11px] font-bold tracking-wider uppercase text-emerald-400">
+                      {isBn ? 'জনবন্ধু AI স্বয়ংক্রিয় নেভিগেশন' : 'Jonobondhu AI Autonomous Transit'}
+                    </span>
+                  </div>
+
+                  <span className="font-mono text-[10px] text-neutral-300 font-semibold px-2 py-0.5 bg-neutral-800 border border-neutral-700">
+                    {navTransition.phase === 'arrived'
+                      ? (isBn ? '✓ গন্তব্যে উপস্থিত' : '✓ Arrived')
+                      : (isBn ? '⚡ স্থানান্তর হচ্ছে...' : '⚡ Teleporting...')}
+                  </span>
+                </div>
+
+                {/* Target Destination & Breadcrumb */}
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-white border-2 border-emerald-400 flex items-center justify-center shrink-0 shadow-lg">
+                    <img
+                      src="/icons/jonobondhu.svg"
+                      alt="AI"
+                      className="w-7 h-7 object-contain"
+                    />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono text-neutral-400 uppercase">
+                        {isBn ? 'টার্গেট সেবা:' : 'Target Service:'}
+                      </span>
+                      <h4 className="text-sm sm:text-base font-extrabold text-white truncate">
+                        {isBn ? navTransition.titleBn : navTransition.titleEn}
+                      </h4>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-[11px] font-mono text-emerald-300 mt-1 truncate">
+                      <span>
+                        {isBn ? navTransition.breadcrumbBn : navTransition.breadcrumbEn}
+                      </span>
+                    </div>
+                  </div>
+
+                  {navTransition.phase === 'arrived' ? (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center shrink-0 text-white shadow-md"
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                    </motion.div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-xs font-mono text-emerald-400 shrink-0">
+                      <Zap className="w-4 h-4 animate-pulse text-amber-300" />
+                    </div>
+                  )}
+                </div>
+
+                {/* High-tech Progress Energy Bar */}
+                <div className="w-full bg-neutral-800 h-1.5 mt-3 overflow-hidden rounded-none relative">
+                  <motion.div
+                    initial={{ width: '0%' }}
+                    animate={{ width: navTransition.phase === 'arrived' ? '100%' : '88%' }}
+                    transition={{
+                      duration: navTransition.phase === 'arrived' ? 0.2 : 0.9,
+                      ease: 'easeInOut',
+                    }}
+                    className="h-full bg-gradient-to-r from-[#006A4E] via-[#00E599] to-emerald-400"
+                  />
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Bottom Cyber-HUD Indicator */}
+            <div className="relative pb-6 text-center z-10">
+              <span className="inline-block px-3 py-1 bg-neutral-900/90 text-emerald-400 font-mono text-[10px] uppercase tracking-widest border border-neutral-700/80 shadow-md">
+                {isBn ? 'দিশারী পোর্টাল ডিরেক্টরি রুট লকিং...' : 'Dishari Portal Route Locking...'}
+              </span>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* ─── MOVABLE FLOATING MESSENGER BUBBLE (100% SYMMETRICAL) ─── */}
       {!isOpen && isBubbleVisible && (
         <div
@@ -1337,43 +1487,62 @@ export function JonobondhuChat() {
                             }`}
                           >
                             {msg.text}
-                            {/* ─── NAVIGATION CARD ─── */}
+                            {/* ─── ENHANCED NAVIGATION TELEMETRY CARD ─── */}
                             {msg.navCard && (
-                              <div className="mt-3 border border-[#006A4E] bg-[#F0FAF5] rounded-none overflow-hidden">
-                                {/* Card Header */}
-                                <div className="flex items-center gap-2 px-3 py-2 bg-[#006A4E] text-white">
-                                  <Navigation className="w-3.5 h-3.5 shrink-0" />
-                                  <span className="text-[11px] font-bold tracking-wide uppercase">
-                                    {isBn ? 'ম্যানুয়াল পথ — পরবর্তীবার নিজে যেতে' : 'Manual Path — Find it yourself next time'}
+                              <div className="mt-3 border-2 border-[#006A4E] bg-[#F0FAF5] rounded-none overflow-hidden shadow-sm">
+                                {/* Card Header with Live Teleport Status */}
+                                <div className="flex items-center justify-between px-3 py-2 bg-[#006A4E] text-white">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <Zap className="w-3.5 h-3.5 text-amber-300 animate-pulse shrink-0" />
+                                    <span className="text-[11px] font-bold tracking-wide uppercase truncate">
+                                      {isBn ? 'স্বয়ংক্রিয় নেভিগেশন' : 'Autonomous AI Navigation'}
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] font-mono text-emerald-200 shrink-0">
+                                    {isBn ? 'সক্রিয় রুট' : 'Active Route'}
                                   </span>
                                 </div>
+
                                 {/* Breadcrumb Steps */}
-                                <div className="px-3 py-2.5">
+                                <div className="px-3 pt-2.5 pb-2">
+                                  <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider mb-1.5 font-bold">
+                                    {isBn ? 'পরবর্তীবার নিজে যেতে ম্যানুয়াল পথ:' : 'Manual path for next time:'}
+                                  </div>
                                   <div className="flex items-center flex-wrap gap-1 text-[11px] font-medium text-neutral-700">
                                     {(isBn ? msg.navCard.breadcrumbBn : msg.navCard.breadcrumbEn)
                                       .split('→')
                                       .map((step, i, arr) => (
                                         <React.Fragment key={i}>
-                                          <span className={`px-1.5 py-0.5 rounded-none border ${i === arr.length - 1 ? 'bg-[#006A4E] text-white border-[#004D38] font-bold' : 'bg-white border-neutral-300 text-neutral-600'}`}>
+                                          <span
+                                            className={`px-1.5 py-0.5 rounded-none border ${
+                                              i === arr.length - 1
+                                                ? 'bg-[#006A4E] text-white border-[#004D38] font-bold shadow-xs'
+                                                : 'bg-white border-neutral-300 text-neutral-700'
+                                            }`}
+                                          >
                                             {step.trim()}
                                           </span>
                                           {i < arr.length - 1 && (
-                                            <ArrowRight className="w-3 h-3 text-neutral-400 shrink-0" />
+                                            <ArrowRight className="w-3 h-3 text-emerald-600 shrink-0" />
                                           )}
                                         </React.Fragment>
                                       ))}
                                   </div>
                                 </div>
+
                                 {/* Direct Link Button */}
-                                <div className="px-3 pb-2.5">
+                                <div className="px-3 pb-2.5 pt-1 border-t border-emerald-100 flex items-center justify-between">
                                   <button
                                     type="button"
                                     onClick={() => router.push(msg.navCard!.url)}
-                                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#006A4E] border border-[#006A4E] px-2.5 py-1 hover:bg-[#006A4E] hover:text-white transition-colors cursor-pointer win-press"
+                                    className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#006A4E] border border-[#006A4E] px-2.5 py-1 hover:bg-[#006A4E] hover:text-white transition-colors cursor-pointer win-press rounded-none"
                                   >
                                     <ExternalLink className="w-3 h-3" />
-                                    {isBn ? 'সরাসরি লিংকে যান' : 'Go there directly'}
+                                    <span>{isBn ? 'সরাসরি এই পাতায় যান' : 'Go directly to page'}</span>
                                   </button>
+                                  <span className="text-[10px] font-mono text-emerald-700 font-semibold">
+                                    {msg.navCard.url}
+                                  </span>
                                 </div>
                               </div>
                             )}
