@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText,
@@ -30,17 +30,28 @@ import {
   HardDrive,
   Filter,
   ArrowUpDown,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  Maximize2,
+  Printer,
+  Info,
+  ChevronRight,
+  ArrowLeft,
+  ExternalLink
 } from 'lucide-react'
 import type { CitizenDocument, DocType } from '@/types'
 import { uploadDocument, deleteDocument, scanDocumentOCR, type UserProfile } from '@/lib/api'
 import { win10DialogBackdropMotion, win10DialogMotion } from '@/lib/motion'
+import { cn } from '@/lib/utils'
 
 interface DocumentLockerProps {
   documents: CitizenDocument[]
   onRefresh: () => void
   lang: 'bn' | 'en'
   user?: UserProfile | null
+  externalUploadTrigger?: number
 }
 
 export type FolderCategory = 'all' | 'identity' | 'vital' | 'education' | 'business' | 'tax' | 'other'
@@ -187,10 +198,10 @@ function autoDetectDocType(meta?: Record<string, any> | null): DocType | null {
   return null
 }
 
-export default function DocumentLocker({ documents, onRefresh, lang, user }: DocumentLockerProps) {
+export default function DocumentLocker({ documents, onRefresh, lang, user, externalUploadTrigger }: DocumentLockerProps) {
   const isBn = lang === 'bn'
 
-  // Local optimistic state synced with props & persistent cache
+  // Persistent optimistic local documents state
   const [localDocs, setLocalDocs] = useState<CitizenDocument[]>(() => {
     if (documents && documents.length > 0) return documents
     if (typeof window !== 'undefined') {
@@ -221,18 +232,28 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
     }
   }, [documents])
 
-  // File explorer controls
+  // Google Drive Style Controls
   const [activeFolder, setActiveFolder] = useState<FolderCategory>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'details'>('details')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'name_asc' | 'size_desc'>('date_desc')
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [inspectedDoc, setInspectedDoc] = useState<CitizenDocument | null>(null)
-  const [previewDoc, setPreviewDoc] = useState<CitizenDocument | null>(null)
+  
+  // Google Drive Collapsible Details/Activity Panel (Toggleable ⓘ)
+  const [showDetailsPanel, setShowDetailsPanel] = useState<boolean>(true)
+
+  // Google Drive Fullscreen Lightbox File Viewer
+  const [lightboxDoc, setLightboxDoc] = useState<CitizenDocument | null>(null)
+  const [lightboxZoom, setLightboxZoom] = useState<number>(100)
+  const [lightboxRotate, setLightboxRotate] = useState<number>(0)
+  const [showLightboxOcr, setShowLightboxOcr] = useState<boolean>(true)
+
+  // Notification & Feedback States
   const [toastMsg, setToastMsg] = useState<string | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
-  // Upload Modal States
+  // Upload & OCR Modal States
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [selectedType, setSelectedType] = useState<DocType>('birth_certificate')
   const [isScanning, setIsScanning] = useState(false)
@@ -242,12 +263,33 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
   const [scannedMeta, setScannedMeta] = useState<Record<string, any> | null>(null)
   const [ocrSource, setOcrSource] = useState<string | null>(null)
 
+  // External trigger for + New Document button in sidebar
+  useEffect(() => {
+    if (externalUploadTrigger && externalUploadTrigger > 0) {
+      resetUploadState()
+      setShowUploadModal(true)
+    }
+  }, [externalUploadTrigger])
+
   const showToast = (msg: string) => {
     setToastMsg(msg)
-    setTimeout(() => setToastMsg(null), 3000)
+    setTimeout(() => setToastMsg(null), 3500)
   }
 
-  // Auto-select first document as inspected doc when list changes
+  // Keyboard shortcut for closing Lightbox (Escape)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (lightboxDoc) {
+          setLightboxDoc(null)
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [lightboxDoc])
+
+  // Auto-select inspected doc
   useEffect(() => {
     if (localDocs.length > 0 && !inspectedDoc) {
       setInspectedDoc(localDocs[0])
@@ -310,7 +352,7 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
         return a.file_name.localeCompare(b.file_name)
       }
       if (sortBy === 'size_desc') {
-        return (b.file_size || 0) - (a.file_size || 0)
+        return (Number(b.file_size) || 0) - (Number(a.file_size) || 0)
       }
       return 0
     })
@@ -318,7 +360,7 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
     return list
   }, [localDocs, activeFolder, searchQuery, sortBy])
 
-  // Total storage in bytes
+  // Total storage in bytes & formatted text
   const totalSizeBytes = useMemo(() => {
     return localDocs.reduce((acc, d) => acc + (Number(d.file_size) || 0), 0)
   }, [localDocs])
@@ -331,11 +373,6 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
       return `${kb} KB / 100 MB`
     }
     return `${mb.toFixed(2)} MB / 100 MB`
-  }, [totalSizeBytes])
-
-  const storagePercent = useMemo(() => {
-    if (totalSizeBytes === 0) return 0
-    return Math.min(100, Math.max(2, (totalSizeBytes / (100 * 1024 * 1024)) * 100))
   }, [totalSizeBytes])
 
   const resetUploadState = () => {
@@ -380,7 +417,7 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
           setUploadError(isBn ? 'ওসিআর স্ক্যান সমাপ্ত, তথ্যাবলী পর্যালোচনা করুন।' : 'OCR scan finished, please verify fields.')
           setScannedMeta({})
         }
-      } catch (err: any) {
+      } catch {
         setUploadError(isBn ? 'স্ক্যান সম্পন্ন করতে ত্রুটি হয়েছে' : 'Failed to scan document')
         setScannedMeta({})
       } finally {
@@ -418,7 +455,6 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
         extractedMeta: scannedMeta || {},
       })
 
-      // Immediate optimistic update
       const newDoc: CitizenDocument = res.document || {
         id: Date.now(),
         user_id: user?.id || 1,
@@ -456,10 +492,12 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
     if (!confirm(isBn ? 'আপনি কি নিশ্চিতভাবে এই নথিটি মুছে ফেলতে চান?' : 'Are you sure you want to delete this document?')) {
       return
     }
-    // Optimistic delete
     setLocalDocs((prev) => prev.filter((d) => d.id !== id))
     if (inspectedDoc?.id === id) {
       setInspectedDoc(null)
+    }
+    if (lightboxDoc?.id === id) {
+      setLightboxDoc(null)
     }
     setSelectedIds((prev) => {
       const next = new Set(prev)
@@ -525,14 +563,43 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
 
   const handleCopy = (text: string, keyName: string) => {
     if (!text) return
-    navigator.clipboard.writeText(String(text))
+    navigator.clipboard.writeText(text)
     setCopiedKey(keyName)
+    showToast(isBn ? 'ক্লিপবোর্ডে কপি করা হয়েছে' : 'Copied to clipboard')
     setTimeout(() => setCopiedKey(null), 2000)
+  }
+
+  const openLightbox = (doc: CitizenDocument) => {
+    setLightboxDoc(doc)
+    setLightboxZoom(100)
+    setLightboxRotate(0)
+    setInspectedDoc(doc)
+  }
+
+  const handlePrint = (doc: CitizenDocument) => {
+    if (!doc.file_data) return
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) return
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${doc.file_name} — Dishari Citizen Vault</title>
+          <style>
+            body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }
+            img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+          </style>
+        </head>
+        <body>
+          <img src="${doc.file_data}" onload="window.print(); window.close();" />
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
   }
 
   return (
     <div className="space-y-4">
-      {/* ─── Toast Notification Strip ────────────────────────────────────── */}
+      {/* ─── Toast Notification Strip ─────────────────────────────────────── */}
       <AnimatePresence>
         {toastMsg && (
           <motion.div
@@ -545,366 +612,266 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
               <CheckCircle2 className="w-4 h-4 text-[#006A4E]" />
               <span>{toastMsg}</span>
             </span>
-            <button onClick={() => setToastMsg(null)} className="text-neutral-500 hover:text-neutral-900">
+            <button onClick={() => setToastMsg(null)} className="text-neutral-500 hover:text-neutral-900 cursor-pointer">
               <X className="w-3.5 h-3.5" />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ─── Windows 10 File Explorer Top Ribbon / Action Header ─────────── */}
-      <div className="border border-neutral-300 bg-white p-4 rounded-none shadow-xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-neutral-200">
+      {/* ─── Google Drive Style Top Command & Breadcrumb Bar ───────────────── */}
+      <div className="border border-neutral-200 bg-white p-3.5 sm:p-4 rounded-none shadow-xs space-y-3.5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Breadcrumbs & Active Title */}
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-[#006A4E] uppercase tracking-wider flex items-center gap-1.5">
-                <HardDrive className="w-3.5 h-3.5 text-[#006A4E]" />
-                <span>{isBn ? 'নাগরিক ডিজিটাল লকার ও ফাইল ম্যানেজার' : 'Citizen Vault & File Explorer'}</span>
+            <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500">
+              <span className="hover:text-neutral-900 cursor-pointer" onClick={() => setActiveFolder('all')}>
+                {isBn ? 'আমার লকার' : 'My Vault'}
               </span>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-emerald-50 text-[#006A4E] border border-emerald-200 inline-flex items-center gap-1">
+              <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />
+              <span className="font-bold text-[#006A4E]">
+                {isBn
+                  ? FOLDERS.find((f) => f.id === activeFolder)?.nameBn
+                  : FOLDERS.find((f) => f.id === activeFolder)?.nameEn}
+              </span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mt-0.5 flex items-center gap-2">
+              <span>{isBn ? 'ডিজিটাল সিটিজেন ফাইল ম্যানেজার' : 'Citizen Document Vault'}</span>
+              <span className="text-[11px] font-mono font-bold px-2 py-0.5 bg-emerald-50 text-[#006A4E] border border-emerald-200 hidden sm:inline-flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-[#00E599]" />
-                <span>JavaScript Vision OCR</span>
+                <span>AI Vision OCR</span>
               </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mt-0.5">
-              {isBn ? 'ফাইল ও নথিপত্র ব্যবস্থাপনা' : 'Document Vault & Archive Manager'}
             </h2>
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-              <span className="font-mono text-xs text-neutral-700 bg-neutral-100 border border-neutral-200 px-2 py-0.5 inline-flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#006A4E]" />
-                <span className="font-bold">{localDocs.length}</span> {isBn ? 'টি নথি সংরক্ষিত' : 'files stored'}
-              </span>
-              <span className="font-mono text-xs text-neutral-600 bg-neutral-100 border border-neutral-200 px-2 py-0.5 inline-flex items-center gap-1.5">
-                <HardDrive className="w-3.5 h-3.5 text-neutral-500" />
-                <span>{storageDisplayText}</span>
-              </span>
-            </div>
           </div>
 
+          {/* Action Toolbar */}
           <div className="flex items-center flex-wrap gap-2">
+            {/* Search Input Bar */}
+            <div className="relative w-full sm:w-64">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                placeholder={isBn ? 'নথিপত্র বা আইডি নম্বর খুঁজুন...' : 'Search files or ID numbers...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 border border-neutral-300 bg-neutral-50/70 focus:bg-white text-xs font-medium rounded-none focus:outline-none focus:border-[#006A4E] transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+
+            {/* Bulk Selection Actions */}
             {selectedIds.size > 0 && (
-              <div className="flex items-center gap-2 pr-2 border-r border-neutral-300">
+              <div className="flex items-center gap-1.5">
                 <span className="text-xs font-mono font-bold text-[#006A4E] bg-emerald-50 px-2 py-1 border border-emerald-200">
-                  {selectedIds.size} {isBn ? 'টি নির্বাচিত' : 'Selected'}
+                  {selectedIds.size} {isBn ? 'নির্বাচিত' : 'Selected'}
                 </span>
                 <button
                   onClick={handleBulkDelete}
-                  className="min-h-[36px] px-3 border border-red-300 bg-red-50 hover:bg-red-100 text-[#C8102E] text-xs font-bold uppercase inline-flex items-center gap-1.5 rounded-none win-press"
+                  className="min-h-[34px] px-2.5 border border-red-300 bg-red-50 hover:bg-red-100 text-[#C8102E] text-xs font-bold uppercase inline-flex items-center gap-1 rounded-none win-press cursor-pointer"
                   title={isBn ? 'নির্বাচিত মুছুন' : 'Delete selected'}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>{isBn ? 'মুছুন' : 'Delete'}</span>
+                  <span className="hidden sm:inline">{isBn ? 'মুছুন' : 'Delete'}</span>
                 </button>
               </div>
             )}
 
-            <button
-              onClick={handleExportSelected}
-              className="min-h-[38px] px-3.5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-bold uppercase inline-flex items-center gap-1.5 rounded-none win-press"
-              title={isBn ? 'মেটাডাটা এক্সপোর্ট করুন' : 'Export metadata JSON'}
+            {/* Sort Dropdown */}
+            <select
+              value={sortBy}
+              onChange={(e: any) => setSortBy(e.target.value)}
+              className="min-h-[34px] px-2.5 border border-neutral-300 bg-white text-neutral-700 text-xs font-medium rounded-none focus:outline-none focus:border-[#006A4E] cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 text-neutral-600" />
-              <span>{isBn ? 'এক্সপোর্ট' : 'Export'}</span>
-            </button>
+              <option value="date_desc">{isBn ? 'তারিখ (নতুন)' : 'Date (Newest)'}</option>
+              <option value="date_asc">{isBn ? 'তারিখ (পুরাতন)' : 'Date (Oldest)'}</option>
+              <option value="name_asc">{isBn ? 'ফাইলের নাম (A-Z)' : 'File Name (A-Z)'}</option>
+              <option value="size_desc">{isBn ? 'ফাইলের আকার (বৃহৎ)' : 'File Size (Largest)'}</option>
+            </select>
 
-            <button
-              onClick={() => {
-                resetUploadState()
-                setShowUploadModal(true)
-              }}
-              className="min-h-[38px] px-4 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center gap-2 rounded-none transition-colors cursor-pointer win-btn"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{isBn ? 'নতুন নথি স্ক্যান ও যোগ' : 'Scan & Add Document'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Search, Filter & View Mode Controls Bar */}
-        <div className="pt-3 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
-          {/* Search Bar */}
-          <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isBn ? 'ফাইলের নাম, এনআইডি, রোল বা তথ্য দিয়ে খুঁজুন...' : 'Search by filename, ID, roll, or text...'}
-              className="w-full pl-9 pr-8 py-2 border border-neutral-300 bg-neutral-50/50 text-neutral-900 placeholder:text-neutral-400 text-xs focus:bg-white focus:border-[#006A4E] focus:outline-none rounded-none"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Sort & View Mode Switches */}
-          <div className="flex items-center justify-between w-full md:w-auto gap-3">
-            <div className="flex items-center gap-1.5 font-mono text-neutral-600">
-              <ArrowUpDown className="w-3.5 h-3.5 text-neutral-400" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="border border-neutral-300 bg-white py-1.5 px-2 text-xs font-mono text-neutral-800 rounded-none focus:outline-none focus:border-[#006A4E]"
-              >
-                <option value="date_desc">{isBn ? 'সর্বশেষ আপলোড' : 'Newest Added'}</option>
-                <option value="date_asc">{isBn ? 'প্রাচীনতম' : 'Oldest Added'}</option>
-                <option value="name_asc">{isBn ? 'নাম অনুযায়ী (A-Z)' : 'File Name (A-Z)'}</option>
-                <option value="size_desc">{isBn ? 'আকার অনুযায়ী' : 'File Size'}</option>
-              </select>
-            </div>
-
+            {/* View Mode Toggle (Google Drive List vs Grid) */}
             <div className="flex items-center border border-neutral-300 bg-neutral-100 p-0.5 rounded-none">
               <button
                 onClick={() => setViewMode('details')}
-                className={`p-1.5 rounded-none transition-colors ${
-                  viewMode === 'details' ? 'bg-white text-[#006A4E] shadow-2xs font-bold' : 'text-neutral-600 hover:text-neutral-900'
-                }`}
-                title={isBn ? 'বিস্তারিত তালিকা ভিউ' : 'Details List View'}
+                className={cn(
+                  'p-1.5 rounded-none transition-colors cursor-pointer',
+                  viewMode === 'details' ? 'bg-white text-[#006A4E] shadow-2xs font-bold' : 'text-neutral-500 hover:text-neutral-900'
+                )}
+                title={isBn ? 'তালিকা ভিউ (List)' : 'List view'}
               >
                 <List className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-none transition-colors ${
-                  viewMode === 'grid' ? 'bg-white text-[#006A4E] shadow-2xs font-bold' : 'text-neutral-600 hover:text-neutral-900'
-                }`}
-                title={isBn ? 'গ্রিড কার্ড ভিউ' : 'Tile Grid View'}
+                className={cn(
+                  'p-1.5 rounded-none transition-colors cursor-pointer',
+                  viewMode === 'grid' ? 'bg-white text-[#006A4E] shadow-2xs font-bold' : 'text-neutral-500 hover:text-neutral-900'
+                )}
+                title={isBn ? 'টাইল ভিউ (Grid)' : 'Grid view'}
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Export JSON Button */}
+            <button
+              onClick={handleExportSelected}
+              className="min-h-[34px] px-2.5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-medium inline-flex items-center gap-1.5 rounded-none win-press cursor-pointer"
+              title={isBn ? 'মেটাডাটা JSON ডাউনলোড' : 'Export metadata JSON'}
+            >
+              <Download className="w-3.5 h-3.5 text-neutral-600" />
+              <span className="hidden sm:inline">{isBn ? 'এক্সপোর্ট' : 'Export'}</span>
+            </button>
+
+            {/* Google Drive Info / Details Panel Toggle Button (ⓘ) */}
+            <button
+              onClick={() => setShowDetailsPanel(!showDetailsPanel)}
+              className={cn(
+                'min-h-[34px] px-2.5 border text-xs font-semibold inline-flex items-center gap-1.5 rounded-none transition-colors win-press cursor-pointer',
+                showDetailsPanel
+                  ? 'border-[#006A4E] bg-emerald-50 text-[#006A4E] font-bold'
+                  : 'border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700'
+              )}
+              title={isBn ? 'নথির বিবরণ প্যানেল (Info)' : 'Toggle Details Panel (Info)'}
+            >
+              <Info className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">{isBn ? 'বিবরণ' : 'Details'}</span>
+            </button>
+
+            {/* New Document Upload Button */}
+            <button
+              onClick={() => {
+                resetUploadState()
+                setShowUploadModal(true)
+              }}
+              className="min-h-[34px] px-3.5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase tracking-wider inline-flex items-center gap-1.5 rounded-none transition-colors cursor-pointer win-btn"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{isBn ? 'নথি স্ক্যান' : 'New File'}</span>
+            </button>
           </div>
+        </div>
+
+        {/* ─── Google Drive Horizontal Folder Filter Chips ───────────────────── */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 -mx-1 px-1 scrollbar-none border-t border-neutral-100">
+          {FOLDERS.map((folder) => {
+            const isActive = activeFolder === folder.id
+            const count = folderCounts[folder.id] || 0
+            return (
+              <button
+                key={folder.id}
+                onClick={() => setActiveFolder(folder.id)}
+                className={cn(
+                  'shrink-0 inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-none border transition-colors cursor-pointer win-press select-none',
+                  isActive
+                    ? 'border-[#006A4E] bg-[#006A4E] text-white font-bold shadow-xs'
+                    : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 hover:text-neutral-900'
+                )}
+              >
+                {isActive ? (
+                  <FolderOpen className="w-3.5 h-3.5 shrink-0" />
+                ) : (
+                  <Folder className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                )}
+                <span>{isBn ? folder.nameBn : folder.nameEn}</span>
+                <span
+                  className={cn(
+                    'text-[10px] font-mono px-1.5 py-0.2 rounded-none font-bold',
+                    isActive ? 'bg-emerald-900 text-emerald-100' : 'bg-neutral-200 text-neutral-700'
+                  )}
+                >
+                  {count}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* ─── Main File Explorer Multi-Pane View (Folders Sidebar + File Canvas + Inspector) ──── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left Folder Tree Sidebar (3 columns on desktop) */}
-        <div className="lg:col-span-3 border border-neutral-300 bg-white p-3.5 rounded-none shadow-xs space-y-4">
-          <div>
-            <span className="text-[11px] font-mono font-bold text-neutral-500 uppercase tracking-wider block mb-2 px-1">
-              {isBn ? 'ফাইল ক্যাটাগরি ফোল্ডার' : 'Vault Folders'}
-            </span>
-            <div className="space-y-1">
-              {FOLDERS.map((f) => {
-                const count = folderCounts[f.id] || 0
-                const isActive = activeFolder === f.id
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => setActiveFolder(f.id)}
-                    className={`w-full px-2.5 py-2 text-xs flex items-center justify-between rounded-none transition-colors text-left cursor-pointer win-press ${
-                      isActive
-                        ? 'bg-[#006A4E] text-white font-bold'
-                        : 'bg-white text-neutral-800 hover:bg-neutral-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      {isActive ? (
-                        <FolderOpen className="w-4 h-4 text-emerald-200 shrink-0" />
-                      ) : (
-                        <Folder className="w-4 h-4 text-neutral-400 shrink-0" />
-                      )}
-                      <span className="truncate">{isBn ? f.nameBn : f.nameEn}</span>
-                    </div>
-                    <span
-                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded-none ${
-                        isActive ? 'bg-emerald-800 text-emerald-100' : 'bg-neutral-100 text-neutral-600'
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Vault Storage Quota Meter */}
-          <div className="pt-3 border-t border-neutral-200 text-xs">
-            <div className="flex items-center justify-between text-[11px] font-mono text-neutral-600 mb-1">
-              <span>{isBn ? 'ব্যবহৃত স্পেস:' : 'Space Used:'}</span>
-              <strong className="text-neutral-900">{storageDisplayText}</strong>
-            </div>
-            <div className="w-full h-1.5 bg-neutral-200 rounded-none overflow-hidden">
-              <div
-                className="h-full bg-[#006A4E] rounded-none transition-all duration-300"
-                style={{ width: `${storagePercent}%` }}
-              />
-            </div>
-            <div className="mt-2 text-[10px] font-mono text-neutral-500 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-[#006A4E]" />
-              <span>{isBn ? '২৫৬-বিট এইএস এনক্রিপশন সক্রিয়' : '256-Bit AES Storage Enforced'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Center: File List / Grid Canvas (6 columns on desktop if inspector open, or 9 columns) */}
-        <div className={`lg:col-span-6 border border-neutral-300 bg-white p-4 rounded-none shadow-xs overflow-hidden flex flex-col justify-between`}>
-          <div>
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-neutral-200">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-neutral-800">
-                <span>{isBn ? 'ফাইল ব্রাউজার' : 'Directory Contents'}</span>
-                <span className="text-neutral-400">•</span>
-                <span className="text-[#006A4E]">
-                  {filteredDocs.length} {isBn ? 'টি নথি পাওয়া গেছে' : 'items'}
-                </span>
+      {/* ─── Main Workspace Canvas: Expansive File List + Collapsible Inspector ─── */}
+      <div className="flex flex-col lg:flex-row gap-5 items-start">
+        {/* Left / Center: Full Width File List or Grid Canvas */}
+        <div className="flex-1 min-w-0 w-full border border-neutral-300 bg-white rounded-none shadow-xs overflow-hidden">
+          {filteredDocs.length === 0 ? (
+            /* Empty State */
+            <div className="p-16 text-center">
+              <div className="w-16 h-16 mx-auto border border-neutral-200 bg-neutral-50 flex items-center justify-center mb-3 text-neutral-400">
+                <Folder className="w-8 h-8" />
               </div>
-
-              {filteredDocs.length > 0 && (
-                <button
-                  onClick={handleSelectAll}
-                  className="text-xs font-mono text-neutral-600 hover:text-[#006A4E] flex items-center gap-1"
-                >
-                  {selectedIds.size === filteredDocs.length ? (
-                    <CheckSquare className="w-3.5 h-3.5 text-[#006A4E]" />
-                  ) : (
-                    <Square className="w-3.5 h-3.5" />
-                  )}
-                  <span>{selectedIds.size === filteredDocs.length ? (isBn ? 'সব নির্বাচন বাতিল' : 'Deselect All') : (isBn ? 'সব নির্বাচন' : 'Select All')}</span>
-                </button>
-              )}
+              <h3 className="text-base font-bold text-neutral-800">
+                {isBn ? 'এই ফোল্ডারে কোনো নথি নেই' : 'No documents in this folder'}
+              </h3>
+              <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto leading-relaxed">
+                {isBn
+                  ? 'নতুন জন্ম নিবন্ধন সনদ, জাতীয় পরিচয়পত্র বা প্রবেশপত্র আপলোড করতে "নথি স্ক্যান" বাটনে ক্লিক করুন।'
+                  : 'Click "New File" above to scan and save your government certificates or admit cards.'}
+              </p>
+              <button
+                onClick={() => {
+                  resetUploadState()
+                  setShowUploadModal(true)
+                }}
+                className="mt-4 px-4 py-2 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white font-bold text-xs uppercase inline-flex items-center gap-1.5 rounded-none cursor-pointer win-btn"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{isBn ? 'নতুন নথি আপলোড করুন' : 'Upload First Document'}</span>
+              </button>
             </div>
+          ) : viewMode === 'details' ? (
+            /* ─── Google Drive Style High-Density Table View ────────────── */
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-neutral-200 bg-neutral-100/90 text-neutral-600 font-mono text-[11px] uppercase tracking-wider select-none">
+                    <th className="p-3 w-10 text-center">
+                      <button onClick={handleSelectAll} className="cursor-pointer text-neutral-600 hover:text-neutral-900">
+                        {selectedIds.size === filteredDocs.length && filteredDocs.length > 0 ? (
+                          <CheckSquare className="w-4 h-4 text-[#006A4E]" />
+                        ) : (
+                          <Square className="w-4 h-4 text-neutral-400" />
+                        )}
+                      </button>
+                    </th>
+                    <th className="p-3 font-semibold">{isBn ? 'ফাইলের নাম' : 'File Name'}</th>
+                    <th className="p-3 font-semibold hidden md:table-cell">{isBn ? 'ক্যাটাগরি' : 'Category'}</th>
+                    <th className="p-3 font-semibold hidden sm:table-cell">{isBn ? 'সনদ / রোল নম্বর' : 'ID / Roll No'}</th>
+                    <th className="p-3 font-semibold hidden lg:table-cell">{isBn ? 'ফাইলের আকার' : 'Size'}</th>
+                    <th className="p-3 font-semibold hidden xl:table-cell">{isBn ? 'আপলোডের তারিখ' : 'Date Uploaded'}</th>
+                    <th className="p-3 text-right font-semibold">{isBn ? 'অ্যাকশন' : 'Actions'}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredDocs.map((doc) => {
+                    const isSelected = selectedIds.has(doc.id)
+                    const isInspected = inspectedDoc?.id === doc.id
+                    const meta = doc.extracted_meta || {}
+                    const identifier = meta.id_number || meta.nid_number || meta.roll || meta.tin_number || meta.br_number || '—'
+                    const sizeKb = Math.round((Number(doc.file_size) || 0) / 1024)
+                    const typeDef = DOC_TYPES.find((t) => t.type === doc.doc_type)
 
-            {filteredDocs.length === 0 ? (
-              <div className="p-8 text-center border border-dashed border-neutral-200 bg-neutral-50/50 rounded-none my-6">
-                <Scan className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-                <h4 className="font-bold text-sm text-neutral-800">
-                  {searchQuery ? (isBn ? 'কোনো নথি মেলেনি' : 'No matching documents found') : (isBn ? 'এই ফোল্ডারে কোনো নথি নেই' : 'No documents in this folder')}
-                </h4>
-                <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
-                  {isBn
-                    ? 'আপনার এনআইডি, জন্ম সনদ বা শিক্ষাগত নথির ছবি স্ক্যান করে লকারে যুক্ত করুন।'
-                    : 'Upload photo of your document to run automated JavaScript OCR.'}
-                </p>
-                <button
-                  onClick={() => {
-                    resetUploadState()
-                    setShowUploadModal(true)
-                  }}
-                  className="mt-4 min-h-[36px] px-4 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white text-xs font-bold uppercase rounded-none win-btn inline-flex items-center gap-1.5"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>{isBn ? 'নথি স্ক্যান করুন' : 'Scan Document'}</span>
-                </button>
-              </div>
-            ) : viewMode === 'details' ? (
-              /* ─── Details List View (Windows 10 Explorer Style Table) ──── */
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-neutral-200 bg-neutral-50 text-neutral-600 font-mono text-[11px] uppercase">
-                      <th className="p-2 w-8 text-center">#</th>
-                      <th className="p-2">{isBn ? 'ফাইলের নাম' : 'Name'}</th>
-                      <th className="p-2">{isBn ? 'নথির ধরন' : 'Category'}</th>
-                      <th className="p-2">{isBn ? 'আইডি / নম্বর' : 'Identifier'}</th>
-                      <th className="p-2">{isBn ? 'আকার' : 'Size'}</th>
-                      <th className="p-2">{isBn ? 'তারিখ' : 'Date'}</th>
-                      <th className="p-2 text-right">{isBn ? 'অ্যাকশন' : 'Actions'}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredDocs.map((doc) => {
-                      const typeMeta = DOC_TYPES.find((t) => t.type === doc.doc_type)
-                      const isSelected = selectedIds.has(doc.id)
-                      const isInspected = inspectedDoc?.id === doc.id
-                      const meta = doc.extracted_meta || {}
-                      const identifier = meta.id_number || meta.nid_number || meta.roll || meta.tin_number || meta.br_number || '—'
-                      const sizeKb = Math.round((doc.file_size || 0) / 1024)
-
-                      return (
-                        <tr
-                          key={doc.id}
-                          onClick={() => setInspectedDoc(doc)}
-                          className={`border-b border-neutral-100 transition-colors cursor-pointer select-none ${
-                            isInspected ? 'bg-emerald-50/70 border-emerald-200' : 'hover:bg-neutral-50'
-                          }`}
-                        >
-                          <td className="p-2 text-center" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => handleToggleSelect(doc.id)}
-                              className="text-neutral-400 hover:text-[#006A4E]"
-                            >
-                              {isSelected ? (
-                                <CheckSquare className="w-4 h-4 text-[#006A4E]" />
-                              ) : (
-                                <Square className="w-4 h-4" />
-                              )}
-                            </button>
-                          </td>
-                          <td className="p-2 font-semibold text-neutral-900 flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-[#006A4E] shrink-0" />
-                            <span className="truncate max-w-[160px]" title={doc.file_name}>
-                              {doc.file_name}
-                            </span>
-                          </td>
-                          <td className="p-2 text-neutral-600 font-mono text-[11px]">
-                            <span className="px-1.5 py-0.5 bg-neutral-100 border border-neutral-200">
-                              {isBn ? typeMeta?.nameBn || doc.doc_type : typeMeta?.nameEn || doc.doc_type}
-                            </span>
-                          </td>
-                          <td className="p-2 font-mono font-bold text-neutral-800 text-[11px] truncate max-w-[120px]">
-                            {identifier}
-                          </td>
-                          <td className="p-2 font-mono text-neutral-500 text-[11px]">{sizeKb} KB</td>
-                          <td className="p-2 font-mono text-neutral-500 text-[11px]">
-                            {new Date(doc.uploaded_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US')}
-                          </td>
-                          <td className="p-2 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                onClick={() => setPreviewDoc(doc)}
-                                className="p-1 hover:text-[#006A4E] text-neutral-400 transition-colors"
-                                title={isBn ? 'প্রিভিউ দেখুন' : 'Preview document'}
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(doc.id)}
-                                className="p-1 hover:text-[#C8102E] text-neutral-400 transition-colors"
-                                title={isBn ? 'মুছে ফেলুন' : 'Delete document'}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              /* ─── Grid View (Card Tiles) ──── */
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {filteredDocs.map((doc) => {
-                  const typeMeta = DOC_TYPES.find((t) => t.type === doc.doc_type)
-                  const isSelected = selectedIds.has(doc.id)
-                  const isInspected = inspectedDoc?.id === doc.id
-                  const meta = doc.extracted_meta || {}
-                  const sizeKb = Math.round((doc.file_size || 0) / 1024)
-
-                  return (
-                    <div
-                      key={doc.id}
-                      onClick={() => setInspectedDoc(doc)}
-                      className={`p-3 border transition-colors cursor-pointer rounded-none relative flex flex-col justify-between ${
-                        isInspected ? 'border-[#006A4E] bg-emerald-50/40 shadow-xs' : 'border-neutral-200 bg-white hover:border-neutral-400'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-start justify-between gap-2 mb-2">
+                    return (
+                      <tr
+                        key={doc.id}
+                        onClick={() => setInspectedDoc(doc)}
+                        onDoubleClick={() => openLightbox(doc)}
+                        className={cn(
+                          'transition-colors cursor-pointer select-none group',
+                          isInspected
+                            ? 'bg-emerald-50/80 border-l-3 border-l-[#006A4E]'
+                            : 'hover:bg-neutral-50/90'
+                        )}
+                      >
+                        {/* Selection Checkbox */}
+                        <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleToggleSelect(doc.id)
-                            }}
-                            className="text-neutral-400 hover:text-[#006A4E]"
+                            onClick={() => handleToggleSelect(doc.id)}
+                            className="cursor-pointer text-neutral-400 hover:text-neutral-900"
                           >
                             {isSelected ? (
                               <CheckSquare className="w-4 h-4 text-[#006A4E]" />
@@ -912,182 +879,569 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
                               <Square className="w-4 h-4" />
                             )}
                           </button>
+                        </td>
 
-                          <span className="text-[10px] font-mono font-bold text-[#006A4E] bg-emerald-50 border border-emerald-200 px-1.5 py-0.2">
-                            {isBn ? 'যাচাইকৃত' : 'OCR Ready'}
+                        {/* File Name & Document Type Icon */}
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 shrink-0 border border-neutral-200 bg-neutral-100 flex items-center justify-center text-[#006A4E] rounded-none overflow-hidden">
+                              {doc.file_data && doc.mime_type.startsWith('image/') ? (
+                                <img src={doc.file_data} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <FileText className="w-4 h-4 text-[#006A4E]" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-neutral-900 truncate max-w-xs sm:max-w-md group-hover:text-[#006A4E] transition-colors">
+                                {doc.file_name}
+                              </div>
+                              <div className="text-[11px] text-neutral-500 font-mono flex items-center gap-2">
+                                <span>{isBn ? typeDef?.nameBn : typeDef?.nameEn}</span>
+                                {doc.verified && (
+                                  <span className="text-[10px] text-[#006A4E] font-bold bg-emerald-50 px-1 border border-emerald-200 inline-flex items-center gap-0.5">
+                                    <Check className="w-2.5 h-2.5 text-[#006A4E]" />
+                                    <span>Verified</span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Category */}
+                        <td className="p-3 text-neutral-600 font-mono text-[11px] hidden md:table-cell">
+                          <span className="px-2 py-0.5 bg-neutral-100 border border-neutral-200">
+                            {typeDef?.category || 'other'}
                           </span>
-                        </div>
+                        </td>
 
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <FileText className="w-4 h-4 text-[#006A4E] shrink-0" />
-                          <h4 className="font-bold text-xs text-neutral-900 truncate" title={doc.file_name}>
-                            {doc.file_name}
-                          </h4>
-                        </div>
+                        {/* Identifier (ID / Roll) */}
+                        <td className="p-3 font-mono text-neutral-800 font-semibold text-[11px] hidden sm:table-cell">
+                          <span className="bg-neutral-50 px-1.5 py-0.5 border border-neutral-200">
+                            {identifier}
+                          </span>
+                        </td>
 
-                        <span className="text-[11px] font-mono text-neutral-500 block truncate">
-                          {isBn ? typeMeta?.nameBn : typeMeta?.nameEn}
-                        </span>
+                        {/* File Size */}
+                        <td className="p-3 font-mono text-neutral-500 text-[11px] hidden lg:table-cell">
+                          {sizeKb} KB
+                        </td>
 
-                        {meta.id_number && (
-                          <div className="mt-2 p-1.5 bg-neutral-50 border border-neutral-200 font-mono text-[11px] text-neutral-800 truncate">
-                            ID: <strong>{meta.id_number}</strong>
+                        {/* Date Uploaded */}
+                        <td className="p-3 font-mono text-neutral-500 text-[11px] hidden xl:table-cell">
+                          {new Date(doc.uploaded_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </td>
+
+                        {/* Action Buttons */}
+                        <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Fullscreen Lightbox Button */}
+                            <button
+                              onClick={() => openLightbox(doc)}
+                              className="p-1.5 border border-neutral-200 hover:border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-700 transition-colors win-press cursor-pointer"
+                              title={isBn ? 'পূর্ণাঙ্গ ভিউয়ার ওপেন করুন (Lightbox)' : 'Open Full Lightbox Viewer'}
+                            >
+                              <Eye className="w-3.5 h-3.5 text-[#006A4E]" />
+                            </button>
+
+                            {/* Copy Identifier */}
+                            {identifier !== '—' && (
+                              <button
+                                onClick={() => handleCopy(identifier, `row-${doc.id}`)}
+                                className="p-1.5 border border-neutral-200 hover:border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-700 transition-colors win-press cursor-pointer"
+                                title={isBn ? 'আইডি কপি করুন' : 'Copy ID number'}
+                              >
+                                {copiedKey === `row-${doc.id}` ? (
+                                  <Check className="w-3.5 h-3.5 text-[#006A4E]" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            )}
+
+                            {/* Delete */}
+                            <button
+                              onClick={() => handleDelete(doc.id)}
+                              className="p-1.5 border border-neutral-200 hover:border-red-300 hover:bg-red-50 text-neutral-500 hover:text-[#C8102E] transition-colors win-press cursor-pointer"
+                              title={isBn ? 'নথি মুছুন' : 'Delete file'}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            /* ─── Google Drive Style Spacious Grid View ─────────────────── */
+            <div className="p-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredDocs.map((doc) => {
+                  const isSelected = selectedIds.has(doc.id)
+                  const isInspected = inspectedDoc?.id === doc.id
+                  const meta = doc.extracted_meta || {}
+                  const sizeKb = Math.round((Number(doc.file_size) || 0) / 1024)
+                  const typeDef = DOC_TYPES.find((t) => t.type === doc.doc_type)
+
+                  return (
+                    <div
+                      key={doc.id}
+                      onClick={() => setInspectedDoc(doc)}
+                      onDoubleClick={() => openLightbox(doc)}
+                      className={cn(
+                        'border transition-all cursor-pointer relative group rounded-none flex flex-col justify-between overflow-hidden',
+                        isInspected
+                          ? 'border-[#006A4E] shadow-sm ring-1 ring-[#006A4E]'
+                          : 'border-neutral-200 hover:border-neutral-400 bg-white'
+                      )}
+                    >
+                      {/* Top Thumbnail Preview Container */}
+                      <div className="h-36 bg-neutral-900/95 relative overflow-hidden flex items-center justify-center p-2">
+                        {doc.file_data && doc.mime_type.startsWith('image/') ? (
+                          <img
+                            src={doc.file_data}
+                            alt={doc.file_name}
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
+                          />
+                        ) : (
+                          <div className="text-center text-neutral-400 font-mono text-xs">
+                            <FileText className="w-10 h-10 mx-auto mb-1 text-[#00E599]" />
+                            <span className="truncate block max-w-[150px]">{doc.file_name}</span>
                           </div>
                         )}
-                      </div>
 
-                      <div className="pt-2 mt-2 border-t border-neutral-100 flex items-center justify-between text-[10px] font-mono text-neutral-500">
-                        <span>{sizeKb} KB</span>
-                        <div className="flex items-center gap-1">
+                        {/* Hover Overlay Action Bar */}
+                        <div className="absolute inset-0 bg-neutral-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              setPreviewDoc(doc)
+                              openLightbox(doc)
                             }}
-                            className="p-1 hover:text-[#006A4E]"
+                            className="p-2 bg-white hover:bg-neutral-100 text-neutral-900 rounded-none shadow-md transition-transform hover:scale-110 cursor-pointer"
+                            title={isBn ? 'পূর্ণাঙ্গ লাইটবক্স প্রিভিউ' : 'Open Full Lightbox'}
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-4 h-4 text-[#006A4E]" />
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               handleDelete(doc.id)
                             }}
-                            className="p-1 hover:text-[#C8102E]"
+                            className="p-2 bg-white hover:bg-red-50 text-red-600 rounded-none shadow-md transition-transform hover:scale-110 cursor-pointer"
+                            title={isBn ? 'মুছুন' : 'Delete'}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
+                        </div>
+
+                        {/* Top-Right Selection Checkbox */}
+                        <div
+                          className="absolute top-2 left-2 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleToggleSelect(doc.id)
+                          }}
+                        >
+                          <button className="cursor-pointer text-white drop-shadow">
+                            {isSelected ? (
+                              <CheckSquare className="w-4 h-4 text-[#00E599]" />
+                            ) : (
+                              <Square className="w-4 h-4 opacity-70 hover:opacity-100" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Bottom Metadata Info Card */}
+                      <div className="p-3 bg-white space-y-1">
+                        <div className="font-bold text-xs text-neutral-900 truncate" title={doc.file_name}>
+                          {doc.file_name}
+                        </div>
+                        <div className="text-[11px] font-mono text-neutral-500 truncate">
+                          {isBn ? typeDef?.nameBn : typeDef?.nameEn}
+                        </div>
+                        {meta.id_number && (
+                          <div className="font-mono text-[10px] text-neutral-700 font-semibold bg-neutral-100 px-1 py-0.5 border border-neutral-200 truncate">
+                            ID: {meta.id_number}
+                          </div>
+                        )}
+                        <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[10px] font-mono text-neutral-400">
+                          <span>{sizeKb} KB</span>
+                          <span>
+                            {new Date(doc.uploaded_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </span>
                         </div>
                       </div>
                     </div>
                   )
                 })}
               </div>
-            )}
-          </div>
-
-          <div className="pt-3 mt-3 border-t border-neutral-200 flex items-center justify-between text-[11px] font-mono text-neutral-500">
-            <span>
-              {isBn ? 'মোট সংরক্ষিত নথি:' : 'Vault Records:'} {localDocs.length}
-            </span>
-            <span>{isBn ? 'এনক্রিপ্টেড ক্লাউড স্টোরেজ' : 'SSL Encrypted'}</span>
-          </div>
-        </div>
-
-        {/* Right Column: File Inspector / Metadata Details Pane (3 columns on desktop) */}
-        <div className="lg:col-span-3 border border-neutral-300 bg-white p-4 rounded-none shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
-            <span className="text-xs font-mono font-bold text-neutral-800 uppercase flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#006A4E]" />
-              <span>{isBn ? 'নথি বিবরণ ও এআই রেকর্ড' : 'Document Inspector'}</span>
-            </span>
-          </div>
-
-          {inspectedDoc ? (
-            <div className="space-y-4 text-xs">
-              {/* Document Image Thumbnail / Preview Box */}
-              <div className="border border-neutral-200 bg-neutral-50 p-2 text-center rounded-none relative">
-                {inspectedDoc.file_data && inspectedDoc.mime_type.startsWith('image/') ? (
-                  <img
-                    src={inspectedDoc.file_data}
-                    alt={inspectedDoc.file_name}
-                    className="max-h-36 mx-auto object-contain border border-neutral-200 bg-white"
-                  />
-                ) : (
-                  <div className="py-8 text-center text-neutral-400">
-                    <FileText className="w-10 h-10 mx-auto mb-1 text-[#006A4E]" />
-                    <span className="font-mono text-[10px]">{inspectedDoc.mime_type}</span>
-                  </div>
-                )}
-                <button
-                  onClick={() => setPreviewDoc(inspectedDoc)}
-                  className="mt-2 w-full min-h-[30px] border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-mono text-[11px] font-bold uppercase inline-flex items-center justify-center gap-1.5 win-press"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>{isBn ? 'পূর্ণাঙ্গ প্রিভিউ' : 'Fullscreen View'}</span>
-                </button>
-              </div>
-
-              {/* File Specs */}
-              <div className="space-y-1 font-mono text-[11px] p-2.5 bg-neutral-50 border border-neutral-200">
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">{isBn ? 'নাম:' : 'Name:'}</span>
-                  <strong className="text-neutral-900 truncate max-w-[130px]" title={inspectedDoc.file_name}>
-                    {inspectedDoc.file_name}
-                  </strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">{isBn ? 'আকার:' : 'Size:'}</span>
-                  <span>{Math.round((inspectedDoc.file_size || 0) / 1024)} KB</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">{isBn ? 'আপলোড:' : 'Uploaded:'}</span>
-                  <span>{new Date(inspectedDoc.uploaded_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US')}</span>
-                </div>
-              </div>
-
-              {/* Extracted OCR Records */}
-              <div>
-                <span className="text-[11px] font-mono font-bold text-neutral-600 uppercase block mb-1.5">
-                  {isBn ? 'এক্সট্র্যাক্ট করা তথ্য (Click to copy):' : 'Extracted Records:'}
-                </span>
-
-                {inspectedDoc.extracted_meta && Object.keys(inspectedDoc.extracted_meta).length > 0 ? (
-                  <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-                    {Object.entries(inspectedDoc.extracted_meta).map(([key, val]) => {
-                      if (!val || key === 'raw_text') return null
-                      const label = FIELD_LABELS[key] ? (isBn ? FIELD_LABELS[key].bn : FIELD_LABELS[key].en) : key
-                      const isCopied = copiedKey === key
-
-                      return (
-                        <div
-                          key={key}
-                          onClick={() => handleCopy(String(val), key)}
-                          className="p-1.5 bg-white border border-neutral-200 hover:border-[#006A4E] flex items-center justify-between gap-1 cursor-pointer transition-colors"
-                          title={isBn ? 'কপি করতে ক্লিক করুন' : 'Click to copy'}
-                        >
-                          <div className="truncate">
-                            <span className="text-[10px] font-mono text-neutral-500 block truncate">{label}</span>
-                            <span className="font-mono text-[11px] font-bold text-neutral-900 block truncate">
-                              {String(val)}
-                            </span>
-                          </div>
-                          {isCopied ? (
-                            <Check className="w-3 h-3 text-[#006A4E] shrink-0" />
-                          ) : (
-                            <Copy className="w-3 h-3 text-neutral-400 shrink-0" />
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <div className="p-3 text-center text-neutral-400 text-[11px] border border-dashed border-neutral-200">
-                    {isBn ? 'কোনো মেটাডাটা নিষ্কাশিত হয়নি' : 'No OCR metadata extracted'}
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-2">
-                <button
-                  onClick={() => handleDelete(inspectedDoc.id)}
-                  className="w-full min-h-[34px] border border-red-300 bg-white hover:bg-red-50 text-[#C8102E] font-bold text-xs uppercase inline-flex items-center justify-center gap-1.5 win-press"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>{isBn ? 'নথিটি মুছে ফেলুন' : 'Delete Document'}</span>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="p-6 text-center text-neutral-400 text-xs">
-              <FileText className="w-8 h-8 mx-auto mb-2 text-neutral-300" />
-              <span>{isBn ? 'একটি নথিতে ক্লিক করে বিস্তারিত দেখুন' : 'Select a document to inspect details'}</span>
             </div>
           )}
         </div>
+
+        {/* ─── Right Collapsible Details / Activity Panel (Google Drive ⓘ Panel) ─── */}
+        {showDetailsPanel && (
+          <aside className="w-full lg:w-84 xl:w-96 shrink-0 border border-neutral-300 bg-white p-4.5 rounded-none shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#006A4E]" />
+                <h3 className="font-bold text-sm text-neutral-900">
+                  {isBn ? 'নথি বিবরণ ও এআই রেকর্ড' : 'Document Details & Metadata'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowDetailsPanel(false)}
+                className="p-1 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                title={isBn ? 'বিবরণ প্যানেল বন্ধ করুন' : 'Close Details Pane'}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {inspectedDoc ? (
+              <div className="space-y-4">
+                {/* Visual Thumbnail & One-Click Lightbox Trigger */}
+                <div className="border border-neutral-200 bg-neutral-900 p-2 flex flex-col items-center justify-center relative group min-h-[160px]">
+                  {inspectedDoc.file_data && inspectedDoc.mime_type.startsWith('image/') ? (
+                    <img
+                      src={inspectedDoc.file_data}
+                      alt={inspectedDoc.file_name}
+                      className="max-h-40 max-w-full object-contain cursor-pointer"
+                      onClick={() => openLightbox(inspectedDoc)}
+                    />
+                  ) : (
+                    <div className="text-center text-neutral-400 font-mono text-xs p-4">
+                      <FileText className="w-10 h-10 mx-auto mb-1 text-[#006A4E]" />
+                      <span>{inspectedDoc.file_name}</span>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => openLightbox(inspectedDoc)}
+                    className="mt-2 w-full min-h-[32px] border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-mono text-[11px] font-bold uppercase inline-flex items-center justify-center gap-1.5 win-press cursor-pointer shadow-xs"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-[#006A4E]" />
+                    <span>{isBn ? 'পূর্ণাঙ্গ প্রিভিউ দেখুন' : 'Open Fullscreen Lightbox'}</span>
+                  </button>
+                </div>
+
+                {/* Technical File Properties */}
+                <div className="border border-neutral-200 bg-neutral-50/70 p-3 text-xs font-mono space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">{isBn ? 'ফাইলের নাম:' : 'File:'}</span>
+                    <strong className="text-neutral-800 truncate max-w-[170px]" title={inspectedDoc.file_name}>
+                      {inspectedDoc.file_name}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">{isBn ? 'আকার:' : 'Size:'}</span>
+                    <span className="text-neutral-800">{Math.round((Number(inspectedDoc.file_size) || 0) / 1024)} KB</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">{isBn ? 'আপলোড তারিখ:' : 'Uploaded:'}</span>
+                    <span className="text-neutral-800">
+                      {new Date(inspectedDoc.uploaded_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* OCR Verified Citizen Fields (Click to Copy) */}
+                <div>
+                  <span className="text-[11px] font-mono font-bold text-neutral-600 uppercase block mb-2">
+                    {isBn ? 'যাচাইকৃত সিটিজেন ফিল্ডস:' : 'Verified Citizen Fields:'}
+                  </span>
+
+                  {inspectedDoc.extracted_meta && Object.keys(inspectedDoc.extracted_meta).length > 0 ? (
+                    <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
+                      {Object.entries(inspectedDoc.extracted_meta).map(([key, val]) => {
+                        if (key === 'raw_text') return null
+                        const label = FIELD_LABELS[key] ? (isBn ? FIELD_LABELS[key].bn : FIELD_LABELS[key].en) : key
+                        const isCopied = copiedKey === key
+
+                        return (
+                          <div
+                            key={key}
+                            className="p-2 border border-neutral-200 bg-neutral-50/70 hover:bg-emerald-50/40 transition-colors flex items-center justify-between gap-2"
+                          >
+                            <div className="min-w-0">
+                              <span className="text-[10px] font-mono text-neutral-500 block">{label}</span>
+                              <span className="font-mono text-xs font-bold text-neutral-900 truncate block">
+                                {String(val)}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleCopy(String(val), key)}
+                              className="p-1 border border-neutral-300 hover:border-neutral-900 bg-white text-neutral-600 transition-colors cursor-pointer shrink-0"
+                              title={isBn ? 'কপি করুন' : 'Copy field'}
+                            >
+                              {isCopied ? (
+                                <Check className="w-3.5 h-3.5 text-[#006A4E]" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-3 border border-dashed border-neutral-300 text-center text-xs text-neutral-500">
+                      {isBn ? 'কোনো ওসিআর ফিল্ড পাওয়া যায়নি' : 'No OCR fields extracted'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Single Document Actions */}
+                <div className="pt-2 border-t border-neutral-200 flex items-center gap-2">
+                  <button
+                    onClick={() => handlePrint(inspectedDoc)}
+                    className="flex-1 min-h-[34px] border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-semibold inline-flex items-center justify-center gap-1.5 rounded-none cursor-pointer win-press"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>{isBn ? 'প্রিন্ট' : 'Print'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(inspectedDoc.id)}
+                    className="min-h-[34px] px-3 border border-red-300 bg-red-50 hover:bg-red-100 text-[#C8102E] text-xs font-semibold inline-flex items-center justify-center gap-1.5 rounded-none cursor-pointer win-press"
+                    title={isBn ? 'মুছুন' : 'Delete'}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-10 text-neutral-400 text-xs font-mono">
+                <FileText className="w-8 h-8 mx-auto mb-2 text-neutral-300" />
+                <span>{isBn ? 'একটি ফাইল নির্বাচন করুন' : 'Select a document to inspect'}</span>
+              </div>
+            )}
+          </aside>
+        )}
       </div>
 
-      {/* ─── UPLOAD & OCR SCANNING MODAL ────────────────────────────────────── */}
+      {/* ─── GOOGLE DRIVE FULLSCREEN LIGHTBOX FILE VIEWER ──────────────────── */}
+      <AnimatePresence>
+        {lightboxDoc && (
+          <div className="fixed inset-0 z-50 bg-[#141414]/96 backdrop-blur-md flex flex-col text-white">
+            {/* Top Lightbox Command Ribbon */}
+            <div className="h-14 px-4 bg-[#1e1e1e] border-b border-neutral-800 flex items-center justify-between shrink-0">
+              {/* Left: Back / Title */}
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  onClick={() => setLightboxDoc(null)}
+                  className="p-1.5 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-none cursor-pointer transition-colors"
+                  title={isBn ? 'ফিরে যান (Esc)' : 'Back (Esc)'}
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div className="truncate min-w-0">
+                  <div className="font-bold text-sm text-neutral-100 truncate max-w-sm sm:max-w-md">
+                    {lightboxDoc.file_name}
+                  </div>
+                  <div className="text-[11px] font-mono text-neutral-400 flex items-center gap-2">
+                    <span>{Math.round((Number(lightboxDoc.file_size) || 0) / 1024)} KB</span>
+                    <span className="text-[#00E599] font-semibold bg-emerald-950/60 px-1 border border-emerald-800 text-[10px]">
+                      Verified Citizen Record
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Center: Interactive Image Controls */}
+              <div className="hidden md:flex items-center gap-1 bg-[#282828] border border-neutral-700 p-1">
+                <button
+                  onClick={() => setLightboxZoom((prev) => Math.max(50, prev - 25))}
+                  className="p-1.5 hover:bg-neutral-700 text-neutral-300 hover:text-white cursor-pointer"
+                  title={isBn ? 'জুম আউট' : 'Zoom Out'}
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <span className="font-mono text-xs px-2 text-neutral-300 select-none">
+                  {lightboxZoom}%
+                </span>
+                <button
+                  onClick={() => setLightboxZoom((prev) => Math.min(300, prev + 25))}
+                  className="p-1.5 hover:bg-neutral-700 text-neutral-300 hover:text-white cursor-pointer"
+                  title={isBn ? 'জুম ইন' : 'Zoom In'}
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    setLightboxZoom(100)
+                    setLightboxRotate(0)
+                  }}
+                  className="p-1.5 hover:bg-neutral-700 text-neutral-300 hover:text-white cursor-pointer border-l border-neutral-700"
+                  title={isBn ? 'রিসেট' : 'Reset'}
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setLightboxRotate((prev) => (prev + 90) % 360)}
+                  className="p-1.5 hover:bg-neutral-700 text-neutral-300 hover:text-white cursor-pointer"
+                  title={isBn ? 'ঘোরান (Rotate 90°)' : 'Rotate 90°'}
+                >
+                  <RotateCw className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Right: Actions */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowLightboxOcr(!showLightboxOcr)}
+                  className={cn(
+                    'px-3 py-1.5 border text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer',
+                    showLightboxOcr
+                      ? 'border-[#00E599] bg-emerald-950/70 text-[#00E599]'
+                      : 'border-neutral-700 bg-neutral-800 text-neutral-300 hover:text-white'
+                  )}
+                  title={isBn ? 'ওসিআর মেটাডাটা প্যানেল' : 'OCR Metadata Panel'}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{isBn ? 'মেটাডাটা' : 'Metadata'}</span>
+                </button>
+
+                <button
+                  onClick={() => handlePrint(lightboxDoc)}
+                  className="px-3 py-1.5 border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-mono inline-flex items-center gap-1.5 cursor-pointer"
+                  title={isBn ? 'প্রিন্ট করুন' : 'Print Document'}
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{isBn ? 'প্রিন্ট' : 'Print'}</span>
+                </button>
+
+                {lightboxDoc.file_data && (
+                  <a
+                    href={lightboxDoc.file_data}
+                    download={lightboxDoc.file_name}
+                    className="px-3 py-1.5 border border-[#006A4E] bg-[#006A4E] hover:bg-[#004D38] text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+                    title={isBn ? 'ডাউনলোড' : 'Download File'}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{isBn ? 'ডাউনলোড' : 'Download'}</span>
+                  </a>
+                )}
+
+                <button
+                  onClick={() => setLightboxDoc(null)}
+                  className="p-1.5 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-none cursor-pointer"
+                  title={isBn ? 'বন্ধ করুন (Esc)' : 'Close (Esc)'}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Center Canvas Viewport */}
+            <div className="flex-1 min-h-0 flex overflow-hidden relative">
+              {/* Image Viewport */}
+              <div className="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-auto select-none">
+                {lightboxDoc.file_data && lightboxDoc.mime_type.startsWith('image/') ? (
+                  <div
+                    className="transition-transform duration-150 ease-out flex items-center justify-center"
+                    style={{
+                      transform: `scale(${lightboxZoom / 100}) rotate(${lightboxRotate}deg)`,
+                    }}
+                  >
+                    <img
+                      src={lightboxDoc.file_data}
+                      alt={lightboxDoc.file_name}
+                      className="max-h-[82vh] max-w-full object-contain shadow-2xl border border-neutral-800"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center text-neutral-400 font-mono text-sm">
+                    <FileText className="w-16 h-16 mx-auto mb-2 text-[#00E599]" />
+                    <p>{lightboxDoc.file_name}</p>
+                    <p className="text-xs text-neutral-500 mt-1">Non-image government document docket</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Lightbox Side OCR Drawer */}
+              {showLightboxOcr && (
+                <div className="w-80 sm:w-96 bg-[#1b1b1b] border-l border-neutral-800 p-5 overflow-y-auto shrink-0 flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
+                      <div>
+                        <span className="text-[10px] font-mono text-[#00E599] uppercase tracking-wider block">
+                          Verified Document Data
+                        </span>
+                        <h4 className="font-bold text-sm text-neutral-100">
+                          {isBn ? 'ওসিআর এক্সট্র্যাক্ট রেকর্ড' : 'OCR Extracted Records'}
+                        </h4>
+                      </div>
+                      <span className="text-xs font-mono text-neutral-400">
+                        {lightboxDoc.extracted_meta?.confidence ? `${lightboxDoc.extracted_meta.confidence}% acc.` : '100%'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {lightboxDoc.extracted_meta &&
+                        Object.entries(lightboxDoc.extracted_meta).map(([key, val]) => {
+                          if (key === 'raw_text') return null
+                          const label = FIELD_LABELS[key] ? (isBn ? FIELD_LABELS[key].bn : FIELD_LABELS[key].en) : key
+                          const isCopied = copiedKey === `lb-${key}`
+
+                          return (
+                            <div
+                              key={key}
+                              className="p-2.5 border border-neutral-800 bg-[#242424] hover:border-neutral-700 transition-colors flex items-center justify-between gap-2"
+                            >
+                              <div className="min-w-0">
+                                <span className="text-[10px] font-mono text-neutral-400 block">{label}</span>
+                                <span className="font-mono text-xs font-bold text-neutral-100 truncate block">
+                                  {String(val)}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => handleCopy(String(val), `lb-${key}`)}
+                                className="p-1.5 border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white cursor-pointer shrink-0"
+                                title={isBn ? 'কপি করুন' : 'Copy'}
+                              >
+                                {isCopied ? (
+                                  <Check className="w-3.5 h-3.5 text-[#00E599]" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            </div>
+                          )
+                        })}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-neutral-800">
+                    <button
+                      onClick={() => {
+                        const json = JSON.stringify(lightboxDoc.extracted_meta || {}, null, 2)
+                        handleCopy(json, 'lb-all-json')
+                      }}
+                      className="w-full py-2 border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono text-xs font-bold uppercase inline-flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{copiedKey === 'lb-all-json' ? (isBn ? 'কপি সম্পন্ন!' : 'Copied!') : (isBn ? 'সকল মেটাডাটা কপি (JSON)' : 'Copy All Meta (JSON)')}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── SCAN / UPLOAD DOCUMENT MODAL ──────────────────────────────────── */}
       <AnimatePresence>
         {showUploadModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -1110,34 +1464,27 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
               initial="initial"
               animate="animate"
               exit="exit"
-              className="relative z-10 border border-neutral-300 bg-white max-w-xl w-full p-6 shadow-2xl rounded-none max-h-[92vh] overflow-y-auto"
+              className="relative z-10 border border-neutral-300 bg-white max-w-2xl w-full p-6 shadow-2xl rounded-none max-h-[92vh] overflow-y-auto"
             >
               <div className="absolute top-0 left-0 right-0 h-1 bg-[#006A4E]" />
 
               <div className="flex items-start justify-between pb-3 mb-4 border-b border-neutral-200">
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#006A4E] uppercase">
-                    <Sparkles className="w-3.5 h-3.5 text-[#00E599]" />
-                    <span>{isBn ? 'এআই ভিশন ডকুমেন্ট স্ক্যানার' : 'AI Vision Document Scanner'}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-neutral-900 mt-0.5">
-                    {scannedMeta && Object.keys(scannedMeta).length > 0
-                      ? isBn
-                        ? 'ওসিআর ফলাফল ও তথ্য নিশ্চিতকরণ'
-                        : 'Review Extracted OCR Data'
-                      : isBn
-                      ? 'নতুন নথি আপলোড ও স্ক্যান'
-                      : 'Scan & Upload Document'}
+                  <span className="font-mono text-xs font-bold text-[#006A4E] uppercase tracking-wider flex items-center gap-1.5">
+                    <Scan className="w-4 h-4 text-[#006A4E]" />
+                    <span>{isBn ? 'নাগরিক ভল্ট আপলোড ও এআই স্ক্যান' : 'Citizen Vault OCR Scanner'}</span>
+                  </span>
+                  <h3 className="text-xl font-bold text-neutral-900 mt-1">
+                    {isBn ? 'নতুন নথি লকারে সংরক্ষণ করুন' : 'Add New Document to Locker'}
                   </h3>
                 </div>
                 <button
                   onClick={() => {
-                    if (!isSaving && !isScanning) {
-                      setShowUploadModal(false)
-                      resetUploadState()
-                    }
+                    setShowUploadModal(false)
+                    resetUploadState()
                   }}
-                  className="p-1.5 border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-100 text-neutral-600 rounded-none transition-colors win-press"
+                  disabled={isSaving || isScanning}
+                  className="p-1.5 border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-100 text-neutral-600 rounded-none transition-colors win-press cursor-pointer disabled:opacity-50"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1150,17 +1497,17 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
                 </div>
               )}
 
-              {/* STEP 1: Select Type & File */}
-              {!scannedMeta && (
+              {/* Step 1: Select Type & Upload */}
+              {!stagedFile ? (
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-mono font-bold text-neutral-700 uppercase mb-1.5">
-                      {isBn ? 'নথির ধরন নির্বাচন করুন:' : 'Document Category:'}
+                      {isBn ? 'নথির ধরন নির্বাচন করুন:' : 'Select Document Type:'}
                     </label>
                     <select
                       value={selectedType}
                       onChange={(e) => setSelectedType(e.target.value as DocType)}
-                      className="w-full p-2.5 border border-neutral-300 bg-white font-mono text-xs text-neutral-900 rounded-none focus:outline-none focus:border-[#006A4E]"
+                      className="w-full p-2.5 border border-neutral-300 bg-white text-xs font-semibold text-neutral-900 rounded-none focus:outline-none focus:border-[#006A4E]"
                     >
                       {DOC_TYPES.map((t) => (
                         <option key={t.type} value={t.type}>
@@ -1170,66 +1517,67 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
                     </select>
                   </div>
 
-                  {/* Dropzone with Laser Scanning HUD */}
-                  <div className="relative border-2 border-dashed border-neutral-300 bg-neutral-50/70 p-6 text-center rounded-none overflow-hidden hover:border-[#006A4E] transition-colors">
-                    {isScanning && (
-                      <div className="absolute inset-0 bg-neutral-900/85 z-20 flex flex-col items-center justify-center text-white">
-                        <motion.div
-                          initial={{ top: '0%' }}
-                          animate={{ top: '100%' }}
-                          transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-                          className="absolute left-0 right-0 h-1 bg-[#00E599] shadow-[0_0_15px_#00E599]"
-                        />
-                        <Loader2 className="w-8 h-8 text-[#00E599] animate-spin mb-2" />
-                        <span className="font-mono text-xs font-bold text-emerald-300 uppercase tracking-wider">
-                          {isBn ? 'জাভাস্ক্রিপ্ট ওসিআর স্ক্যান চলছে...' : 'JavaScript Vision OCR Scanning...'}
-                        </span>
-                        <span className="text-[10px] text-neutral-400 mt-1 font-mono">
-                          {isBn ? 'টেক্সট, এনআইডি ও রোল নম্বর শনাক্ত করা হচ্ছে' : 'Extracting text, registration & identifiers'}
-                        </span>
-                      </div>
-                    )}
-
+                  <div className="border-2 border-dashed border-neutral-300 hover:border-[#006A4E] bg-neutral-50/70 p-8 text-center transition-colors relative cursor-pointer">
                     <input
                       type="file"
-                      accept="image/*,.pdf"
+                      accept="image/png,image/jpeg,image/jpg"
                       onChange={handleFileSelect}
-                      disabled={isScanning}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                     />
-
                     <div className="w-12 h-12 mx-auto border border-neutral-200 bg-white flex items-center justify-center mb-3 text-[#006A4E]">
-                      <Scan className="w-6 h-6 text-[#006A4E]" />
+                      <Upload className="w-6 h-6" />
                     </div>
-
                     <span className="font-bold text-sm text-neutral-900 block">
-                      {isBn ? 'নথির স্পষ্ট ছবি বা স্ক্যান কপি আপলোড করুন' : 'Click or drag document photo to scan'}
+                      {isBn ? 'নথির ছবি টেনে আনুন অথবা ক্লিক করে আপলোড করুন' : 'Drop document image here or click to browse'}
                     </span>
-                    <span className="text-xs text-neutral-500 font-mono block mt-1">
-                      PNG, JPG, JPEG (Max 15MB)
+                    <span className="text-xs text-neutral-500 font-mono mt-1 block">
+                      PNG, JPG, JPEG (Max 25MB)
                     </span>
                   </div>
                 </div>
-              )}
-
-              {/* STEP 2: Review & Edit Extracted Fields */}
-              {scannedMeta && (
+              ) : isScanning ? (
+                /* OCR Scanning Animation */
+                <div className="p-12 text-center space-y-4">
+                  <div className="w-16 h-16 mx-auto border-2 border-[#006A4E] bg-emerald-50 flex items-center justify-center relative overflow-hidden">
+                    <motion.div
+                      className="absolute inset-x-0 h-1 bg-[#00E599]"
+                      animate={{ top: ['0%', '100%', '0%'] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                    />
+                    <Loader2 className="w-8 h-8 text-[#006A4E] animate-spin" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-base text-neutral-900">
+                      {isBn ? 'ওসিআর স্ক্যান চলছে...' : 'Scanning Document...'}
+                    </h4>
+                    <p className="text-xs text-neutral-500 mt-1">
+                      {isBn
+                        ? 'জাভাস্ক্রিপ্ট ভিশন ইঞ্জিন দ্বারা ১৭-ডিজিটের সনদ ও নাম এক্সট্র্যাক্ট করা হচ্ছে।'
+                        : 'JavaScript Vision OCR is recognizing citizen credentials.'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Step 2: Edit & Review Extracted Records */
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 text-xs font-mono text-[#006A4E]">
-                    <span className="font-bold flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#00E599]" />
-                      <span>{isBn ? 'ওসিআর সফলভাবে তথ্য নিষ্কাশন করেছে' : 'OCR Scan Complete'}</span>
-                    </span>
-                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 bg-white border border-emerald-300">
-                      {ocrSource || 'Vision Engine'}
-                    </span>
+                  <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
+                    <div className="flex items-center gap-2">
+                      <FileCheck className="w-4 h-4 text-[#006A4E]" />
+                      <span className="font-bold text-xs text-neutral-900">
+                        {isBn ? 'এক্সট্র্যাক্ট করা তথ্যাবলী (প্রয়োজনে সম্পাদনা করুন):' : 'Extracted Fields (Edit if needed):'}
+                      </span>
+                    </div>
+                    {ocrSource && (
+                      <span className="text-[10px] font-mono text-[#006A4E] bg-emerald-50 px-2 py-0.5 border border-emerald-200">
+                        {ocrSource === 'gemini_vision_api' ? 'Gemini 3.5 Flash' : 'JavaScript Vision (Tesseract)'}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
-                    {Object.entries(scannedMeta).map(([key, val]) => {
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[45vh] overflow-y-auto p-1">
+                    {scannedMeta && Object.entries(scannedMeta).map(([key, val]) => {
                       if (key === 'raw_text') return null
                       const label = FIELD_LABELS[key] ? (isBn ? FIELD_LABELS[key].bn : FIELD_LABELS[key].en) : key
-
                       return (
                         <div key={key}>
                           <label className="block text-[11px] font-mono text-neutral-600 mb-1">
@@ -1249,10 +1597,8 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
                   <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-200">
                     <button
                       type="button"
-                      onClick={() => {
-                        resetUploadState()
-                      }}
-                      className="min-h-[38px] px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-bold uppercase rounded-none win-press"
+                      onClick={() => resetUploadState()}
+                      className="min-h-[38px] px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-bold uppercase rounded-none win-press cursor-pointer"
                     >
                       {isBn ? 'পুনরায় স্ক্যান' : 'Rescan'}
                     </button>
@@ -1278,117 +1624,6 @@ export default function DocumentLocker({ documents, onRefresh, lang, user }: Doc
                   </div>
                 </div>
               )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── FULLSCREEN PREVIEW & COPIER MODAL ──────────────────────────────── */}
-      <AnimatePresence>
-        {previewDoc && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              variants={win10DialogBackdropMotion}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="fixed inset-0 bg-neutral-900/60 backdrop-blur-xs"
-              onClick={() => setPreviewDoc(null)}
-            />
-
-            <motion.div
-              variants={win10DialogMotion}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="relative z-10 border border-neutral-300 bg-white max-w-4xl w-full p-6 shadow-2xl rounded-none max-h-[92vh] overflow-y-auto"
-            >
-              <div className="absolute top-0 left-0 right-0 h-1 bg-[#006A4E]" />
-
-              <div className="flex items-start justify-between pb-3 mb-4 border-b border-neutral-200">
-                <div>
-                  <span className="font-mono text-xs font-bold text-[#006A4E] uppercase">
-                    {previewDoc.doc_type}
-                  </span>
-                  <h3 className="text-xl font-bold text-neutral-900">{previewDoc.file_name}</h3>
-                </div>
-                <button
-                  onClick={() => setPreviewDoc(null)}
-                  className="p-1.5 border border-neutral-300 hover:border-neutral-900 hover:bg-neutral-100 text-neutral-600 rounded-none transition-colors win-press"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
-                {/* Left: Document Image */}
-                <div className="border border-neutral-200 bg-neutral-900 flex items-center justify-center p-2 min-h-[300px]">
-                  {previewDoc.file_data && previewDoc.mime_type.startsWith('image/') ? (
-                    <img
-                      src={previewDoc.file_data}
-                      alt={previewDoc.file_name}
-                      className="max-h-[50vh] max-w-full object-contain"
-                    />
-                  ) : (
-                    <div className="text-center text-neutral-400 font-mono text-xs">
-                      <FileText className="w-12 h-12 mx-auto mb-2 text-[#00E599]" />
-                      <span>{previewDoc.file_name}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right: Extracted OCR fields */}
-                <div className="border border-neutral-200 bg-neutral-50 p-4 space-y-2 overflow-y-auto max-h-[50vh]">
-                  <span className="text-xs font-mono font-bold text-neutral-800 uppercase block pb-2 border-b border-neutral-200">
-                    {isBn ? 'এক্সট্র্যাক্ট করা নথিপত্র মেটাডাটা' : 'Extracted Metadata Fields'}
-                  </span>
-
-                  {previewDoc.extracted_meta && Object.keys(previewDoc.extracted_meta).length > 0 ? (
-                    Object.entries(previewDoc.extracted_meta).map(([key, val]) => {
-                      if (key === 'raw_text') return null
-                      const label = FIELD_LABELS[key] ? (isBn ? FIELD_LABELS[key].bn : FIELD_LABELS[key].en) : key
-                      const isCopied = copiedKey === key
-
-                      return (
-                        <div
-                          key={key}
-                          className="p-2 bg-white border border-neutral-200 flex items-center justify-between gap-2"
-                        >
-                          <div className="truncate">
-                            <span className="text-[10px] font-mono text-neutral-500 block">{label}</span>
-                            <span className="font-mono text-xs font-bold text-neutral-900 block truncate">
-                              {String(val)}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => handleCopy(String(val), key)}
-                            className="p-1 hover:text-[#006A4E] text-neutral-400"
-                            title={isBn ? 'কপি করুন' : 'Copy'}
-                          >
-                            {isCopied ? <Check className="w-3.5 h-3.5 text-[#006A4E]" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </div>
-                      )
-                    })
-                  ) : (
-                    <div className="text-center py-8 text-neutral-400 text-xs">
-                      {isBn ? 'কোনো মেটাডাটা সংরক্ষিত নেই' : 'No OCR metadata'}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-neutral-200">
-                <span className="text-xs font-mono text-[#006A4E] font-bold">
-                  ✓ {isBn ? 'নাগরিক সেবা ফরমের জন্য অনুমোদিত' : 'Authorized for citizen service forms'}
-                </span>
-                <button
-                  onClick={() => setPreviewDoc(null)}
-                  className="min-h-[36px] px-5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-bold text-xs uppercase win-press"
-                >
-                  {isBn ? 'বন্ধ করুন' : 'Close'}
-                </button>
-              </div>
             </motion.div>
           </div>
         )}
