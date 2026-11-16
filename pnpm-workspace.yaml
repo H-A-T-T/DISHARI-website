@@ -3,6 +3,7 @@ packages:
   - 'server'
 allowBuilds:
   esbuild: true
+  tesseract.js: false
 minimumReleaseAgeExclude:
   - framer-motion@14.9.1
   - lucide-react@1.68.0

@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { pool } from './db.js'
 import { initDatabase } from './schema.js'
+import { runJavaScriptOCR, parseDocumentText } from './ocrEngine.js'
 
 dotenv.config()
 
@@ -144,108 +145,23 @@ app.get('/api/services/:slug', async (req, res) => {
 
 // ─── DOCUMENT LOCKER ENDPOINTS ─────────────────────────────────────────────
 
-function generateSmartDocumentMeta(docType: string, fileName?: string): Record<string, any> {
-  const name = fileName || ''
-  const isAdmitCard =
-    docType === 'educational_transcript' ||
-    name.toLowerCase().includes('admit') ||
-    name.toLowerCase().includes('roll')
-
-  if (isAdmitCard) {
-    return {
-      doc_title: 'মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড - প্রবেশপত্র / সনদ',
-      candidate_name: 'আহমেদ জামিল (Ahmed Jamil)',
-      roll: '418920',
-      reg_no: '1512839401',
-      exam_name: 'HSC / আলিম পরীক্ষা',
-      board: 'Dhaka',
-      session: '2023-2024',
-      institution: 'ঢাকা রেসিডেনসিয়াল মডেল কলেজ',
-      status: 'পরীক্ষার জন্য বৈধ ও অনুমোদিত',
-      verified_source: 'Inter-Board Examination Registry Bridge',
-    }
-  }
-
-  if (docType === 'nid_front') {
-    return {
-      doc_title: 'গণপ্রজাতন্ত্রী বাংলাদেশ সরকার - জাতীয় পরিচয়পত্র',
-      full_name_bn: 'আহমেদ জামিল',
-      full_name_en: 'Ahmed Jamil',
-      father_name: 'মাহমুদুর রহমান',
-      mother_name: 'রোকেয়া বেগম',
-      id_number: '7359128392',
-      dob: '15/04/1998',
-      blood_group: 'B+',
-      verified_source: 'National Civil Registry & Election Commission',
-    }
-  }
-
-  if (docType === 'nid_back') {
-    return {
-      doc_title: 'জাতীয় পরিচয়পত্র (পেছনের পাতা)',
-      address: 'বাসা নং ১২, রোড নং ৪, ধানমন্ডি, ঢাকা-১২০৫',
-      blood_group: 'B+',
-      issue_date: '10/08/2019',
-      verified_source: 'National Civil Registry Bridge',
-    }
-  }
-
-  if (docType === 'birth_certificate') {
-    return {
-      doc_title: 'জন্ম ও মৃত্যু নিবন্ধন কার্যালয় - জন্ম নিবন্ধন সনদপত্র',
-      full_name_bn: 'আহমেদ জামিল',
-      full_name_en: 'Ahmed Jamil',
-      id_number: '19982692015041289',
-      dob: '15/04/1998',
-      father_name: 'মাহমুদুর রহমান',
-      mother_name: 'রোকেয়া বেগম',
-      place_of_birth: 'ঢাকা, বাংলাদেশ',
-      verified_source: 'BDRIS National Birth Registry System',
-    }
-  }
-
-  if (docType === 'tin_certificate') {
-    return {
-      doc_title: 'জাতীয় রাজস্ব বোর্ড (NBR) - ই-টিআইএন সনদপত্র',
-      taxpayer_name: 'Ahmed Jamil',
-      id_number: '482910482910',
-      assessment_zone: 'কর অঞ্চল-০৮, ঢাকা',
-      status: 'সক্রিয় করদাতা (Active Taxpayer)',
-      verified_source: 'NBR National Tax Registry',
-    }
-  }
-
-  if (docType === 'trade_license') {
-    return {
-      doc_title: 'ঢাকা উত্তর সিটি কর্পোরーション - ই-ট্রেড লাইসেন্স',
-      business_name: 'দিশারী টেক সল্যুশনস',
-      owner_name: 'আহমেদ জামিল',
-      id_number: 'TRAD/DNCC/049281/2026',
-      business_type: 'তথ্যপ্রযুক্তি ও সফটওয়্যার সেবা',
-      issue_date: '01/07/2026',
-      valid_till: '30/06/2027',
-      verified_source: 'City Corporation Local Governance Portal',
-    }
-  }
-
-  if (docType === 'citizenship_certificate') {
-    return {
-      doc_title: 'ইউনিয়ন পরিষদ / পৌরসভা - নাগরিকত্ব ও চারিত্রিক সনদ',
-      applicant_name: 'আহমেদ জামিল',
-      father_name: 'মাহমুদুর রহমান',
-      id_number: 'NAG/2026/08941',
-      ward: 'ওয়ার্ড নং ০৪',
-      status: 'স্থায়ী নাগরিক ও উত্তম চরিত্র',
-      verified_source: 'Local Government Division Portal',
-    }
+function getDocumentSkeleton(docType?: string, fileName?: string): Record<string, any> {
+  const titles: Record<string, string> = {
+    educational_transcript: 'মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড - প্রবেশপত্র / সনদ',
+    nid_front: 'গণপ্রজাতন্ত্রী বাংলাদেশ সরকার - জাতীয় পরিচয়পত্র',
+    nid_back: 'জাতীয় পরিচয়পত্র (পেছনের পাতা)',
+    birth_certificate: 'জন্ম ও মৃত্যু নিবন্ধন কার্যালয় - জন্ম নিবন্ধন সনদপত্র',
+    tin_certificate: 'জাতীয় রাজস্ব বোর্ড (NBR) - ই-টিআইএন সনদপত্র',
+    trade_license: 'সিটি কর্পোরেশন - ই-ট্রেড লাইসেন্স',
+    citizenship_certificate: 'ইউনিয়ন পরিষদ / পৌরসভা - নাগরিকত্ব সনদ',
   }
 
   return {
-    doc_title: 'ডিজিটাল সংরক্ষিত নাগরিক নথি',
-    file_name: fileName || 'document.pdf',
+    doc_title: titles[docType || ''] || 'নাগরিক সরকারি নথি',
+    file_name: fileName || 'document.jpg',
     scanned_at: new Date().toISOString(),
-    status: 'Verified & Encrypted',
-    verified_source: 'Dishari AI Document Vision Bridge',
+    status: 'পর্যালোচনা ও তথ্য নিশ্চিতকরণ প্রয়োজন',
+    verified_source: 'Manual Verification (Image text unreadable)',
   }
 }
 
@@ -352,13 +268,29 @@ Return ONLY a valid JSON object (without markdown code blocks, fences, or prose)
           }
         }
       } catch (aiErr) {
-        console.warn('Gemini AI Vision call failed, switching to smart parser:', aiErr)
+        console.warn('Gemini AI Vision call failed, switching to JavaScript OCR:', aiErr)
       }
     }
 
-    // 3. Smart Document Parser Fallback
-    const fallbackDoc = generateSmartDocumentMeta(docType || 'nid_front', fileName)
-    return res.json({ success: true, document: fallbackDoc, source: 'smart_parser' })
+    // 3. Real JavaScript Vision OCR Engine (Tesseract.js)
+    try {
+      const imageBuffer = Buffer.from(cleanBase64, 'base64')
+      const jsOcr = await runJavaScriptOCR(imageBuffer, docType)
+      if (jsOcr.success && jsOcr.document) {
+        return res.json({
+          success: true,
+          document: jsOcr.document,
+          source: 'javascript_ocr',
+          rawText: jsOcr.rawText,
+        })
+      }
+    } catch (jsErr) {
+      console.warn('JavaScript OCR engine error:', jsErr)
+    }
+
+    // 4. Clean Document Skeleton (no fake hardcoded personal info)
+    const fallbackDoc = getDocumentSkeleton(docType || 'nid_front', fileName)
+    return res.json({ success: true, document: fallbackDoc, source: 'document_skeleton' })
   } catch (error) {
     console.error('Error in scan-ocr endpoint:', error)
     res.status(500).json({ error: 'OCR processing failed' })

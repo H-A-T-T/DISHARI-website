@@ -48,6 +48,13 @@ web/next-env.d.ts
 __pycache__/
 *.py[cod]
 *$py.class
+*.pytest_cache/
+.coverage
+htmlcov/
+
+# ── OCR Trained Data ──────────────────────────────────────────
+*.traineddata
+*.traineddata.gz
 .pytest_cache/
 .coverage
 htmlcov/

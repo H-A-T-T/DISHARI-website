@@ -157,90 +157,25 @@ export async function scanDocumentOCR(payload: {
     throw new Error('No document data returned from OCR')
   } catch (err) {
     const docType = payload.docType || 'nid_front'
-    const name = payload.fileName || ''
-    const isAdmitCard =
-      docType === 'educational_transcript' ||
-      name.toLowerCase().includes('admit') ||
-      name.toLowerCase().includes('roll')
-
-    let fallbackData: Record<string, any>
-
-    if (isAdmitCard) {
-      fallbackData = {
-        doc_title: 'মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড - প্রবেশপত্র / সনদ',
-        candidate_name: 'আহমেদ জামিল (Ahmed Jamil)',
-        roll: '418920',
-        reg_no: '1512839401',
-        exam_name: 'HSC / আলিম পরীক্ষা',
-        board: 'Dhaka',
-        session: '2023-2024',
-        institution: 'ঢাকা রেসিডেনসিয়াল মডেল কলেজ',
-        status: 'পরীক্ষার জন্য বৈধ ও অনুমোদিত',
-        verified_source: 'Inter-Board Examination Registry Bridge',
-      }
-    } else if (docType === 'nid_front') {
-      fallbackData = {
-        doc_title: 'গণপ্রজাতন্ত্রী বাংলাদেশ সরকার - জাতীয় পরিচয়পত্র',
-        full_name_bn: 'আহমেদ জামিল',
-        full_name_en: 'Ahmed Jamil',
-        father_name: 'মাহমুদুর রহমান',
-        mother_name: 'রোকেয়া বেগম',
-        id_number: '7359128392',
-        dob: '15/04/1998',
-        blood_group: 'B+',
-        verified_source: 'National Civil Registry & Election Commission',
-      }
-    } else if (docType === 'nid_back') {
-      fallbackData = {
-        doc_title: 'জাতীয় পরিচয়পত্র (পেছনের পাতা)',
-        address: 'বাসা নং ১২, রোড নং ৪, ধানমন্ডি, ঢাকা-১২০৫',
-        blood_group: 'B+',
-        issue_date: '10/08/2019',
-        verified_source: 'National Civil Registry Bridge',
-      }
-    } else if (docType === 'birth_certificate') {
-      fallbackData = {
-        doc_title: 'জন্ম ও মৃত্যু নিবন্ধন কার্যালয় - জন্ম নিবন্ধন সনদপত্র',
-        full_name_bn: 'আহমেদ জামিল',
-        full_name_en: 'Ahmed Jamil',
-        id_number: '19982692015041289',
-        dob: '15/04/1998',
-        father_name: 'মাহমুদুর রহমান',
-        mother_name: 'রোকেয়া বেগম',
-        place_of_birth: 'ঢাকা, বাংলাদেশ',
-        verified_source: 'BDRIS National Birth Registry System',
-      }
-    } else if (docType === 'tin_certificate') {
-      fallbackData = {
-        doc_title: 'জাতীয় রাজস্ব বোর্ড (NBR) - ই-টিআইএন সনদপত্র',
-        taxpayer_name: 'Ahmed Jamil',
-        id_number: '482910482910',
-        assessment_zone: 'কর অঞ্চল-০৮, ঢাকা',
-        status: 'সক্রিয় করদাতা (Active Taxpayer)',
-        verified_source: 'NBR National Tax Registry',
-      }
-    } else if (docType === 'trade_license') {
-      fallbackData = {
-        doc_title: 'ঢাকা উত্তর সিটি কর্পোরেশন - ই-ট্রেড লাইসেন্স',
-        business_name: 'দিশারী টেক সল্যুশনস',
-        owner_name: 'আহমেদ জামিল',
-        id_number: 'TRAD/DNCC/049281/2026',
-        business_type: 'তথ্যপ্রযুক্তি ও সফটওয়্যার সেবা',
-        issue_date: '01/07/2026',
-        valid_till: '30/06/2027',
-        verified_source: 'City Corporation Local Governance Portal',
-      }
-    } else {
-      fallbackData = {
-        doc_title: 'ডিজিটাল সংরক্ষিত নাগরিক নথি',
-        file_name: payload.fileName || 'document.pdf',
-        scanned_at: new Date().toISOString(),
-        status: 'Verified & Encrypted',
-        verified_source: 'Dishari AI Document Vision Bridge',
-      }
+    const titles: Record<string, string> = {
+      educational_transcript: 'মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড - প্রবেশপত্র / সনদ',
+      nid_front: 'গণপ্রজাতন্ত্রী বাংলাদেশ সরকার - জাতীয় পরিচয়পত্র',
+      nid_back: 'জাতীয় পরিচয়পত্র (পেছনের পাতা)',
+      birth_certificate: 'জন্ম ও মৃত্যু নিবন্ধন কার্যালয় - জন্ম নিবন্ধন সনদপত্র',
+      tin_certificate: 'জাতীয় রাজস্ব বোর্ড (NBR) - ই-টিআইএন সনদপত্র',
+      trade_license: 'সিটি কর্পোরেশন / পৌরসভা - ই-ট্রেড লাইসেন্স',
+      citizenship_certificate: 'ইউনিয়ন পরিষদ / পৌরসভা - নাগরিকত্ব সনদ',
     }
 
-    return { success: true, document: fallbackData, source: 'client_smart_parser' }
+    const fallbackData: Record<string, any> = {
+      doc_title: titles[docType] || 'ডিজিটাল সংরক্ষিত নাগরিক নথি',
+      file_name: payload.fileName || 'document.jpg',
+      scanned_at: new Date().toISOString(),
+      status: 'তথ্য পর্যালোচনা ও নিশ্চিতকরণ প্রয়োজন',
+      verified_source: 'Client Vision Bridge (Please verify or enter details)',
+    }
+
+    return { success: true, document: fallbackData, source: 'client_document_skeleton' }
   }
 }
 
