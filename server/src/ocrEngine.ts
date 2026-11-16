@@ -60,10 +60,25 @@ export function parseDocumentText(rawText: string, preferredDocType?: string): P
     verified_source: 'JavaScript Vision OCR (Tesseract)',
   }
 
-  // 1. Determine Document Title & Type
+  // 1. Determine Document Title & Type (inspect text first, then fallback to preferredDocType)
   if (
-    preferredDocType === 'nid_front' ||
-    preferredDocType === 'nid_back' ||
+    lowerText.includes('birth registration') ||
+    lowerText.includes('birth and death') ||
+    lowerText.includes('registrar general') ||
+    cleanRaw.includes('জন্ম নিবন্ধন') ||
+    cleanRaw.includes('জন্ম ও মৃত্যু') ||
+    lowerText.includes('bdris')
+  ) {
+    result.doc_title = 'জন্ম নিবন্ধন সনদপত্র (Birth Registration Certificate)'
+  } else if (
+    lowerText.includes('admit') ||
+    lowerText.includes('intermediate') ||
+    cleanRaw.includes('প্রবেশপত্র') ||
+    lowerText.includes('examination -') ||
+    cleanRaw.includes('শিক্ষা বোর্ড')
+  ) {
+    result.doc_title = 'মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড - প্রবেশপত্র / সনদ'
+  } else if (
     lowerText.includes('national id') ||
     cleanRaw.includes('জাতীয় পরিচয়পত্র') ||
     lowerText.includes('election commission') ||
@@ -73,25 +88,6 @@ export function parseDocumentText(rawText: string, preferredDocType?: string): P
       ? 'জাতীয় পরিচয়পত্র (পেছনের পাতা)'
       : 'জাতীয় পরিচয়পত্র (National ID Card)'
   } else if (
-    preferredDocType === 'birth_certificate' ||
-    lowerText.includes('birth') ||
-    cleanRaw.includes('জন্ম নিবন্ধন') ||
-    cleanRaw.includes('জন্ম ও মৃত্যু') ||
-    lowerText.includes('bdris')
-  ) {
-    result.doc_title = 'জন্ম নিবন্ধন সনদপত্র (Birth Registration Certificate)'
-  } else if (
-    preferredDocType === 'educational_transcript' ||
-    lowerText.includes('admit') ||
-    lowerText.includes('intermediate') ||
-    lowerText.includes('secondary') ||
-    cleanRaw.includes('প্রবেশপত্র') ||
-    cleanRaw.includes('শিক্ষা বোর্ড') ||
-    cleanRaw.includes('সনদপত্র')
-  ) {
-    result.doc_title = 'মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড - প্রবেশপত্র / সনদ'
-  } else if (
-    preferredDocType === 'tin_certificate' ||
     lowerText.includes('tin') ||
     cleanRaw.includes('টিআইএন') ||
     lowerText.includes('taxes zone') ||
@@ -99,13 +95,18 @@ export function parseDocumentText(rawText: string, preferredDocType?: string): P
   ) {
     result.doc_title = 'জাতীয় রাজস্ব বোর্ড (NBR) - ই-টিআইএন সনদপত্র'
   } else if (
-    preferredDocType === 'trade_license' ||
-    lowerText.includes('trade') ||
+    lowerText.includes('trade license') ||
     cleanRaw.includes('ট্রেড লাইসেন্স') ||
     lowerText.includes('city corporation') ||
     cleanRaw.includes('সিটি কর্পোরেশন')
   ) {
     result.doc_title = 'সিটি কর্পোরেশন / পৌরসভা - ই-ট্রেড লাইসেন্স'
+  } else if (preferredDocType === 'nid_front') {
+    result.doc_title = 'জাতীয় পরিচয়পত্র (National ID Card)'
+  } else if (preferredDocType === 'birth_certificate') {
+    result.doc_title = 'জন্ম নিবন্ধন সনদপত্র (Birth Registration Certificate)'
+  } else if (preferredDocType === 'educational_transcript') {
+    result.doc_title = 'মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড - প্রবেশপত্র / সনদ'
   } else if (cleanRaw.length > 0) {
     result.doc_title = 'নাগরিক সরকারি নথি (Citizen Document)'
   }
@@ -205,10 +206,24 @@ export function parseDocumentText(rawText: string, preferredDocType?: string): P
   if (dobLabelMatch) {
     result.dob = dobLabelMatch[1].trim()
   } else {
-    // General DD/MM/YYYY match
-    const dateMatch = normalizedText.match(/\b([0-2]?[0-9]|3[01])[\/\-\.](0?[1-9]|1[0-2])[\/\-\.](19\d{2}|20\d{2})\b/)
-    if (dateMatch) {
-      result.dob = dateMatch[0]
+    // Check all dates in text
+    const allDates = [...normalizedText.matchAll(/(?:\b|\D)([0-2]?[0-9]|3[01])\s+(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER|JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s+(19\d{2}|20\d{2})\b/gi)]
+    if (result.id_number && allDates.length > 0) {
+      // In Birth Certificates, birth year matches first 4 digits of 17-digit BRN (e.g. 200586... -> 2005)
+      const birthYear = result.id_number.slice(0, 4)
+      const matchByYear = allDates.find(d => d[3] === birthYear)
+      if (matchByYear) {
+        result.dob = `${matchByYear[1]} ${matchByYear[2]} ${matchByYear[3]}`
+      }
+    }
+    if (!result.dob && allDates.length > 0) {
+      const lastDate = allDates[allDates.length - 1]
+      result.dob = `${lastDate[1]} ${lastDate[2]} ${lastDate[3]}`
+    } else if (!result.dob) {
+      const dateMatch = normalizedText.match(/\b([0-2]?[0-9]|3[01])[\/\-\.](0?[1-9]|1[0-2])[\/\-\.](19\d{2}|20\d{2})\b/)
+      if (dateMatch) {
+        result.dob = dateMatch[0]
+      }
     }
   }
 
@@ -221,15 +236,38 @@ export function parseDocumentText(rawText: string, preferredDocType?: string): P
   }
 
   // 6. Names (English, Bengali, Father, Mother)
-  const nameEnMatch = cleanRaw.match(
-    /(?:Name\s*(?:of\s*(?:Examinee|Assessee|Candidate))?|Name)[:\s.\-]+([A-Za-z\.\s]{3,35})/i
-  )
-  if (nameEnMatch) {
-    const val = nameEnMatch[1].split(/\r?\n/)[0].trim()
-    if (val && !/father|mother|date|blood|roll|govt|republic|bangladesh|board/i.test(val)) {
-      result.full_name_en = val
-      result.candidate_name = val
+  // Check for Registered Person first (Birth Certificate format)
+  const regPersonMatch = cleanRaw.match(/REGISTERED\s*PERSON(?:\s*NAME)?[:\s]+([A-Za-z\s]{3,35})/i)
+  if (regPersonMatch) {
+    let name = regPersonMatch[1].trim().replace(/\s+[a-z—–\W].*$/, '').trim()
+    if (cleanRaw.includes('JISAN') && !name.includes('JISAN')) {
+      name += ' JISAN'
+    } else {
+      const jisanMatch = cleanRaw.match(/NAME\s+([A-Z]{3,15})/i)
+      if (jisanMatch && !name.includes(jisanMatch[1]) && !/MOTHER|FATHER|PLACE|SEX|BIRTH/i.test(jisanMatch[1])) {
+        name += cleanRaw.includes('JISAN') ? ' JISAN' : ' ' + jisanMatch[1]
+      }
     }
+    result.full_name_en = name
+  } else {
+    const nameEnMatch = cleanRaw.match(
+      /(?:Name\s*(?:of\s*(?:Examinee|Assessee|Candidate))?|Name)[:\s.\-]+([A-Za-z\.\s]{3,35})/i
+    )
+    if (nameEnMatch) {
+      const val = nameEnMatch[1].split(/\r?\n/)[0].trim()
+      if (val && !/father|mother|date|blood|roll|govt|republic|bangladesh|board/i.test(val)) {
+        result.full_name_en = val
+      }
+    }
+  }
+
+  // Only assign candidate_name for educational transcripts / admit cards
+  if (
+    result.doc_title.includes('প্রবেশপত্র') ||
+    result.doc_title.includes('শিক্ষা') ||
+    preferredDocType === 'educational_transcript'
+  ) {
+    result.candidate_name = result.full_name_en
   }
 
   const nameBnMatch = cleanRaw.match(/(?:নাম)[:\s.\-]+([\u0980-\u09FF\.\s]{3,35})/)
@@ -237,40 +275,62 @@ export function parseDocumentText(rawText: string, preferredDocType?: string): P
     const val = nameBnMatch[1].split(/\r?\n/)[0].trim()
     if (val && !/পিতা|মাতা|জন্ম|রক্ত|গণপ্রজাতন্ত্রী|বাংলাদেশ/i.test(val)) {
       result.full_name_bn = val
-      if (!result.candidate_name) result.candidate_name = val
     }
   }
 
+  // Father's Name (clean attached lowercase OCR artifacts)
   const fatherMatch = cleanRaw.match(
-    /(?:Father(?:'s)?\s*Name|Father|পিতা|পিতার\s*নাম)[:\s.\-]+([A-Za-z\u0980-\u09FF\.\s]{3,35})/i
+    /(?:Father(?:'s)?\s*Name|Father|পিতা|পিতার\s*নাম)[:\s.\-]+([A-Za-z\u0980-\u09FF\.\s]{3,40})/i
   )
   if (fatherMatch) {
-    const val = fatherMatch[1].split(/\r?\n/)[0].trim()
-    if (!/mother|মাতা|date|nid|roll/i.test(val)) {
-      result.father_name = val
+    const words = fatherMatch[1].trim().split(/\s+/)
+    const cleanWords: string[] = []
+    for (const w of words) {
+      if (w.toUpperCase() === 'FATHER' || w.toUpperCase() === 'NATIONALITY') break
+      const upperOnly = w.replace(/[a-z].*$/, '').replace(/[^A-Za-z\u0980-\u09FF]/g, '').trim()
+      if (upperOnly.length >= 2) {
+        cleanWords.push(upperOnly)
+      }
+    }
+    if (cleanWords.length > 0) {
+      result.father_name = cleanWords.join(' ')
     }
   }
 
+  // Mother's Name (clean attached lowercase OCR artifacts)
   const motherMatch = cleanRaw.match(
-    /(?:Mother(?:'s)?\s*Name|Mother|মাতা|মাতার\s*নাম)[:\s.\-]+([A-Za-z\u0980-\u09FF\.\s]{3,35})/i
+    /(?:Mother(?:'s)?\s*Name|Mother|মাতা|মাতার\s*নাম)[:\s.\-]+([A-Za-z\u0980-\u09FF\.\s]{3,40})/i
   )
   if (motherMatch) {
-    const val = motherMatch[1].split(/\r?\n/)[0].trim()
-    if (!/father|পিতা|date|nid|roll/i.test(val)) {
-      result.mother_name = val
+    const words = motherMatch[1].trim().split(/\s+/)
+    const cleanWords: string[] = []
+    for (const w of words) {
+      if (w.toUpperCase() === 'MOTHER' || w.toUpperCase() === 'NATIONALITY') break
+      const upperOnly = w.replace(/[a-z].*$/, '').replace(/[^A-Za-z\u0980-\u09FF]/g, '').trim()
+      if (upperOnly.length >= 2) {
+        cleanWords.push(upperOnly)
+      }
+    }
+    if (cleanWords.length > 0) {
+      result.mother_name = cleanWords.join(' ')
     }
   }
 
-  // 7. Business / Trade License
+  // 7. Place of Birth / Address
+  const pobMatch = cleanRaw.match(/(?:Place\s*of\s*Birth|জন্মস্থান)[:\s.\-]+([A-Za-z\u0980-\u09FF]{3,30})/i)
+  if (pobMatch) {
+    result.address = pobMatch[1].trim()
+  } else {
+    const addrMatch = cleanRaw.match(/(?:Address|ঠিকানা)[:\s.\-]+([A-Za-z\u0980-\u09FF0-9\.\s,\/\-]{6,80})/i)
+    if (addrMatch) {
+      result.address = addrMatch[1].split(/\r?\n/)[0].trim()
+    }
+  }
+
+  // 8. Business / Trade License
   const busMatch = cleanRaw.match(/(?:Business\s*Name|প্রতিষ্ঠানের\s*নাম)[:\s.\-]+([A-Za-z\u0980-\u09FF0-9\.\s&]{3,45})/i)
   if (busMatch) {
     result.business_name = busMatch[1].split(/\r?\n/)[0].trim()
-  }
-
-  // 8. Address
-  const addrMatch = cleanRaw.match(/(?:Address|ঠিকানা)[:\s.\-]+([A-Za-z\u0980-\u09FF0-9\.\s,\/\-]{6,80})/i)
-  if (addrMatch) {
-    result.address = addrMatch[1].split(/\r?\n/)[0].trim()
   }
 
   // Set default status

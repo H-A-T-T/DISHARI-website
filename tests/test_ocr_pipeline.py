@@ -145,6 +145,37 @@ class TestOCRPipeline(unittest.TestCase):
         self.assertEqual(len(brn), 17, f"Digital Birth Certificate must be 17 digits, got: {len(brn)}")
         self.assertEqual(brn, "20022692015091823")
 
+    def test_bdris_verification_record_parsing(self):
+        """Verify real BDRIS birth record verification text parsing."""
+        if not self.is_server_online:
+            self.skipTest("Backend server is not running on port 5000")
+
+        bdris_image_b64 = generate_doc_image_base64([
+            "Office of the Registrar General, Birth and Death Registration",
+            "Birth Registration Record Verification",
+            "Date of Birth: 21 FEBRUARY 2005",
+            "Birth Registration Number: 20058619458016610",
+            "Registered Person Name: MD ASIF MAHMUD JISAN",
+            "Mother's Name: SABINA YESMIN",
+            "Father's Name: MD MOFIZUL ISLAM",
+            "Place of Birth: SHARIATPUR",
+        ])
+        payload = {
+            "imageBase64": bdris_image_b64,
+            "docType": "nid_front",  # Test that title auto-detects birth certificate despite default
+            "fileName": "birth_record.png",
+        }
+        res = post_api("/documents/scan-ocr", payload)
+        self.assertIsNotNone(res)
+        self.assertTrue(res.get("success"))
+
+        doc = res.get("document", {})
+        self.assertEqual(doc.get("id_number"), "20058619458016610")
+        self.assertIn("Birth Registration", doc.get("doc_title", ""))
+        self.assertIn("ASIF MAHMUD", doc.get("full_name_en", ""))
+        self.assertEqual(doc.get("father_name"), "MD MOFIZUL ISLAM")
+        self.assertEqual(doc.get("mother_name"), "SABINA YESMIN")
+
     def test_unreadable_image_does_not_invent_fake_names(self):
         """Verify unreadable or blank image returns skeleton without hardcoded fake names."""
         if not self.is_server_online:
