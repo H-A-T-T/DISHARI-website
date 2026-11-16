@@ -43,3 +43,11 @@ web/.eslintcache
 web/*.tsbuildinfo
 web/next-env.d.ts
 .neon
+
+# ── Python Test Artifacts ─────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/

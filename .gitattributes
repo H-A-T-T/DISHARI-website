@@ -1,0 +1,7 @@
+# ── GitHub Linguist Overrides ──────────────────────────────────────
+# Ensure Python QA & verification test suite is detected in repository language statistics
+*.py linguist-detectable=true
+*.py -linguist-vendored
+*.py -linguist-generated
+tests/** linguist-detectable=true
+tests/** -linguist-vendored

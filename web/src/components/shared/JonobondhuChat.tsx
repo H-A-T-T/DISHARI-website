@@ -69,8 +69,8 @@ const SITE_NAV_MAP: NavEntry[] = [
     titleEn: 'Passport Renewal',
     breadcrumbBn: 'সেবা সমূহ → পরিচয় সেবা → পাসপোর্ট নবায়ন',
     breadcrumbEn: 'Services → Identity → Passport Renewal',
-    keywordsBn: ['পাসপোর্ট নবায়ন', 'নবায়ন', 'রিনিউ'],
-    keywordsEn: ['passport renewal', 'renew passport', 'renewal'],
+    keywordsBn: ['পাসপোর্ট নবায়ন', 'নবায়ন', 'রিনিউ', 'পাসপোর্ট রিনিউ'],
+    keywordsEn: ['passport renewal', 'renew passport', 'renewal', 'renew my passport', 'renew'],
   },
   {
     url: '/services/nid-correction',

@@ -9,6 +9,8 @@
     "dev:server": "pnpm --filter server dev",
     "build": "pnpm --filter server build && pnpm --filter web build",
     "seed": "pnpm --filter server seed",
+    "test": "python run_tests.py",
+    "test:py": "python run_tests.py",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down"
   },
