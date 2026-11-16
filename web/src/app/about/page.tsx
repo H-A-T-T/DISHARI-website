@@ -292,7 +292,7 @@ export default function AboutPage() {
                 id: 'ai-voice',
                 titleBn: 'জনবন্ধু এআই ভয়েস সহকারী (Bangla Voice AI)',
                 titleEn: 'Jonobondhu Voice Assistant (Regional Dialects)',
-                status: 'upcoming',
+                status: 'active',
                 descBn: 'কীবোর্ডে টাইপ না করে নিজের আঞ্চলিক ভাষায় মুখে কথা বলে সরকারি সেবা ও কাগজপত্র সংক্রান্ত প্রশ্নের তাৎক্ষণিক সমাধান।',
                 descEn: 'Conversational voice assistant capable of understanding everyday Bengali accents and giving step-by-step oral guidance.',
               },

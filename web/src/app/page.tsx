@@ -4,7 +4,6 @@ import { WeatherAdvisory } from '@/components/home/WeatherAdvisory'
 import { CategoryGrid } from '@/components/home/CategoryGrid'
 import { HowItWorks } from '@/components/home/HowItWorks'
 import { FeaturedServices } from '@/components/home/FeaturedServices'
-import { AITeaser } from '@/components/home/AITeaser'
 
 export default function HomePage() {
   return (
@@ -15,7 +14,6 @@ export default function HomePage() {
       <CategoryGrid />
       <HowItWorks />
       <FeaturedServices />
-      <AITeaser />
     </>
   )
 }
