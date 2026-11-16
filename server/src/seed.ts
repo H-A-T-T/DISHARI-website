@@ -1219,6 +1219,1163 @@ export const officialServicesData = [
     ],
     important_notes_bn: ['বিমানবন্দরে বহির্গমনের পূর্বে ইমিগ্রেশনে বিএমইটি স্মার্ট কার্ড প্রদর্শন বাধ্যতামূলক।'],
     common_mistakes_bn: ['অপ্রশিক্ষিত দালালের কথায় জাল ভিসা বা নকল মেডিকেল সনদ জমা দিয়ে প্রতারিত হওয়া।']
+  },
+  {
+    slug: 'driving-license',
+    name_bn: 'স্মার্ট ড্রাইভিং লাইসেন্স আবেদন ও নবায়ন',
+    name_en: 'Smart Driving License Application & Renewal',
+    category: 'identity',
+    department_bn: 'বাংলাদেশ সড়ক পরিবহন কর্তৃপক্ষ (বিআরটিএ)',
+    department_en: 'Bangladesh Road Transport Authority (BRTA)',
+    submission_type: 'hybrid',
+    fee: '২,৫৪২',
+    fee_note_bn: 'পেশাদার লাইসেন্স ফি ২,৫৪২ টাকা, অপেশাদার ৪,১৫২ টাকা (১৫% ভ্যাটসহ বিআরটিএ ফি)',
+    processing_time_bn: '৩০ কার্যদিবস (পরীক্ষা ও বায়োমেট্রিক সাপেক্ষে)',
+    official_url: 'https://bsp.brta.gov.bd',
+    apply_location_bn: 'বিআরটিএ সার্ভিস পোর্টাল (BSP) অনলাইনে আবেদন ও সংশ্লিষ্ট সার্কেল অফিসে পরীক্ষা',
+    required_docs: [
+      {
+        name_bn: 'অনলাইন আবেদন ফরম ও লার্নার ড্রাইভিং লাইসেন্স প্রিন্ট কপি',
+        name_en: 'Application Summary & Learner Driving License Printout',
+        copy_type: 'online_print',
+        note_bn: 'বিএসপি পোর্টাল থেকে প্রিন্ট করা লার্নার পারমিট'
+      },
+      {
+        name_bn: 'রেজিস্টার্ড এমবিবিএস ডাক্তার কর্তৃক প্রদত্ত মেডিকেল সার্টিফিকেট ফরম',
+        name_en: 'Medical Fitness Certificate by Registered Physician',
+        copy_type: 'original',
+        note_bn: 'বিএমডিসি রেজিস্ট্রেশন নম্বর ও সিল সম্বলিত নির্ধারিত ফরম'
+      },
+      {
+        name_bn: 'জাতীয় পরিচয়পত্র (NID) অথবা অনলাইন জন্ম নিবন্ধন সনদ',
+        name_en: 'National ID (NID) or 17-digit Birth Certificate',
+        copy_type: 'both',
+        note_bn: '১৮ বছরের ঊর্ধ্বে অপেশাদার, ২১ বছরের ঊর্ধ্বে পেশাদার আবেদন'
+      },
+      {
+        name_bn: 'শিক্ষাগত যোগ্যতার সনদ (ন্যূনতম ৮ম শ্রেণি বা সমমান)',
+        name_en: 'Educational Qualification Certificate (Min Class 8/JSC)',
+        copy_type: 'both',
+        note_bn: 'মূল সার্টিফিকেট ও সত্যায়িত ফটোকপি'
+      },
+      {
+        name_bn: 'বিআরটিএ নির্ধারিত ফি জমার ই-চালান বা ব্যাংক রসিদ',
+        name_en: 'BRTA Fee Bank Challan / E-Payment Receipt',
+        copy_type: 'original',
+        note_bn: 'অনলাইন পেমেন্ট স্লিপ বা সোনালী ব্যাংক চালান'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'বিএসপি পোর্টালে নাগরিক অ্যাকাউন্ট তৈরি',
+        description_bn: 'bsp.brta.gov.bd পোর্টালে মোবাইল নম্বর ও এনআইডি দিয়ে নাগরিক অ্যাকাউন্ট নিবন্ধন করুন।',
+        url: 'https://bsp.brta.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'লার্নার লাইসেন্স আবেদন ও ফি পরিশোধ',
+        description_bn: 'মেডিকেল সার্টিফিকেট আপলোড করে মোটরসাইকেল/হালকা যানবাহনের লার্নার ফি পরিশোধ করুন।',
+        url: 'https://bsp.brta.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'লিখিত, মৌখিক ও ফিল্ড টেস্ট প্রদান',
+        description_bn: 'লার্নার সনদে উল্লেখিত নির্ধারিত তারিখে বিআরটিএ সার্কেল পরীক্ষা কেন্দ্রে ব্যবহারিক পরীক্ষায় অংশ নিন।',
+        url: 'https://bsp.brta.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'বায়োমেট্রিক ও ছবি প্রদান',
+        description_bn: 'উত্তীর্ণ প্রার্থীরা সার্কেল অফিসে আঙুলের ছাপ, ডিজিটাল ছবি ও ইলেকট্রনিক স্বাক্ষর সম্পন্ন করুন।',
+        url: 'https://bsp.brta.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'ই-ড্রাইভিং লাইসেন্স ও স্মার্ট কার্ড গ্রহণ',
+        description_bn: 'তাৎক্ষণিক ই-ড্রাইভিং লাইসেন্স ডাউনলোড করুন এবং ডাকযোগে চিপযুক্ত স্মার্ট কার্ড সংগ্রহ করুন।',
+        url: 'https://bsp.brta.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'পেশাদার ড্রাইভিং লাইসেন্স প্রার্থীদের ক্ষেত্রে সরকারি হাসপাতাল কর্তৃক ডোপ টেস্ট (মাদক পরীক্ষা) রিপোর্ট বাধ্যতামূলক।',
+      'লার্নার সনদের মেয়াদ সাধারণত ৩ মাস থাকে; এই সময়ের মধ্যে পরীক্ষা সম্পন্ন করতে হবে।'
+    ],
+    common_mistakes_bn: [
+      'মেডিকেল সার্টিফিকেটে বিএমডিসি রেজিস্ট্রেশন নম্বর ও ডাক্তারের স্পষ্ট সিল না থাকা।',
+      'পরীক্ষার দিন মূল লার্নার পারমিট ও এনআইডি সাথে না নিয়ে যাওয়া।'
+    ]
+  },
+  {
+    slug: 'vehicle-fitness',
+    name_bn: 'মোটরযান ফিটনেস ও ট্যাক্স টোকেন নবায়ন',
+    name_en: 'Vehicle Fitness & Tax Token Renewal',
+    category: 'business',
+    department_bn: 'বাংলাদেশ সড়ক পরিবহন কর্তৃপক্ষ (বিআরটিএ)',
+    department_en: 'Bangladesh Road Transport Authority (BRTA)',
+    submission_type: 'hybrid',
+    fee: '১,১৫০',
+    fee_note_bn: 'মোটরসাইকেল ট্যাক্স টোকেন ১,১৫০ টাকা; প্রাইভেট কার ও মাইক্রোবাস ফিটনেস ও রোড ট্যাক্স সিসি অনুযায়ী নির্ধারিত',
+    processing_time_bn: '১-৩ কার্যদিবস',
+    official_url: 'https://bsp.brta.gov.bd',
+    apply_location_bn: 'অনলাইনে ফি পরিশোধ শেষে বিআরটিএ ভেহিকেল ইন্সপেকশন সেন্টারে (VIC) মোটরযান প্রদর্শন',
+    required_docs: [
+      {
+        name_bn: 'মোটরযান রেজিস্ট্রেশন সার্টিফিকেট ও মূল ব্লু-বুক',
+        name_en: 'Vehicle Registration Certificate (Smart Card / Blue Book)',
+        copy_type: 'both',
+        note_bn: 'মালিকানা যাচাইয়ের জন্য মূল কার্ড ও ফটোকপি'
+      },
+      {
+        name_bn: 'পূর্ববর্তী মূল ফিটনেস সার্টিফিকেট ও ট্যাক্স টোকেন',
+        name_en: 'Previous Original Fitness Certificate & Tax Token',
+        copy_type: 'original',
+        note_bn: 'মেয়াদোত্তীর্ণ বা হালনাগাদ পূর্ববর্তী রসিদ'
+      },
+      {
+        name_bn: 'হালনাগাদ অগ্রিম আয়কর (AIT) পরিশোধের রসিদ (বাণিজ্যিক/কার)',
+        name_en: 'Advance Income Tax (AIT) Payment Receipt',
+        copy_type: 'original',
+        note_bn: 'প্রাইভেট কার ও বাণিজ্যিক যানবাহনের জন্য প্রযোজ্য'
+      },
+      {
+        name_bn: 'অনলাইন ফিটনেস ও ট্যাক্স টোকেন পেমেন্ট স্লিপ',
+        name_en: 'Online Fee Payment Slip / Bank Challan',
+        copy_type: 'online_print',
+        note_bn: 'বিএসপি পোর্টাল বা ব্যাংকের জমার রসিদ'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'অনলাইনে ফি হিসাব ও যাচাই',
+        description_bn: 'বিএসপি পোর্টালে মোটরযানের নম্বর দিয়ে বকেয়া রোড ট্যাক্স, ফিটনেস ফি ও ভ্যাট যাচাই করুন।',
+        url: 'https://bsp.brta.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'ই-পেমেন্ট সম্পন্ন করণ',
+        description_bn: 'বিকাশ, নগদ বা সোনালী ব্যাংকের মাধ্যমে সরকারি ফিটনেস ও ট্যাক্স টোকেন ফি পরিশোধ করুন।',
+        url: 'https://bsp.brta.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'ইন্সপেকশন সেন্টারে গাড়ি প্রদর্শন',
+        description_bn: 'মিরপুর, ইকুরিয়া বা সংশ্লিষ্ট বিআরটিএ সার্কেল ভেহিকেল ইন্সপেকশন সেন্টারে গাড়ি নিয়ে যান।',
+        url: 'https://bsp.brta.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'স্বয়ংক্রিয় মেশিন টেস্ট',
+        description_bn: 'হেডলাইট, ব্রেক, নির্গমন ধোঁয়া (এমিশন) ও চেসিস নম্বর ডিজিটাল যন্ত্রে স্বয়ংক্রিয়ভাবে পরীক্ষা হবে।',
+        url: 'https://bsp.brta.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'ডিজিটাল সার্টিফিকেট ও ট্যাক্স টোকেন প্রাপ্তি',
+        description_bn: 'উত্তীর্ণ হলে কিউআর কোডযুক্ত ডিজিটাল ফিটনেস সার্টিফিকেট ও ট্যাক্স টোকেন তাৎক্ষণিক গ্রহণ করুন।',
+        url: 'https://bsp.brta.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'ফিটনেসের মেয়াদ উত্তীর্ণ হওয়ার পূর্বে নবায়ন না করলে মাসিক হারে জরিমানা ধার্য করা হয়।',
+      'ট্যাক্স টোকেনের মেয়াদ শেষ হওয়ার ১৫ দিনের মধ্যে নবায়ন করতে হয়।'
+    ],
+    common_mistakes_bn: [
+      'গাড়ির লুকিং গ্লাস, হাই সিকিউরিটি রেট্রো-রিফ্লেক্টিভ নাম্বারপ্লেট বিহীন অবস্থায় পরিদর্শনে যাওয়া।'
+    ]
+  },
+  {
+    slug: 'police-clearance',
+    name_bn: 'অনলাইন পুলিশ ক্লিয়ারেন্স সার্টিফিকেট',
+    name_en: 'Online Police Clearance Certificate',
+    category: 'identity',
+    department_bn: 'বাংলাদেশ পুলিশ (স্পেশাল ব্রাঞ্চ)',
+    department_en: 'Bangladesh Police (Special Branch)',
+    submission_type: 'hybrid',
+    fee: '৫০০',
+    fee_note_bn: 'বাংলাদেশ ব্যাংক বা সোনালী ব্যাংকের ১-২২০১-০০০১-২৬৮১ কোডে ৫০০ টাকার ট্রেজারি চালান',
+    processing_time_bn: '৭-১০ কার্যদিবস',
+    official_url: 'https://pcc.police.gov.bd',
+    apply_location_bn: 'অনলাইনে আবেদন ফরম পূরণ এবং সংশ্লিষ্ট মেট্রোপলিটন পুলিশ কমিশনার বা পুলিশ সুপার কার্যালয় থেকে সনদ সংগ্রহ',
+    required_docs: [
+      {
+        name_bn: 'আবেদনকারীর পাসপোর্টের ১ম শ্রেণির গেজেটেড কর্মকর্তা কর্তৃক সত্যায়িত কপি',
+        name_en: "Applicant's Passport Attested Photocopy",
+        copy_type: 'both',
+        note_bn: 'পাসপোর্টের মেয়াদ ন্যূনতম ৩ মাস থাকতে হবে'
+      },
+      {
+        name_bn: '৫০০ টাকার সরকারি ট্রেজারি চালান (A-Challan) মূল কপি',
+        name_en: 'Tk 500 Treasury Challan (Original)',
+        copy_type: 'original',
+        note_bn: 'কোড: ১-২২০১-০০০১-২৬৮১ খাতে চালানের মূল ভাউচার'
+      },
+      {
+        name_bn: 'ইউনিয়ন পরিষদ চেয়ারম্যান / ওয়ার্ড কাউন্সিলর প্রদত্ত নাগরিকত্ব সনদপত্র',
+        name_en: 'Citizenship Certificate from UP Chairman/Councillor',
+        copy_type: 'original',
+        note_bn: 'বর্তমান ও স্থায়ী ঠিকানার প্রত্যয়নপত্র'
+      },
+      {
+        name_bn: 'প্রবাসীদের ক্ষেত্রে পাসপোর্টের ইমিগ্রেশন ডিপারচার সিল ও ভিসা পৃষ্ঠার কপি',
+        name_en: 'Departure Stamp & Visa Copy for Expatriates',
+        copy_type: 'both',
+        note_bn: 'বিদেশে অবস্থানরতদের জন্য বাংলাদেশ দূতাবাস কর্তৃক সত্যায়ন'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'pcc.police.gov.bd পোর্টালে নিবন্ধন',
+        description_bn: 'সচল মোবাইল নম্বর ও পাসওয়ার্ড দিয়ে অনলাইনে পুলিশ ক্লিয়ারেন্স অ্যাকাউন্ট তৈরি করুন।',
+        url: 'https://pcc.police.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'তথ্য পূরণ ও চালান আপলোড',
+        description_bn: 'পাসপোর্টের সাথে মিল রেখে ঠিকানা দিন এবং ৫০০ টাকার চালানের স্ক্যান কপি আপলোড করুন।',
+        url: 'https://pcc.police.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'সংশ্লিষ্ট থানায় পুলিশ ভেরিফিকেশন',
+        description_bn: 'আপনার আবেদনের ভিত্তিতে স্থানীয় থানার সাব-ইন্সপেক্টর ঠিকানায় গিয়ে তথ্য ও রেকর্ড তদন্ত করবেন।',
+        url: 'https://pcc.police.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'এসবি কর্তৃক অনুমোদন',
+        description_bn: 'থানার ক্লিয়ারেন্স রিপোর্ট স্পেশাল ব্রাঞ্চে (SB) যাচাই শেষে চূড়ান্ত অনুমোদন পায়।',
+        url: 'https://pcc.police.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'কিউআর কোডযুক্ত সার্টিফিকেট গ্রহণ',
+        description_bn: 'পুলিশ সুপারের কার্যালয় বা ডিসি অফিস থেকে কিউআর কোডযুক্ত মূল সার্টিফিকেট সংগ্রহ করুন।',
+        url: 'https://pcc.police.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'পাসপোর্টের উল্লেখিত স্থায়ী ঠিকানার অধিক্ষেত্রভুক্ত থানাতেই পুলিশ ক্লিয়ারেন্স আবেদন করতে হবে।',
+      'বিদেশে ব্যবহারের জন্য পররাষ্ট্র মন্ত্রণালয়ের কনস্যুলার শাখা থেকে সত্যায়ন করে নিতে হবে।'
+    ],
+    common_mistakes_bn: [
+      'চালান কোডে ভুল করা বা ব্যাংকের সঠিক শাখা সিলের স্ক্যান কপি আপলোড না করা।',
+      'পাসপোর্টের ঠিকানার সাথে স্থানীয় ঠিকানার অমিল থাকা।'
+    ]
+  },
+  {
+    slug: 'land-khatian',
+    name_bn: 'অনলাইন খতিয়ান বা পর্চা ও সার্টিফাইড কপি উত্তোলন',
+    name_en: 'Online Khatian & Porcha Certified Copy',
+    category: 'land',
+    department_bn: 'ভূমি সংস্কার বোর্ড ও ভূমি রেকর্ড ও জরিপ অধিদপ্তর',
+    department_en: 'Land Reform Board & DLRS, Ministry of Land',
+    submission_type: 'hybrid',
+    fee: '১০০',
+    fee_note_bn: 'অনলাইন ভিউ ও ডিজিটাল কপি ১০০ টাকা; কোর্ট ফি ও ডাক মাশুলসহ সার্টিফাইড হার্ডকপি ১৪০ টাকা',
+    processing_time_bn: 'তাৎক্ষণিক (অনলাইন কপি) / ৫-৭ কার্যদিবস (ডাকযোগে হার্ডকপি)',
+    official_url: 'https://eporcha.gov.bd',
+    apply_location_bn: 'eporcha.gov.bd পোর্টালে সরাসরি আবেদন বা জেলা প্রশাসকের রেকর্ড রুম / ডাকযোগে বিতরণ',
+    required_docs: [
+      {
+        name_bn: 'আবেদনকারীর জাতীয় পরিচয়পত্র (NID) ও মোবাইল নম্বর',
+        name_en: "Applicant's NID & Active Mobile Number",
+        copy_type: 'online_print',
+        note_bn: 'ওটিপি ভেরিফিকেশনের জন্য সচল মোবাইল'
+      },
+      {
+        name_bn: 'মৌজার নাম, জেএল নম্বর ও কাঙ্ক্ষিত খতিয়ান বা দাগ নম্বর',
+        name_en: 'Mouza, JL Number & Khatian/Dag Number Details',
+        copy_type: 'original',
+        note_bn: 'খতিয়ান অনুসন্ধানের প্রাথমিক তথ্য'
+      },
+      {
+        name_bn: 'ডাকযোগে বাসায় গ্রহণের ক্ষেত্রে পূর্ণাঙ্গ ডাক যোগাযোগের ঠিকানা',
+        name_en: 'Complete Postal Delivery Address with Postcode',
+        copy_type: 'original',
+        note_bn: 'সার্টিফাইড হার্ডকপি সরাসরি বাসায় পৌঁছে দেওয়ার জন্য'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'eporcha.gov.bd পোর্টালে বিভাগ ও জেলা নির্বাচন',
+        description_bn: 'বিভাগ, জেলা, উপজেলা এবং জরিপের ধরন (বিএস/সিএস/এসএ/আরএস) নির্বাচন করুন।',
+        url: 'https://eporcha.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'মৌজা ও খতিয়ান নম্বর অনুসন্ধান',
+        description_bn: 'নির্দিষ্ট মৌজায় খতিয়ান নম্বর বা দাগ নম্বর দিয়ে কাঙ্ক্ষিত খতিয়ান খুঁজে বের করুন।',
+        url: 'https://eporcha.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'মালিকানা ও দাগের বিবরণ যাচাই',
+        description_bn: 'স্ক্রিনে প্রদর্শিত খতিয়ানের জমির অংশ ও হিস্যা মালিকের তথ্যের সাথে মিলিয়ে নিন।',
+        url: 'https://eporcha.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'কপির ধরন নির্বাচন ও ফি পরিশোধ',
+        description_bn: 'অনলাইন কপি বা সার্টিফাইড হার্ডকপি বেছে নিয়ে বিকাশ/নগদে ফি পরিশোধ করুন।',
+        url: 'https://eporcha.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'ডাউনলোড বা ডাকযোগে রিসিভ',
+        description_bn: 'অনলাইন কপি তাৎক্ষণিক ডাউনলোড করুন অথবা পোস্টম্যানের মাধ্যমে মূল সার্টিফাইড কপি গ্রহণ করুন।',
+        url: 'https://eporcha.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'জমির রেজিস্ট্রেশন, ব্যাংকে বন্ধক রাখা এবং নামজারি করার জন্য ডিসি অফিসের সিলযুক্ত সার্টিফাইড হার্ডকপি আবশ্যক।'
+    ],
+    common_mistakes_bn: [
+      'জরিপের ধরন (CS, SA, RS, BS) ভুল নির্বাচন করার কারণে সঠিক খতিয়ান খুঁজে না পাওয়া।'
+    ]
+  },
+  {
+    slug: 'land-tax',
+    name_bn: 'অনলাইন ভূমি উন্নয়ন কর (খাজনা) পরিশোধ',
+    name_en: 'Online Land Development Tax (LD Tax)',
+    category: 'land',
+    department_bn: 'ভূমি মন্ত্রণালয় (Ministry of Land)',
+    department_en: 'Ministry of Land',
+    submission_type: 'online_bot',
+    fee: 'সরকারি গেজেট অনুযায়ী',
+    fee_note_bn: 'কৃষি জমি ২৫ বিঘা পর্যন্ত করমুক্ত (শুধুমাত্র দাখিলা ফি); আবাসিক ও বাণিজ্যিক জমির মৌজা ভিত্তিক বাৎসরিক নির্ধারিত কর',
+    processing_time_bn: 'তাৎক্ষণিক ডিজিটাল দাখিলা রশিদ',
+    official_url: 'https://ldtax.gov.bd',
+    apply_location_bn: 'ldtax.gov.bd পোর্টালে সরাসরি বিকাশ/নগদে পরিশোধ ও তাৎক্ষণিক ডিজিটাল দাখিলা প্রিন্ট',
+    required_docs: [
+      {
+        name_bn: 'আবেদনকারী বা মালিকের জাতীয় পরিচয়পত্র (NID) নম্বর',
+        name_en: "Owner's National ID (NID) Number",
+        copy_type: 'online_print',
+        note_bn: 'নাগরিক পোর্টালে অ্যাকাউন্ট তৈরির জন্য'
+      },
+      {
+        name_bn: 'সর্বশেষ নামজারি (মিউটেশন) খতিয়ানের কপি',
+        name_en: 'Latest Mutation (Namjari) Khatian Copy',
+        copy_type: 'both',
+        note_bn: 'হোল্ডিং নম্বর নির্ধারণের জন্য'
+      },
+      {
+        name_bn: 'পূর্ববর্তী বছরের দাখিলা / রসিদ (যদি থাকে)',
+        name_en: 'Previous Year Land Tax Dakhila / Receipt',
+        copy_type: 'both',
+        note_bn: 'বকেয়া হিসাব মেলানোর জন্য'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'ldtax.gov.bd পোর্টালে নাগরিক নিবন্ধন',
+        description_bn: 'এনআইডি ও সচল মোবাইল নম্বর দিয়ে লগইন প্রোফাইল তৈরি করুন।',
+        url: 'https://ldtax.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'খতিয়ান ও হোল্ডিং সংযোজন',
+        description_bn: 'জেলা, উপজেলা ও মৌজা নির্বাচন করে আপনার নামজারি খতিয়ানের হোল্ডিং যুক্ত করুন।',
+        url: 'https://ldtax.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'ইউনিয়ন ভূমি সহকারী কর্মকর্তা কর্তৃক যাচাই',
+        description_bn: 'দায়িত্বপ্রাপ্ত তহশিলদার অনলাইনে হোল্ডিংয়ের জমির পরিমাণ ও বাৎসরিক কর অনুমোদন করবেন।',
+        url: 'https://ldtax.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'অনলাইন ই-পেমেন্ট',
+        description_bn: 'বিকাশ, নগদ, রকেট বা কার্ডের মাধ্যমে সরাসরি সরকারি চালানে কর পরিশোধ করুন।',
+        url: 'https://ldtax.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'ডিজিটাল দাখিলা ডাউনলোড',
+        description_bn: 'পেমেন্ট সম্পন্ন হওয়ার সাথে সাথে কিউআর কোডযুক্ত আইনসিদ্ধ দাখিলা সংগ্রহ ও প্রিন্ট করুন।',
+        url: 'https://ldtax.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'ডিজিটাল দাখিলায় কোনো কর্মকর্তার ম্যানুয়াল স্বাক্ষরের প্রয়োজন নেই; কিউআর কোড স্ক্যান করলেই সত্যতা যাচাই হয়।'
+    ],
+    common_mistakes_bn: [
+      'পুরানো বা বাতিল খতিয়ানের ভিত্তিতে হোল্ডিং তৈরি করার চেষ্টা করা।'
+    ]
+  },
+  {
+    slug: 'mouza-map',
+    name_bn: 'ডিজিটাল মৌজা ম্যাপ বা নকশা আবেদন',
+    name_en: 'Digital Mouza Map & Plot Sheet',
+    category: 'land',
+    department_bn: 'ভূমি রেকর্ড ও জরিপ অধিদপ্তর (DLRS)',
+    department_en: 'Department of Land Records and Surveys (DLRS)',
+    submission_type: 'hybrid',
+    fee: '৫২০',
+    fee_note_bn: 'প্রতি শিট মৌজা ম্যাপ ফি ৫২০ টাকা (ডাক মাশুল ও পিভিসি টিউব প্যাকেজিং খরচ অন্তর্ভুক্ত)',
+    processing_time_bn: '৭-১৫ কার্যদিবস (ডাকযোগে ডেলিভারি)',
+    official_url: 'https://eporcha.gov.bd',
+    apply_location_bn: 'eporcha.gov.bd পোর্টালে অনলাইন অর্ডার অথবা জেলা রেকর্ড রুম / তেজগাঁও ভূমি রেকর্ড ভবন',
+    required_docs: [
+      {
+        name_bn: 'আবেদনকারীর জাতীয় পরিচয়পত্র (NID) নম্বর ও মোবাইল',
+        name_en: "Applicant's NID Number & Mobile",
+        copy_type: 'online_print',
+        note_bn: 'আবেদন ট্র্যাকিং ও এসএমএসের জন্য'
+      },
+      {
+        name_bn: 'সংশ্লিষ্ট মৌজার নাম, জেএল নম্বর ও শিট নম্বর',
+        name_en: 'Mouza Name, JL Number & Sheet Number',
+        copy_type: 'original',
+        note_bn: 'নকশা নির্বাচনের সুনির্দিষ্ট বিবরণ'
+      },
+      {
+        name_bn: 'ডাকযোগে সরবরাহের জন্য পূর্ণাঙ্গ বর্তমান ঠিকানা',
+        name_en: 'Delivery Address with Postal Code',
+        copy_type: 'original',
+        note_bn: 'পোস্টম্যান কর্তৃক সরাসরি বাসায় বিতরণের ঠিকানা'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'মৌজা ম্যাপ অপশন নির্বাচন',
+        description_bn: 'eporcha.gov.bd ওয়েবসাইটে গিয়ে মৌজা ম্যাপ সেকশন ওপেন করুন।',
+        url: 'https://eporcha.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'বিভাগ, জেলা, থানা ও মৌজা নির্বাচন',
+        description_bn: 'জরিপের ধরন (বিএস/সিএস/আরএস) এবং নির্দিষ্ট মৌজার জেএল নম্বর সিলেক্ট করুন।',
+        url: 'https://eporcha.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'শিট নম্বর ও প্রিভিউ যাচাই',
+        description_bn: 'আপনার জমির দাগ নম্বরটি কোন শিটের অন্তর্ভুক্ত তা যাচাই করে সঠিক শিট নির্বাচন করুন।',
+        url: 'https://eporcha.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: '৫২০ টাকা অনলাইন ফি পরিশোধ',
+        description_bn: 'বিকাশ বা নগদে সরকারি ফি পরিশোধ করে পেমেন্ট কনফার্মেশন সংগ্রহ করুন।',
+        url: 'https://eporcha.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'পিভিসি টিউবে মূল নকশা গ্রহণ',
+        description_bn: 'ডাক বিভাগের মাধ্যমে অক্ষত অবস্থায় প্লাস্টিক টিউবে মোড়ানো মূল মৌজা ম্যাপ বাসায় গ্রহণ করুন।',
+        url: 'https://eporcha.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'জমির সীমানা নিয়ে বিরোধ বা ডিজিটাল সার্ভেয়ার (আমিন) দ্বারা জমি পরিমাপের ক্ষেত্রে মূল মুদ্রিত মৌজা নকশা আবশ্যক।'
+    ],
+    common_mistakes_bn: [
+      'একটি মৌজায় একাধিক শিট থাকলে দাগ নম্বর যাচাই না করে ভুল শিটের জন্য অর্ডার করা।'
+    ]
+  },
+  {
+    slug: 'telemedicine-16263',
+    name_bn: 'স্বাস্থ্য বাতায়ন ১৬২৬৩ ও জরুরি টেলিমেডিসিন সেবা',
+    name_en: 'Shastho Batayan 16263 Telemedicine',
+    category: 'health',
+    department_bn: 'স্বাস্থ্য অধিদপ্তর (DGHS), স্বাস্থ্য ও পরিবার কল্যাণ মন্ত্রণালয়',
+    department_en: 'Directorate General of Health Services (DGHS)',
+    submission_type: 'online_bot',
+    fee: 'বিনামূল্যে',
+    fee_note_bn: 'চিকিৎসা পরামর্শ ও ই-প্রেসক্রিপশন সম্পূর্ণ বিনামূল্যে। শুধুমাত্র মোবাইল অপারেটরের নিয়মিত কল চার্জ প্রযোজ্য',
+    processing_time_bn: 'তাৎক্ষণিক (২৪/৭ রিয়েল-টাইম কল)',
+    official_url: 'https://16263.dghs.gov.bd',
+    apply_location_bn: 'যেকোনো মোবাইল বা টেলিফোন থেকে সরাসরি ১৬২৬৩ নম্বরে ডায়াল করে',
+    required_docs: [
+      {
+        name_bn: 'রোগীর বয়স, লিঙ্গ ও বর্তমান শারীরিক উপসর্গের তথ্য',
+        name_en: "Patient's Age, Gender & Symptoms",
+        copy_type: 'original',
+        note_bn: 'ডাক্তারের সাথে প্রাথমিক কথোপকথনের বিবরণ'
+      },
+      {
+        name_bn: 'পূর্ববর্তী প্রেসক্রিপশন বা চলমান ওষুধের বিবরণ (যদি থাকে)',
+        name_en: 'Previous Medical History / Prescriptions',
+        copy_type: 'both',
+        note_bn: 'ডায়াবেটিস, রক্তচাপ বা অ্যালার্জির তথ্য'
+      },
+      {
+        name_bn: 'ই-প্রেসক্রিপশন গ্রহণের জন্য সচল মোবাইল ফোন নম্বর',
+        name_en: 'Active Mobile Number for SMS E-Prescription',
+        copy_type: 'original',
+        note_bn: 'কল সমাপ্তির সাথে সাথে এসএমএস আসবে'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: '১৬২৬৩ নম্বরে কল প্রদান',
+        description_bn: 'যেকোনো সিম থেকে ১৬২৬৩ ডায়াল করুন (বছরের ৩৬৫ দিন, ২৪ ঘণ্টা সেবা চালু)।',
+        url: 'https://16263.dghs.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'ডাক্তারের সাথে সংযোগ স্থাপন',
+        description_bn: 'আইভিআর নির্দেশনায় ডাক্তারের সাথে কথা বলতে নির্ধারিত বোতাম চেপে চিকিৎসকের সাথে যুক্ত হন।',
+        url: 'https://16263.dghs.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'সমস্যার বিবরণ ও চিকিৎসা গ্রহণ',
+        description_bn: 'সরকারি এমবিবিএস চিকিৎসকের নিকট রোগীর শারীরিক সমস্যা ও উপসর্গের কথা স্পষ্টভাবে বলুন।',
+        url: 'https://16263.dghs.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'ই-প্রেসক্রিপশন এসএমএস প্রাপ্তি',
+        description_bn: 'চিকিৎসক তাৎক্ষণিক প্রেসক্রিপশন তৈরি করে আপনার মোবাইলে অফিশিয়াল এসএমএস পাঠিয়ে দেবেন।',
+        url: 'https://16263.dghs.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'ওষুধ সেবন ও ফলো-আপ',
+        description_bn: 'এসএমএস প্রেসক্রিপশন দেখিয়ে ফার্মেসি থেকে ওষুধ সংগ্রহ করুন এবং প্রয়োজনে পুনরায় ফলো-আপ কল দিন।',
+        url: 'https://16263.dghs.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'জরুরি অ্যাম্বুলেন্স সেবা, সরকারি হাসপাতালের অবস্থান ও হেলথ কার্ডের তথ্যও ১৬২৬৩ থেকে জানা যায়।'
+    ],
+    common_mistakes_bn: [
+      'সংকটাপন্ন বা জরুরি অস্ত্রোপচারের রোগীকে হাসপাতালে না নিয়ে শুধুমাত্র ফোনে সময় নষ্ট করা।'
+    ]
+  },
+  {
+    slug: 'vaccination-certificate',
+    name_bn: 'ইপিআই টিকাদান ও আন্তর্জাতিক স্বাস্থ্য সনদ',
+    name_en: 'EPI Child Vaccination & Health Certificate',
+    category: 'health',
+    department_bn: 'সম্প্রসারিত টিকাদান কর্মসূচি (EPI), স্বাস্থ্য অধিদপ্তর',
+    department_en: 'Expanded Programme on Immunization (EPI), DGHS',
+    submission_type: 'hybrid',
+    fee: 'বিনামূল্যে',
+    fee_note_bn: 'শিশুদের মারাত্মক ১০টি রোগের সরকারি টিকা ও টিকাদান প্রত্যয়ন সম্পূর্ণ বিনামূল্যে',
+    processing_time_bn: '১-৩ কার্যদিবস',
+    official_url: 'https://dghs.gov.bd',
+    apply_location_bn: 'উপজেলা স্বাস্থ্য কমপ্লেক্স, নগর মাতৃসদন বা স্থানীয় ইপিআই স্থায়ী টিকাদান কেন্দ্রে',
+    required_docs: [
+      {
+        name_bn: 'শিশুর মূল ইপিআই টিকাদান কার্ড (EPI Vaccine Card)',
+        name_en: "Child's Original EPI Vaccine Card",
+        copy_type: 'original',
+        note_bn: 'টিকার তারিখ ও স্বাস্থ্যকর্মীর স্বাক্ষরযুক্ত মূল কার্ড'
+      },
+      {
+        name_bn: 'শিশুর ১৭ ডিজিটের অনলাইন জন্ম নিবন্ধন সনদ',
+        name_en: "Child's 17-digit Online Birth Certificate",
+        copy_type: 'both',
+        note_bn: 'ডিএইচআইএস-২ অনলাইন রেকর্ডের জন্য'
+      },
+      {
+        name_bn: 'পিতা ও মাতার জাতীয় পরিচয়পত্র (NID) কপি',
+        name_en: "Parents' National ID Copies",
+        copy_type: 'photocopy',
+        note_bn: 'অভিভাবকত্বের প্রমাণ'
+      },
+      {
+        name_bn: 'বিদেশ ভ্রমণের ক্ষেত্রে শিশুর মূল পাসপোর্ট ও ফটোকপি',
+        name_en: "Child's Original Passport & Copy (for travel)",
+        copy_type: 'both',
+        note_bn: 'আন্তর্জাতিক ট্রাভেল ভ্যাকসিনের জন্য'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'ইপিআই কার্ড ও জন্ম সনদ সংগ্রহ',
+        description_bn: 'শিশুর জন্মের পর থেকে সব কয়টি নির্ধারিত টিকার ডোজ সম্পন্ন করা মূল কার্ডটি নিন।',
+        url: 'https://dghs.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'নিকটস্থ স্বাস্থ্য কমপ্লেক্সে উপস্থিতি',
+        description_bn: 'উপজেলা স্বাস্থ্য কমপ্লেক্স বা নগর স্বাস্থ্য কেন্দ্রের ইপিআই ফোকাল পার্সনের কাছে মূল কার্ড প্রদর্শন করুন।',
+        url: 'https://dghs.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'ডিএইচআইএস-২ অনলাইন ভেরিফিকেশন',
+        description_bn: 'স্বাস্থ্য সহকারী সরকারি স্বাস্থ্য পোর্টালে শিশুর টিকার ডাটা এন্ট্রি ও অনুমোদন নিশ্চিত করবেন।',
+        url: 'https://dghs.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'উপজেলা স্বাস্থ্য কর্মকর্তার প্রতিস্বাক্ষর',
+        description_bn: 'স্বাস্থ্য ও পরিবার পরিকল্পনা কর্মকর্তা (UH&FPO) টিকাদান সনদে প্রাতিষ্ঠানিক সিল ও স্বাক্ষর দেবেন।',
+        url: 'https://dghs.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'আন্তর্জাতিক সনদপত্র গ্রহণ',
+        description_bn: 'স্কুল ভর্তি বা বিদেশে ভ্রমণের জন্য কার্যকর কিউআর কোডযুক্ত ভ্যাকসিনেশন সার্টিফিকেট গ্রহণ করুন।',
+        url: 'https://dghs.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'প্রাপ্তবয়স্ক বিদেশগামীদের হলুদ জ্বর (Yellow Fever) ও পোলিও টিকার জন্য আইইডিসিআর মহাখালীতে যেতে হবে।'
+    ],
+    common_mistakes_bn: [
+      'শিশুর মূল ইপিআই কার্ড হারিয়ে ফেলা বা টিকার ডোজের তারিখ স্পষ্ট না থাকা।'
+    ]
+  },
+  {
+    slug: 'suborno-nagorik-card',
+    name_bn: 'সুবর্ণ নাগরিক - প্রতিবন্ধী ব্যক্তি ডিজিটাল স্মার্ট কার্ড',
+    name_en: 'Suborno Nagorik Disability Smart Card',
+    category: 'health',
+    department_bn: 'সমাজসেবা অধিদপ্তর (সমাজকল্যাণ মন্ত্রণালয়) ও স্বাস্থ্য অধিদপ্তর',
+    department_en: 'Department of Social Services (DSS) & DGHS',
+    submission_type: 'hybrid',
+    fee: 'বিনামূল্যে',
+    fee_note_bn: 'মেডিকেল অ্যাসেসমেন্ট, প্রতিবন্ধিতা শনাক্তকরণ ও সুবর্ণ নাগরিক কার্ড সম্পূর্ণ বিনামূল্যে',
+    processing_time_bn: '১৫-২১ কার্যদিবস',
+    official_url: 'https://dis.dss.gov.bd',
+    apply_location_bn: 'উপজেলা স্বাস্থ্য কমপ্লেক্স (মেডিকেল বোর্ড) এবং উপজেলা সমাজসেবা কার্যালয়ে',
+    required_docs: [
+      {
+        name_bn: 'প্রতিবন্ধী ব্যক্তির জাতীয় পরিচয়পত্র (NID) অথবা অনলাইন জন্ম নিবন্ধন',
+        name_en: "Person's National ID or Online Birth Certificate",
+        copy_type: 'both',
+        note_bn: 'বয়স অনুযায়ী বৈধ সরকারি পরিচয়পত্র'
+      },
+      {
+        name_bn: 'সরকারি মেডিকেল বোর্ডের বিশেষজ্ঞ চিকিৎসকের প্রত্যয়নপত্র',
+        name_en: 'Disability Assessment Certificate by Medical Board',
+        copy_type: 'original',
+        note_bn: 'প্রতিবন্ধিতার ধরন ও মাত্রা সম্বলিত মূল প্রত্যয়ন'
+      },
+      {
+        name_bn: 'আবেদনকারীর ৩ কপি পাসপোর্ট সাইজ ছবি (প্রতিবন্ধিতা স্পষ্ট প্রকাশ পায়)',
+        name_en: '3 Passport-size Photos Showing Disability Clearly',
+        copy_type: 'original',
+        note_bn: 'সত্যায়িত রঙিন ছবি'
+      },
+      {
+        name_bn: 'অভিভাবক বা নমিনির জাতীয় পরিচয়পত্র (NID) কপি',
+        name_en: "Guardian / Nominee's National ID Copy",
+        copy_type: 'photocopy',
+        note_bn: 'নাবালক বা মানসিক প্রতিবন্ধীর ক্ষেত্রে আবশ্যক'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'মেডিকেল বোর্ডে শারীরিক অ্যাসেসমেন্ট',
+        description_bn: 'উপজেলা স্বাস্থ্য কমপ্লেক্সের প্রতিবন্ধিতা শনাক্তকরণ মেডিকেল বোর্ডে অংশ নিয়ে ডাক্তার প্রত্যয়ন নিন।',
+        url: 'https://dis.dss.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'ডিআইএস (DIS) পোর্টালে অনলাইন নিবন্ধন',
+        description_bn: 'dis.dss.gov.bd পোর্টালে ডাক্তারের রিপোর্ট ও ছবি আপলোড করে আবেদন সাবমিট করুন।',
+        url: 'https://dis.dss.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'সমাজসেবা কর্মকর্তা কর্তৃক ফিল্ড ভেরিফিকেশন',
+        description_bn: 'উপজেলা সমাজসেবা কর্মকর্তা আবেদনকারীর তথ্য ডাটাবেসে যাচাই ও অনুমোদন করবেন।',
+        url: 'https://dis.dss.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'সুবর্ণ নাগরিক আইডি নম্বর বরাদ্দ',
+        description_bn: 'জাতীয় ডাটাবেসে নাম অন্তর্ভুক্ত হয়ে ডিজিটাল সুবর্ণ নাগরিক নম্বর জেনারেট হবে।',
+        url: 'https://dis.dss.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'সুবর্ণ নাগরিক স্মার্ট কার্ড গ্রহণ',
+        description_bn: 'উপজেলা সমাজসেবা অফিস থেকে বিশেষ স্মার্ট কার্ড গ্রহণ করে মাসিক ভাতা ও সুযোগ নিশ্চিত করুন।',
+        url: 'https://dis.dss.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'এই কার্ড থাকলে সরকার নির্ধারিত অসচ্ছল প্রতিবন্ধী ভাতা (মাসিক ৮৫০ টাকা) এবং গণপরিবহনে বিশেষ অধিকার পাওয়া যায়।'
+    ],
+    common_mistakes_bn: [
+      'বেসরকারি হাসপাতালের সাধারণ প্রেসক্রিপশন জমা দেওয়া; সরকারি মেডিকেল বোর্ডের প্রত্যয়নই একমাত্র গ্রহণযোগ্য।'
+    ]
+  },
+  {
+    slug: 'board-certificate-duplicate',
+    name_bn: 'শিক্ষা বোর্ড মূল সনদ ও নম্বরপত্র যাচাই ও উত্তোলন',
+    name_en: 'Board Certificate & Transcript Issue',
+    category: 'education',
+    department_bn: 'মাধ্যমিক ও উচ্চমাধ্যমিক শিক্ষা বোর্ডসমূহ (আন্তঃশিক্ষা বোর্ড সমন্বয় সাব-কমিটি)',
+    department_en: 'Board of Intermediate and Secondary Education',
+    submission_type: 'hybrid',
+    fee: '৫০০',
+    fee_note_bn: 'হারানো সনদের জন্য ৫০০ টাকা; নম্বরপত্র বা একাডেমিক ট্রান্সক্রিপ্ট ফি ৩৫০ টাকা',
+    processing_time_bn: '৭-১৫ কার্যদিবস',
+    official_url: 'https://dhakaeducationboard.gov.bd',
+    apply_location_bn: 'সংশ্লিষ্ট শিক্ষা বোর্ডের অনলাইন ই-সেবা পোর্টাল অথবা সরাসরি বোর্ড ওয়ান-স্টপ কাউন্টারে',
+    required_docs: [
+      {
+        name_bn: 'এসএসসি বা এইচএসসি পরীক্ষার মূল প্রবেশপত্র ও রেজিস্ট্রেশন কার্ড',
+        name_en: 'Original Admit Card & Registration Card Copy',
+        copy_type: 'both',
+        note_bn: 'পরীক্ষার বছর, রোল ও রেজিস্ট্রেশন নম্বর'
+      },
+      {
+        name_bn: 'হারানোর ক্ষেত্রে সংশ্লিষ্ট থানার জিডি (সাধারণ ডায়েরি) এর মূল কপি',
+        name_en: 'Police GD (General Diary) Original Copy',
+        copy_type: 'original',
+        note_bn: 'সনদপত্র হারিয়ে যাওয়ার প্রমাণ'
+      },
+      {
+        name_bn: 'জাতীয় দৈনিক পত্রিকায় প্রকাশিত হারানো বিজ্ঞপ্তির মূল কাটিং',
+        name_en: 'Daily Newspaper Lost Notice Original Paper Cutting',
+        copy_type: 'original',
+        note_bn: 'পত্রিকার তারিখ ও নাম স্পষ্ট থাকতে হবে'
+      },
+      {
+        name_bn: 'শিক্ষাপ্রতিষ্ঠান প্রধানের সুপারিশ ও প্রত্যয়নপত্র',
+        name_en: 'Head of Institution Recommendation Letter',
+        copy_type: 'original',
+        note_bn: 'যে স্কুল বা কলেজ থেকে পাস করেছেন'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'থানায় জিডি ও পত্রিকায় বিজ্ঞপ্তি',
+        description_bn: 'সার্টিফিকেট হারিয়ে গেলে নিকটস্থ থানায় জিডি করুন এবং বহুল প্রচারিত পত্রিকায় হারানো বিজ্ঞপ্তি দিন।',
+        url: 'https://dhakaeducationboard.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'বোর্ডের ই-সেবা পোর্টালে অনলাইন আবেদন',
+        description_bn: 'সংশ্লিষ্ট শিক্ষা বোর্ডের পোর্টালে গিয়ে রোল ও রেজিস্ট্রেশন দিয়ে আবেদন ফরম পূরণ করুন।',
+        url: 'https://dhakaeducationboard.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'কাগজপত্র ও জিডি কপি আপলোড',
+        description_bn: 'জিডির কপি, পত্রিকার কাটিং ও প্রবেশপত্রের স্ক্যান কপি অনলাইনে আপলোড করুন।',
+        url: 'https://dhakaeducationboard.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'সোনালী সেবায় ফি পরিশোধ',
+        description_bn: 'সোনালী পেমেন্ট গেটওয়েতে ৫০০ টাকা ফি জমা দিয়ে মানি রিসিট সংরক্ষণ করুন।',
+        url: 'https://dhakaeducationboard.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'ডুপ্লিকেট সনদ সংগ্রহ',
+        description_bn: 'বোর্ড থেকে এসএমএস পেলে মূল রসিদ প্রদর্শন করে বোর্ড কাউন্টার থেকে ডুপ্লিকেট মূল সনদপত্র গ্রহণ করুন।',
+        url: 'https://dhakaeducationboard.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'উচ্চশিক্ষায় বিদেশ গমনের জন্য শিক্ষা বোর্ড থেকে উত্তোলিত সনদে আন্তঃশিক্ষা বোর্ড ও শিক্ষা মন্ত্রণালয়ের সত্যায়ন প্রয়োজন।'
+    ],
+    common_mistakes_bn: [
+      'থানার সাধারণ ডায়েরিতে (জিডি) পরীক্ষার রোল ও রেজিস্ট্রেশন নম্বরের বানানে ভুল থাকা।'
+    ]
+  },
+  {
+    slug: 'school-admission',
+    name_bn: 'সরকারি ও বেসরকারি বিদ্যালয়ে কেন্দ্রীয় অনলাইন ভর্তি আবেদন',
+    name_en: 'Central Online School Admission (GSA)',
+    category: 'education',
+    department_bn: 'মাধ্যমিক ও উচ্চ শিক্ষা অধিদপ্তর (DSHE)',
+    department_en: 'Directorate of Secondary and Higher Education (DSHE)',
+    submission_type: 'online_bot',
+    fee: '১১০',
+    fee_note_bn: 'প্রতি আবেদনে সর্বোচ্চ ৫টি বিদ্যালয় পছন্দের জন্য টেলিটক ফি ১১০ টাকা',
+    processing_time_bn: 'কেন্দ্রীয় ডিজিটাল লটারি ও ফলাফল সরকারি সময়সূচি অনুযায়ী',
+    official_url: 'https://gsa.teletalk.com.bd',
+    apply_location_bn: 'gsa.teletalk.com.bd পোর্টালে অনলাইন আবেদন এবং টেলিটকে এসএমএস ফি পরিশোধ',
+    required_docs: [
+      {
+        name_bn: 'শিক্ষার্থীর ১৭ ডিজিটের অনলাইন জন্ম নিবন্ধন সনদ (BDRIS Verification)',
+        name_en: "Student's 17-digit Online Birth Certificate",
+        copy_type: 'online_print',
+        note_bn: 'সরকারি ডাটাবেসে নাম ও বয়স যাচাইয়ের জন্য'
+      },
+      {
+        name_bn: 'শিক্ষার্থীর পাসপোর্ট সাইজ ডিজিটাল রঙিন ছবি',
+        name_en: 'Digital Color Passport Photo (300x300 px)',
+        copy_type: 'original',
+        note_bn: 'সর্বোচ্চ ১০০ কেবি সাইজ'
+      },
+      {
+        name_bn: 'পিতা ও মাতার জাতীয় পরিচয়পত্র (NID) নম্বর ও মোবাইল',
+        name_en: "Parents' NID Number & Contact Details",
+        copy_type: 'original',
+        note_bn: 'অভিভাবক ভেরিফিকেশন'
+      },
+      {
+        name_bn: 'কোটা সুবিধা থাকলে প্রযোজ্য সনদ (মুক্তিযোদ্ধা, প্রতিবন্ধী বা ক্যাচমেন্ট)',
+        name_en: 'Quota Supporting Certificate (if applicable)',
+        copy_type: 'both',
+        note_bn: 'সরকারি কোটায় ভর্তির প্রমাণপত্র'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'gsa.teletalk.com.bd পোর্টালে প্রবেশ',
+        description_bn: 'বার্ষিক ভর্তি মৌসুমে কেন্দ্রীয় অনলাইন ভর্তি পোর্টালে প্রবেশ করুন।',
+        url: 'https://gsa.teletalk.com.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'শিক্ষার্থীর ১৭ ডিজিটের জন্ম নিবন্ধন এন্ট্রি',
+        description_bn: 'জন্ম নিবন্ধন দিলে স্বয়ংক্রিয়ভাবে নাম ও জন্মতারিখ সরকারি ডাটাবেস থেকে লোড হবে।',
+        url: 'https://gsa.teletalk.com.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'শ্রেণি ও বিদ্যালয় পছন্দক্রম নির্ধারণ',
+        description_bn: 'শিক্ষার্থীর শ্রেণি, শিফট, মাধ্যম এবং এলাকাভিত্তিক সর্বোচ্চ ৫টি পছন্দের বিদ্যালয় নির্বাচন করুন।',
+        url: 'https://gsa.teletalk.com.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'টেলিটক এসএমএসে ১১০ টাকা ফি পরিশোধ',
+        description_bn: 'প্রাপ্ত ইউজার আইডি দিয়ে যেকোনো টেলিটক মোবাইল থেকে এসএমএসে আবেদন ফি পরিশোধ করুন।',
+        url: 'https://gsa.teletalk.com.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'ডিজিটাল লটারির ফলাফল ও ভর্তি',
+        description_bn: 'নির্ধারিত দিনে ডিজিটাল লটারির রেজাল্ট এসএমএসে আসবে এবং নির্বাচিত বিদ্যালয়ে ভর্তি সম্পন্ন করুন।',
+        url: 'https://gsa.teletalk.com.bd'
+      }
+    ],
+    important_notes_bn: [
+      'একটি জন্ম নিবন্ধন দিয়ে একবারই আবেদন করা সম্ভব; অসদুপায় অবলম্বন করলে প্রার্থিতা সম্পূর্ণ বাতিল হয়।'
+    ],
+    common_mistakes_bn: [
+      'অনলাইন ভেরিফাইড ১৭ ডিজিটের জন্ম নিবন্ধন সনদ ব্যবহার না করে ম্যানুয়াল জন্ম সনদের তথ্য দেওয়া।'
+    ]
+  },
+  {
+    slug: 'bmet-smart-card',
+    name_bn: 'বিএমইটি স্মার্ট ইমিগ্রেশন কার্ড ও ছাড়পত্র',
+    name_en: 'BMET Smart Card & Emigration Clearance',
+    category: 'overseas',
+    department_bn: 'জনশক্তি কর্মসংস্থান ও প্রশিক্ষণ ব্যুরো (BMET), প্রবাসী কল্যাণ ও বৈদেশিক কর্মসংস্থান মন্ত্রণালয়',
+    department_en: 'Bureau of Manpower, Employment and Training (BMET)',
+    submission_type: 'hybrid',
+    fee: '৪,৭৫০',
+    fee_note_bn: 'কল্যাণ তহবিল ফি ৩,৫০০ টাকা, বাধ্যতামূলক জীবন বীমা ১,০০০ টাকা ও সরকারি সার্ভিস চার্জ',
+    processing_time_bn: '৩-৫ কার্যদিবস',
+    official_url: 'https://www.bmet.gov.bd',
+    apply_location_bn: 'আমি প্রবাসী (Ami Probashi) ডিজিটাল অ্যাপ অথবা বিএমইটি জেলা কর্মসংস্থান কার্যালয় (DEMO)',
+    required_docs: [
+      {
+        name_bn: 'আবেদনকারীর মূল পাসপোর্ট ও ভিসার সত্যায়িত রঙিন কপি',
+        name_en: "Applicant's Passport & Visa Copy",
+        copy_type: 'both',
+        note_bn: 'পাসপোর্টের মেয়াদ ন্যূনতম ৬ মাস থাকতে হবে'
+      },
+      {
+        name_bn: 'গামকা (GAMCA) অনুমোদিত মেডিকেল ফিটনেস রিপোর্ট',
+        name_en: 'GAMCA Approved Medical Fitness Certificate',
+        copy_type: 'original',
+        note_bn: 'অনুমোদিত মেডিকেল সেন্টার প্রদত্ত রিপোর্ট'
+      },
+      {
+        name_bn: 'বিএমইটি অনুমোদিত ৩ দিনের প্রাক-বহির্গমন ওরিয়েন্টেশন (PDO) সনদ',
+        name_en: 'Pre-Departure Orientation (PDO) Certificate',
+        copy_type: 'both',
+        note_bn: 'সরকারি কারিগরি প্রশিক্ষণ কেন্দ্র (TTC) প্রদত্ত সনদ'
+      },
+      {
+        name_bn: 'নিয়োগকর্তার সাথে সম্পাদিত বৈধ কাজের চুক্তিপত্র (Employment Contract)',
+        name_en: 'Verified Employment Contract Agreement',
+        copy_type: 'both',
+        note_bn: 'বেতন ও সুযোগ-সুবিধা সম্বলিত চুক্তি'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'আমি প্রবাসী অ্যাপে নিবন্ধন ও পাসপোর্ট যাচাই',
+        description_bn: 'অ্যাপের মাধ্যমে পাসপোর্ট স্ক্যান করে তথ্য ও বায়োমেট্রিক ওটিপি দিয়ে প্রোফাইল সম্পন্ন করুন।',
+        url: 'https://www.bmet.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'পিডিও (PDO) ট্রেনিং সম্পন্ন করণ',
+        description_bn: 'নিকটস্থ টিটিসি সেন্টারে ৩ দিনের প্রাক-বহির্গমন প্রশিক্ষণে অংশ নিয়ে সনদ অর্জন করুন।',
+        url: 'https://www.bmet.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'মেডিকেল ও ভিসা আপলোড',
+        description_bn: 'বৈধ কাজের ভিসা ও গামকা ফিটনেস রিপোর্ট অ্যাপে বা বিএমইটি সার্ভারে আপলোড করুন।',
+        url: 'https://www.bmet.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'কল্যাণ তহবিল ও জীবন বীমা ফি পরিশোধ',
+        description_bn: 'বিকাশ বা নগদে প্রবাসী কল্যাণ তহবিল ও বাধ্যতামূলক জীবন বীমার ফি পরিশোধ করুন।',
+        url: 'https://www.bmet.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'বিএমইটি স্মার্ট কার্ড ও কিউআর কোড গ্রহণ',
+        description_bn: 'ইমিগ্রেশন ছাড়পত্র সম্বলিত ডিজিটাল বিএমইটি স্মার্ট কার্ড গ্রহণ করুন যা বিমানবন্দরে প্রদর্শন বাধ্যতামূলক।',
+        url: 'https://www.bmet.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'বৈধ বিএমইটি কার্ড ব্যতীত বিমানবন্দরে বহির্গমন ইমিগ্রেশন পার হওয়া অসম্ভব এবং সরকারি সুবিধা পাওয়া যায় না।'
+    ],
+    common_mistakes_bn: [
+      'অস্বীকৃত দালালের মিথ্যা প্রলোভনে ভুয়া ভিসা বা জাল মেডিকেল সনদ আপলোড করে বিমানবন্দরে আটক হওয়া।'
+    ]
+  },
+  {
+    slug: 'rjsc-company-registration',
+    name_bn: 'যৌথ মূলধন কোম্পানি ও ফার্ম নিবন্ধন (RJSC)',
+    name_en: 'RJSC Company Registration & Incorporation',
+    category: 'business',
+    department_bn: 'যৌথ মূলধন কোম্পানি ও ফার্মসমূহের পরিদপ্তর (RJSC), বাণিজ্য মন্ত্রণালয়',
+    department_en: 'Registrar of Joint Stock Companies and Firms (RJSC)',
+    submission_type: 'hybrid',
+    fee: '৪,২০০',
+    fee_note_bn: 'নামের ছাড়পত্র ফি ১,০০০ টাকা, প্রাথমিক মূলধন স্ট্যাম্প ডিউটি ও সরকারি গেজেট ফি অন্তর্ভুক্ত',
+    processing_time_bn: '৭-১০ কার্যদিবস',
+    official_url: 'https://roc.gov.bd',
+    apply_location_bn: 'roc.gov.bd অনলাইন পোর্টালে ডিজিটাল আবেদন ও ই-পেমেন্ট',
+    required_docs: [
+      {
+        name_bn: 'অনুমোদিত নামের ছাড়পত্র (Name Clearance Certificate)',
+        name_en: 'Approved Name Clearance Certificate',
+        copy_type: 'online_print',
+        note_bn: 'আরজেএসসি থেকে ইস্যুকৃত ৩০ দিন মেয়াদী ছাড়পত্র'
+      },
+      {
+        name_bn: 'কোম্পানির মেমোরেন্ডাম অব অ্যাসোসিয়েশন (MoA) ও আর্টিক্যালস (AoA)',
+        name_en: 'Memorandum (MoA) & Articles of Association (AoA)',
+        copy_type: 'original',
+        note_bn: 'কোম্পানির উদ্দেশ্য ও পরিচালনা বিধিমালার মূল কপি'
+      },
+      {
+        name_bn: 'সকল পরিচালকের জাতীয় পরিচয়পত্র (NID), ই-টিআইএন ও ছবি',
+        name_en: "All Directors' NID, e-TIN & Passport Photos",
+        copy_type: 'both',
+        note_bn: 'পরিচালকদের কর শনাক্তকরণ ও নাগরিক তথ্য'
+      },
+      {
+        name_bn: 'কোম্পানির রেজিস্টার্ড অফিসের ঠিকানা সংক্রান্ত চুক্তি বা ইউটিলিটি বিল',
+        name_en: 'Registered Office Rent Agreement / Utility Bill',
+        copy_type: 'both',
+        note_bn: 'দাপ্তরিক ঠিকানার প্রমাণ'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'নামের ছাড়পত্র (Name Clearance) আবেদন',
+        description_bn: 'roc.gov.bd পোর্টালে কোম্পানির কাঙ্ক্ষিত নাম অনুসন্ধান করে ছাড়পত্র গ্রহণ করুন।',
+        url: 'https://roc.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'MoA ও AoA প্রণয়ন ও স্বাক্ষর',
+        description_bn: 'কোম্পানির শেয়ারহোল্ডারদের বিবরণ ও ব্যবসায়িক উদ্দেশ্য সম্বলিত স্মারকলিপি চূড়ান্ত করুন।',
+        url: 'https://roc.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'আরজেএসসি ডিজিটাল ফরম পূরণ ও স্ট্যাম্প ফি',
+        description_bn: 'ফর্ম I, VI, IX, X, XII অনলাইনে সাবমিট করে সরকারি ট্রেজারি ও স্ট্যাম্প ডিউটি পরিশোধ করুন।',
+        url: 'https://roc.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'সহকারী নিবন্ধক কর্তৃক নিরীক্ষা',
+        description_bn: 'আরজেএসসি কর্মকর্তা দাখিলকৃত সকল কাগজপত্র ও পরিচালকদের এনআইডি যাচাই করবেন।',
+        url: 'https://roc.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'সার্টিফিকেট অব ইনকর্পোরেশন (CIN) লাভ',
+        description_bn: 'অনুমোদিত ডিজিটাল সার্টিফিকেট অব ইনকর্পোরেশন ডাউনলোড করে প্রাতিষ্ঠানিক কার্যক্রম শুরু করুন।',
+        url: 'https://roc.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'কোম্পানি নিবন্ধনের পর অবিলম্বে কোম্পানির নামে ব্যাংক হিসাব খোলা এবং বাণিজ্যিক ট্রেড লাইসেন্স গ্রহণ করতে হয়।'
+    ],
+    common_mistakes_bn: [
+      'পরিচালকদের এনআইডির নামের বানানের সাথে ই-টিআইএন ও আরজেএসসি ফর্মের বানানে অমিল থাকা।'
+    ]
+  },
+  {
+    slug: 'maternity-allowance',
+    name_bn: 'মা ও শিশু সহায়তা কর্মসূচি / মাতৃত্বকালীন ভাতা',
+    name_en: 'Mother & Child Benefit Programme (MCBP)',
+    category: 'welfare',
+    department_bn: 'মহিলা বিষয়ক অধিদপ্তর (মহিলা ও শিশু বিষয়ক মন্ত্রণালয়)',
+    department_en: 'Department of Women Affairs (DWA)',
+    submission_type: 'hybrid',
+    fee: 'বিনামূল্যে',
+    fee_note_bn: 'আবেদন সম্পূর্ণ বিনামূল্যে। নির্বাচিত গর্ভবতী মায়েরা মাসিক ৮০০ টাকা হারে মোট ৩৬ মাস (২৮,৮০০ টাকা) ভাতা পান',
+    processing_time_bn: '৩০-৪৫ কার্যদিবস (বাছাই কমিটি সাপেক্ষে)',
+    official_url: 'https://dwa.gov.bd',
+    apply_location_bn: 'উপজেলা মহিলা বিষয়ক কর্মকর্তার কার্যালয়, ইউনিয়ন ডিজিটাল সেন্টার বা পৌরসভা',
+    required_docs: [
+      {
+        name_bn: 'গর্ভবতী মায়ের মূল জাতীয় পরিচয়পত্র (NID) ও ফটোকপি',
+        name_en: "Pregnant Mother's National ID (Both Copies)",
+        copy_type: 'both',
+        note_bn: 'ভোটার তালিকাভুক্ত বৈধ এনআইডি কার্ড'
+      },
+      {
+        name_bn: 'উপজেলা স্বাস্থ্য কমপ্লেক্স বা পরিবার পরিকল্পনা কেন্দ্র প্রদত্ত এএনসি (ANC) কার্ড',
+        name_en: 'Antenatal Care (ANC) Card from Health Center',
+        copy_type: 'both',
+        note_bn: 'নিয়মিত গর্ভকালীন স্বাস্থ্য পরীক্ষার প্রমাণ'
+      },
+      {
+        name_bn: 'গর্ভধারণের বয়স ৫-৭ মাস প্রমাণের সরকারি ডাক্তারের আল্ট্রাসনোগ্রাম রিপোর্ট',
+        name_en: 'Doctor Certified Ultrasonography Report (5-7 months)',
+        copy_type: 'original',
+        note_bn: 'গর্ভধারণের সঠিক সময়কাল প্রমাণের জন্য'
+      },
+      {
+        name_bn: 'আবেদনকারিণীর নিজের নামে নিবন্ধিত মোবাইল ব্যাংকিং (বিকাশ/নগদ) হিসাব',
+        name_en: 'Active Mobile Financial Account (bKash/Nagad)',
+        copy_type: 'original',
+        note_bn: 'মায়ের নিজের নামে সিম ও অ্যাকাউন্ট থাকা বাধ্যতামূলক'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'ইউনিয়ন বা পৌর ডিজিটাল সেন্টারে আবেদন',
+        description_bn: 'গর্ভবতী মা স্বাস্থ্য কেন্দ্রের এএনসি কার্ড ও এনআইডি নিয়ে অনলাইনে নিবন্ধন ফরম পূরণ করবেন।',
+        url: 'https://dwa.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'আর্থ-সামাজিক তথ্য এন্ট্রি',
+        description_bn: 'প্রথম বা দ্বিতীয় গর্ভধারণ, পরিবারের বাৎসরিক আয় ও পেশা সংক্রান্ত সঠিক তথ্য দিন।',
+        url: 'https://dwa.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'মাঠপর্যায়ে স্বাস্থ্য সহকারীর যাচাই',
+        description_bn: 'স্বাস্থ্য সহকারী ও পরিবার কল্যাণ সহকারী গর্ভবতী মায়ের শারীরিক অবস্থা নিশ্চিত করবেন।',
+        url: 'https://dwa.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'উপজেলা কমিটির চূড়ান্ত অনুমোদন',
+        description_bn: 'উপজেলা নির্বাহী কর্মকর্তার (ইউএনও) নেতৃত্বে কমিটি যোগ্য মায়েদের নাম তালিকাভুক্ত করে।',
+        url: 'https://dwa.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'জিটুপি (G2P) মোবাইল ব্যাংকিংয়ে ভাতা লাভ',
+        description_bn: 'প্রতি মাসে সরাসরি বাংলাদেশ ব্যাংক থেকে মায়ের বিকাশ বা নগদ নম্বরে ৮০০ টাকা ভাতা জমা হবে।',
+        url: 'https://dwa.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'এই ভাতা শুধুমাত্র প্রথম ও দ্বিতীয় গর্ভধারণের জন্য প্রযোজ্য; তৃতীয় সন্তানের ক্ষেত্রে এই সুবিধা পাওয়া যায় না।'
+    ],
+    common_mistakes_bn: [
+      'স্বামীর বা অন্যের নামে নিবন্ধিত সিম দিয়ে মোবাইল ব্যাংকিং নম্বর দেওয়া; নিজের এনআইডিতে সিম থাকা বাধ্যতামূলক।'
+    ]
+  },
+  {
+    slug: 'warishan-certificate',
+    name_bn: 'ওয়ারিশান বা উত্তরাধিকার সনদপত্র',
+    name_en: 'Warishan / Legal Heirship Certificate',
+    category: 'identity',
+    department_bn: 'স্থানীয় সরকার বিভাগ (ইউনিয়ন পরিষদ / পৌরসভা / সিটি কর্পোরেশন)',
+    department_en: 'Local Government Division (UP / Pourashava / City Corporation)',
+    submission_type: 'hybrid',
+    fee: '১০০-৩০০',
+    fee_note_bn: 'স্থানীয় সরকার গেজেট অনুযায়ী ইউনিয়ন পরিষদে ১০০ টাকা, পৌরসভা বা সিটি কর্পোরেশনে ২০০-৩০০ টাকা',
+    processing_time_bn: '৩-৭ কার্যদিবস',
+    official_url: 'https://pouroseba.gov.bd',
+    apply_location_bn: 'pouroseba.gov.bd পোর্টাল অথবা সংশ্লিষ্ট ইউনিয়ন পরিষদ / ওয়ার্ড কাউন্সিলর কার্যালয়ে',
+    required_docs: [
+      {
+        name_bn: 'মৃত ব্যক্তির ডিজিটাল অনলাইন মৃত্যু নিবন্ধন সনদপত্র',
+        name_en: "Deceased Person's Digital Online Death Certificate",
+        copy_type: 'both',
+        note_bn: 'বিডিআরআইএস (BDRIS) অনলাইন ভেরিফাইড সনদ'
+      },
+      {
+        name_bn: 'সকল জীবিত ওয়ারিশের জাতীয় পরিচয়পত্র (NID) বা অনলাইন জন্ম নিবন্ধন',
+        name_en: "All Living Heirs' NID or Online Birth Certificates",
+        copy_type: 'both',
+        note_bn: 'স্ত্রী, পুত্র, কন্যাসহ সকল উত্তরাধিকারীর নথিপত্র'
+      },
+      {
+        name_bn: 'আবেদনকারী ও সকল ওয়ারিশের পাসপোর্ট সাইজ সত্যায়িত ছবি',
+        name_en: "Passport-size Attested Photos of All Heirs",
+        copy_type: 'original',
+        note_bn: 'স্থানীয় জনপ্রতিনিধি কর্তৃক সত্যায়িত'
+      },
+      {
+        name_bn: 'সকল ওয়ারিশের নাম ও সম্পর্ক উল্লেখপূর্বক ৩০০ টাকার স্ট্যাম্পে হলফনামা',
+        name_en: 'Notarized Affidavit on Tk 300 Non-Judicial Stamp',
+        copy_type: 'original',
+        note_bn: 'কোনো ওয়ারিশ বাদ না পড়ার শপথনামা'
+      }
+    ],
+    steps: [
+      {
+        step: 1,
+        title_bn: 'ইউপি বা পৌরসভা পোর্টালে আবেদন',
+        description_bn: 'pouroseba.gov.bd সাইটে বা কাউন্সিলর কার্যালয়ে ওয়ারিশান আবেদন ফরম পূরণ করুন।',
+        url: 'https://pouroseba.gov.bd'
+      },
+      {
+        step: 2,
+        title_bn: 'মৃত ব্যক্তি ও ওয়ারিশদের তালিকা এন্ট্রি',
+        description_bn: 'মৃত ব্যক্তির সকল বৈধ ওয়ারিশের নাম, এনআইডি নম্বর ও সম্পর্কের বিবরণ নির্ভুলভাবে দিন।',
+        url: 'https://pouroseba.gov.bd'
+      },
+      {
+        step: 3,
+        title_bn: 'ইউপি সদস্য / কাউন্সিলরের সরেজমিন তদন্ত',
+        description_bn: 'স্থানীয় জনপ্রতিনিধি ওয়ারিশদের সঠিকতা ও কোনো ওয়ারিশ গোপন করা হয়েছে কিনা তা তদন্ত করবেন।',
+        url: 'https://pouroseba.gov.bd'
+      },
+      {
+        step: 4,
+        title_bn: 'ইউপি চেয়ারম্যান বা মেয়রের ডিজিটাল স্বাক্ষর',
+        description_bn: 'তদন্ত প্রতিবেদনের ভিত্তিতে চেয়ারম্যান বা মেয়র ওয়ারিশান সনদে অফিশিয়াল অনুমোদন দেবেন।',
+        url: 'https://pouroseba.gov.bd'
+      },
+      {
+        step: 5,
+        title_bn: 'কিউআর কোডযুক্ত ওয়ারিশান সনদ গ্রহণ',
+        description_bn: 'নির্ধারিত ফি পরিশোধ করে কিউআর কোড সম্বলিত সরকারি ওয়ারিশান সনদপত্র সংগ্রহ করুন।',
+        url: 'https://pouroseba.gov.bd'
+      }
+    ],
+    important_notes_bn: [
+      'জমি খারিজ (মিউটেশন), ব্যাংকে থাকা টাকা উত্তোলন এবং উত্তরাধিকার সূত্রে সম্পত্তি বণ্টনে ওয়ারিশান সনদ অপরিহার্য।'
+    ],
+    common_mistakes_bn: [
+      'কন্যাসন্তান বা কোনো নির্দিষ্ট ওয়ারিশের নাম বাদ দেওয়া; এটি দণ্ডবিধিতে আইনত শাস্তিযোগ্য অপরাধ।'
+    ]
   }
 ]
 

@@ -42,6 +42,11 @@ const COPY_TYPE_LABELS: Record<CopyType, { bn: string; en: string; badgeClass: s
     en: 'Digital / Online Copy',
     badgeClass: 'bg-purple-100 text-purple-800 border-purple-300'
   },
+  online_print: {
+    bn: 'অনলাইন প্রিন্ট কপি',
+    en: 'Digital / Online Printout',
+    badgeClass: 'bg-purple-100 text-purple-800 border-purple-300'
+  },
   both: {
     bn: 'মূল + ফটোকপি উভয়ই',
     en: 'Both Original & Copy',

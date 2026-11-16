@@ -1,6 +1,6 @@
 export type Language = 'bn' | 'en'
 
-export type CopyType = 'original' | 'photocopy' | 'online' | 'both'
+export type CopyType = 'original' | 'photocopy' | 'online' | 'online_print' | 'both'
 
 export type SubmissionType = 'online_bot' | 'pdf_only' | 'hybrid'
 

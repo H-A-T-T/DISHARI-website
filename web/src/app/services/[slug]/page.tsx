@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import ServiceDetailContent from './ServiceDetailContent'
 import { fetchAllServices } from '@/lib/api'
+import { ALL_OFFICIAL_SERVICES } from '@/lib/default-services'
 
 export const metadata: Metadata = {
   title: 'সরকারি সেবা বিস্তারিত | দিশারী',
@@ -12,15 +13,7 @@ export const metadata: Metadata = {
 export async function generateStaticParams() {
   const services = await fetchAllServices()
   if (!services || services.length === 0) {
-    return [
-      { slug: 'passport' },
-      { slug: 'nid-correction' },
-      { slug: 'birth-registration' },
-      { slug: 'widow-allowance' },
-      { slug: 'scholarship' },
-      { slug: 'trade-license' },
-      { slug: 'tax-return' },
-    ]
+    return ALL_OFFICIAL_SERVICES.map((s) => ({ slug: s.slug }))
   }
   return services.map((s) => ({ slug: s.slug }))
 }

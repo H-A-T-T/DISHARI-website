@@ -115,8 +115,8 @@ function ServicesPageInner() {
 
   const popularSearches = useMemo(() => {
     return lang === 'bn'
-      ? ['পাসপোর্ট', 'NID সংশোধন', 'জন্ম নিবন্ধন', 'ট্রেড লাইসেন্স', 'ভূমি নামজারি', 'বিধবা ভাতা', 'আয়কর রিটার্ন', 'প্রবাসী কল্যাণ']
-      : ['Passport', 'NID Correction', 'Birth Certificate', 'Trade License', 'Land Mutation', 'Allowance', 'Tax Return', 'Overseas Welfare']
+      ? ['পাসপোর্ট', 'NID সংশোধন', 'ড্রাইভিং লাইসেন্স', 'জন্ম নিবন্ধন', 'খতিয়ান ও পর্চা', 'ট্রেড লাইসেন্স', 'স্বাস্থ্য বাতায়ন', 'আয়কর রিটার্ন', 'পুলিশ ক্লিয়ারেন্স']
+      : ['Passport', 'NID Correction', 'Driving License', 'Birth Certificate', 'Khatian & Porcha', 'Trade License', 'Telemedicine 16263', 'Tax Return', 'Police Clearance']
   }, [lang])
 
   useEffect(() => {

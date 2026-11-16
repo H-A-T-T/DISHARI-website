@@ -1,4 +1,5 @@
 import type { Service, CitizenDocument, CitizenApplication, CitizenDeadline, DocType } from '@/types'
+import { ALL_OFFICIAL_SERVICES } from './default-services'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
 
@@ -20,24 +21,37 @@ export async function fetchAllServices(category?: string, query?: string): Promi
     const res = await fetch(url, { cache: 'no-store' })
 
     if (!res.ok) throw new Error(`HTTP error ${res.status}`)
-    return await res.json()
+    const data = await res.json()
+    if (Array.isArray(data) && data.length > 0) return data
+    return ALL_OFFICIAL_SERVICES
   } catch (err) {
-    console.error('Error fetching services from DB API:', err)
-    return []
+    let results = [...ALL_OFFICIAL_SERVICES]
+    if (category && category !== 'all') {
+      results = results.filter((s) => s.category === category)
+    }
+    if (query && query.trim()) {
+      const q = query.trim().toLowerCase()
+      results = results.filter(
+        (s) =>
+          s.name_bn.toLowerCase().includes(q) ||
+          s.name_en.toLowerCase().includes(q) ||
+          s.department_bn.toLowerCase().includes(q) ||
+          s.department_en.toLowerCase().includes(q)
+      )
+    }
+    return results
   }
 }
 
 export async function fetchServiceBySlug(slug: string): Promise<Service | null> {
   try {
     const res = await fetch(`${API_BASE}/services/${slug}`, { cache: 'no-store' })
-    if (!res.ok) {
-      if (res.status === 404) return null
-      throw new Error(`HTTP error ${res.status}`)
+    if (res.ok) {
+      return await res.json()
     }
-    return await res.json()
+    return ALL_OFFICIAL_SERVICES.find((s) => s.slug === slug) || null
   } catch (err) {
-    console.error(`Error fetching service ${slug} from DB API:`, err)
-    return null
+    return ALL_OFFICIAL_SERVICES.find((s) => s.slug === slug) || null
   }
 }
 
