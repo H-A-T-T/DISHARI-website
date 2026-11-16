@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import {
   X,
   Send,
@@ -12,16 +13,270 @@ import {
   Info,
   Volume2,
   VolumeX,
-  Sparkles
+  Sparkles,
+  Navigation,
+  ArrowRight,
+  ExternalLink,
 } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { WIN10_EASE_ENTRANCE, win10DialogMotion } from '@/lib/motion'
+
+interface NavCard {
+  url: string
+  titleBn: string
+  titleEn: string
+  breadcrumbBn: string
+  breadcrumbEn: string
+}
 
 interface Message {
   id: string
   sender: 'ai' | 'user'
   text: string
   time: string
+  navCard?: NavCard
+}
+
+// ─── FULL WEBSITE SITEMAP FOR AI NAVIGATION ───
+interface NavEntry {
+  url: string
+  titleBn: string
+  titleEn: string
+  breadcrumbBn: string
+  breadcrumbEn: string
+  keywordsBn: string[]
+  keywordsEn: string[]
+}
+
+const SITE_NAV_MAP: NavEntry[] = [
+  {
+    url: '/services/passport',
+    titleBn: 'ই-পাসপোর্ট আবেদন',
+    titleEn: 'E-Passport Application',
+    breadcrumbBn: 'সেবা সমূহ → পরিচয় সেবা → ই-পাসপোর্ট আবেদন',
+    breadcrumbEn: 'Services → Identity → E-Passport Application',
+    keywordsBn: ['পাসপোর্ট', 'ই-পাসপোর্ট', 'পাসপোর্ট আবেদন'],
+    keywordsEn: ['passport', 'e-passport', 'passport application', 'epassport'],
+  },
+  {
+    url: '/services/passport-renewal',
+    titleBn: 'পাসপোর্ট নবায়ন',
+    titleEn: 'Passport Renewal',
+    breadcrumbBn: 'সেবা সমূহ → পরিচয় সেবা → পাসপোর্ট নবায়ন',
+    breadcrumbEn: 'Services → Identity → Passport Renewal',
+    keywordsBn: ['পাসপোর্ট নবায়ন', 'নবায়ন', 'রিনিউ'],
+    keywordsEn: ['passport renewal', 'renew passport', 'renewal'],
+  },
+  {
+    url: '/services/nid-correction',
+    titleBn: 'NID সংশোধন',
+    titleEn: 'NID Correction',
+    breadcrumbBn: 'সেবা সমূহ → পরিচয় সেবা → জাতীয় পরিচয়পত্র সংশোধন',
+    breadcrumbEn: 'Services → Identity → NID Correction',
+    keywordsBn: ['nid', 'জাতীয় পরিচয়পত্র', 'পরিচয়পত্র', 'nid সংশোধন', 'সংশোধন'],
+    keywordsEn: ['nid', 'national id', 'nid correction', 'voter id'],
+  },
+  {
+    url: '/services/birth-registration',
+    titleBn: 'জন্ম নিবন্ধন',
+    titleEn: 'Birth Registration',
+    breadcrumbBn: 'সেবা সমূহ → পরিচয় সেবা → জন্ম নিবন্ধন (BDRIS)',
+    breadcrumbEn: 'Services → Identity → Birth Registration (BDRIS)',
+    keywordsBn: ['জন্ম নিবন্ধন', 'জন্ম সনদ', 'নিবন্ধন'],
+    keywordsEn: ['birth registration', 'birth certificate', 'bdris'],
+  },
+  {
+    url: '/services/tin-certificate',
+    titleBn: 'টিআইএন সনদ',
+    titleEn: 'TIN Certificate',
+    breadcrumbBn: 'সেবা সমূহ → ব্যবসা ও কর → টিআইএন সনদ',
+    breadcrumbEn: 'Services → Business & Tax → TIN Certificate',
+    keywordsBn: ['টিআইএন', 'tin', 'কর শনাক্তকরণ', 'ট্যাক্স আইডি'],
+    keywordsEn: ['tin', 'tin certificate', 'tax identification'],
+  },
+  {
+    url: '/services/trade-license',
+    titleBn: 'ট্রেড লাইসেন্স',
+    titleEn: 'Trade License',
+    breadcrumbBn: 'সেবা সমূহ → ব্যবসা ও কর → ট্রেড লাইসেন্স',
+    breadcrumbEn: 'Services → Business & Tax → Trade License',
+    keywordsBn: ['ট্রেড লাইসেন্স', 'ব্যবসা লাইসেন্স', 'বাণিজ্য'],
+    keywordsEn: ['trade license', 'business license', 'trade'],
+  },
+  {
+    url: '/services/widow-allowance',
+    titleBn: 'বিধবা ভাতা',
+    titleEn: 'Widow Allowance',
+    breadcrumbBn: 'সেবা সমূহ → সামাজিক সুরক্ষা → বিধবা ভাতা',
+    breadcrumbEn: 'Services → Social Welfare → Widow Allowance',
+    keywordsBn: ['বিধবা ভাতা', 'বিধবা', 'স্বামীহারা'],
+    keywordsEn: ['widow allowance', 'widow', 'widow benefit'],
+  },
+  {
+    url: '/services/scholarship',
+    titleBn: 'উপবৃত্তি / বৃত্তি',
+    titleEn: 'Scholarship / Stipend',
+    breadcrumbBn: 'সেবা সমূহ → শিক্ষা → উপবৃত্তি ও বৃত্তি',
+    breadcrumbEn: 'Services → Education → Scholarship & Stipend',
+    keywordsBn: ['উপবৃত্তি', 'বৃত্তি', 'স্কলারশিপ', 'শিক্ষা সহায়তা'],
+    keywordsEn: ['scholarship', 'stipend', 'pmeat', 'education grant'],
+  },
+  {
+    url: '/services/tax-return',
+    titleBn: 'আয়কর রিটার্ন',
+    titleEn: 'Income Tax Return',
+    breadcrumbBn: 'সেবা সমূহ → ব্যবসা ও কর → আয়কর রিটার্ন',
+    breadcrumbEn: 'Services → Business & Tax → Income Tax Return',
+    keywordsBn: ['আয়কর', 'ট্যাক্স রিটার্ন', 'কর রিটার্ন', 'ইনকাম ট্যাক্স'],
+    keywordsEn: ['tax return', 'income tax', 'income tax return'],
+  },
+  {
+    url: '/services/land-mutation',
+    titleBn: 'ই-নামজারি (ভূমি)',
+    titleEn: 'E-Mutation (Land)',
+    breadcrumbBn: 'সেবা সমূহ → ভূমি সেবা → ই-নামজারি',
+    breadcrumbEn: 'Services → Land Services → E-Mutation',
+    keywordsBn: ['নামজারি', 'ই-নামজারি', 'জমি', 'ভূমি', 'মিউটেশন', 'খতিয়ান'],
+    keywordsEn: ['land mutation', 'mutation', 'land', 'e-mutation', 'khatian'],
+  },
+  {
+    url: '/opportunities',
+    titleBn: 'সরকারি সুযোগ',
+    titleEn: 'Government Opportunities',
+    breadcrumbBn: 'নেভিবার → সরকারি সুযোগ',
+    breadcrumbEn: 'Navbar → Opportunities',
+    keywordsBn: ['সুযোগ', 'অনুদান', 'গ্রান্ট', 'সুযোগ-সুবিধা'],
+    keywordsEn: ['opportunities', 'grants', 'government opportunities'],
+  },
+  {
+    url: '/dashboard?tab=locker',
+    titleBn: 'ডকুমেন্ট লকার',
+    titleEn: 'Document Locker',
+    breadcrumbBn: 'ড্যাশবোর্ড → ডকুমেন্ট লকার ট্যাব',
+    breadcrumbEn: 'Dashboard → Document Locker tab',
+    keywordsBn: ['লকার', 'ডকুমেন্ট লকার', 'কাগজপত্র', 'ডকুমেন্ট'],
+    keywordsEn: ['locker', 'document locker', 'documents', 'my documents'],
+  },
+  {
+    url: '/dashboard?tab=applications',
+    titleBn: 'আমার আবেদন',
+    titleEn: 'My Applications',
+    breadcrumbBn: 'ড্যাশবোর্ড → আমার আবেদন ট্যাব',
+    breadcrumbEn: 'Dashboard → My Applications tab',
+    keywordsBn: ['আবেদন', 'আমার আবেদন', 'আবেদনের তালিকা'],
+    keywordsEn: ['applications', 'my applications', 'application list'],
+  },
+  {
+    url: '/dashboard?tab=deadlines',
+    titleBn: 'ডেডলাইন রাডার',
+    titleEn: 'Deadlines Radar',
+    breadcrumbBn: 'ড্যাশবোর্ড → ডেডলাইন রাডার ট্যাব',
+    breadcrumbEn: 'Dashboard → Deadlines Radar tab',
+    keywordsBn: ['ডেডলাইন', 'সময়সীমা', 'শেষ তারিখ'],
+    keywordsEn: ['deadlines', 'deadline radar', 'due dates'],
+  },
+  {
+    url: '/dashboard?tab=opportunities',
+    titleBn: 'সুযোগ ট্যাব',
+    titleEn: 'Opportunities Tab',
+    breadcrumbBn: 'ড্যাশবোর্ড → সুযোগ ট্যাব',
+    breadcrumbEn: 'Dashboard → Opportunities tab',
+    keywordsBn: ['ড্যাশবোর্ড সুযোগ'],
+    keywordsEn: ['dashboard opportunities'],
+  },
+  {
+    url: '/dashboard?tab=settings',
+    titleBn: 'প্রোফাইল সেটিংস',
+    titleEn: 'Profile Settings',
+    breadcrumbBn: 'ড্যাশবোর্ড → সেটিংস ট্যাব',
+    breadcrumbEn: 'Dashboard → Settings tab',
+    keywordsBn: ['সেটিংস', 'প্রোফাইল', 'অ্যাকাউন্ট'],
+    keywordsEn: ['settings', 'profile', 'account settings'],
+  },
+  {
+    url: '/dashboard',
+    titleBn: 'ড্যাশবোর্ড',
+    titleEn: 'Dashboard',
+    breadcrumbBn: 'নেভিবার → ড্যাশবোর্ড',
+    breadcrumbEn: 'Navbar → Dashboard',
+    keywordsBn: ['ড্যাশবোর্ড'],
+    keywordsEn: ['dashboard', 'my dashboard'],
+  },
+  {
+    url: '/services',
+    titleBn: 'সকল সেবা',
+    titleEn: 'All Services',
+    breadcrumbBn: 'নেভিবার → সেবা সমূহ',
+    breadcrumbEn: 'Navbar → Services',
+    keywordsBn: ['সেবা', 'সকল সেবা', 'সেবা সমূহ', 'সার্ভিস'],
+    keywordsEn: ['services', 'all services', 'service directory'],
+  },
+  {
+    url: '/login',
+    titleBn: 'লগইন',
+    titleEn: 'Login',
+    breadcrumbBn: 'নেভিবার → লগইন',
+    breadcrumbEn: 'Navbar → Login',
+    keywordsBn: ['লগইন', 'সাইন ইন', 'প্রবেশ করুন'],
+    keywordsEn: ['login', 'sign in', 'log in'],
+  },
+  {
+    url: '/register',
+    titleBn: 'নিবন্ধন',
+    titleEn: 'Register',
+    breadcrumbBn: 'নেভিবার → নিবন্ধন',
+    breadcrumbEn: 'Navbar → Register',
+    keywordsBn: ['নিবন্ধন', 'রেজিস্ট্রেশন', 'অ্যাকাউন্ট তৈরি'],
+    keywordsEn: ['register', 'sign up', 'create account'],
+  },
+  {
+    url: '/about',
+    titleBn: 'আমাদের সম্পর্কে',
+    titleEn: 'About',
+    breadcrumbBn: 'নেভিবার → সম্পর্কে',
+    breadcrumbEn: 'Navbar → About',
+    keywordsBn: ['সম্পর্কে', 'আমাদের সম্পর্কে', 'পরিচিতি'],
+    keywordsEn: ['about', 'about us', 'who we are'],
+  },
+  {
+    url: '/',
+    titleBn: 'হোম পেজ',
+    titleEn: 'Home Page',
+    breadcrumbBn: 'নেভিবার → হোম',
+    breadcrumbEn: 'Navbar → Home',
+    keywordsBn: ['হোম', 'প্রথম পাতা', 'মূল পাতা'],
+    keywordsEn: ['home', 'home page', 'main page'],
+  },
+]
+
+// Intent trigger words (navigation verbs)
+const NAV_TRIGGERS_EN = ['take me to', 'go to', 'open', 'show me', 'navigate to', 'navigate', 'find', 'where is', 'bring me to', 'i want to go to', 'i need to go to']
+const NAV_TRIGGERS_BN = ['নিয়ে যান', 'নিয়ে যাও', 'দেখান', 'খুলুন', 'যাও', 'যেতে চাই', 'কোথায়', 'খুঁজে দাও', 'নিয়ে চলো', 'এখানে নিয়ে যাও']
+
+function resolveNavigationIntent(text: string): NavEntry | null {
+  const lower = text.toLowerCase().trim()
+
+  // Check if the message has a navigation trigger word
+  const hasNavTrigger =
+    NAV_TRIGGERS_EN.some((t) => lower.includes(t)) ||
+    NAV_TRIGGERS_BN.some((t) => lower.includes(t))
+
+  if (!hasNavTrigger) return null
+
+  // Find the best matching nav entry (most specific match wins — longer keyword = more specific)
+  let bestMatch: NavEntry | null = null
+  let bestLen = 0
+
+  for (const entry of SITE_NAV_MAP) {
+    for (const kw of [...entry.keywordsEn, ...entry.keywordsBn]) {
+      if (lower.includes(kw.toLowerCase()) && kw.length > bestLen) {
+        bestMatch = entry
+        bestLen = kw.length
+      }
+    }
+  }
+
+  return bestMatch
 }
 
 export function JonobondhuChat() {
@@ -33,6 +288,7 @@ export function JonobondhuChat() {
 
   const { lang } = useLanguage()
   const isBn = lang === 'bn'
+  const router = useRouter()
 
   const [isOpen, setIsOpen] = useState(false)
 
@@ -138,6 +394,17 @@ export function JonobondhuChat() {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, isOpen])
+
+  // Close with Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [isOpen])
 
   // ─── POINTER CAPTURE: BUBBLE DRAG & FLING LOGIC ───
   const handleBubblePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -254,6 +521,10 @@ export function JonobondhuChat() {
 
   // ─── POINTER CAPTURE: CHAT WINDOW DRAGGING ───
   const handleWindowPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // If user clicked on a button (e.g. close button), ignore drag capture
+    if ((e.target as HTMLElement).closest('button')) {
+      return
+    }
     if (e.button !== 0) return
     e.preventDefault()
 
@@ -403,7 +674,42 @@ export function JonobondhuChat() {
       setMessages((prev) => [...prev, userMsg])
       if (!textOverride) setInput('')
 
-      // Intelligent simulated civic knowledge engine
+      // ─── STEP 1: NAVIGATION INTENT DETECTION ───
+      const navMatch = resolveNavigationIntent(text)
+      if (navMatch) {
+        setTimeout(() => {
+          const navCard: NavCard = {
+            url: navMatch.url,
+            titleBn: navMatch.titleBn,
+            titleEn: navMatch.titleEn,
+            breadcrumbBn: navMatch.breadcrumbBn,
+            breadcrumbEn: navMatch.breadcrumbEn,
+          }
+
+          const aiMsg: Message = {
+            id: `ai-nav-${Date.now()}`,
+            sender: 'ai',
+            text: isBn
+              ? `আপনাকে "${navMatch.titleBn}" পৃষ্ঠায় নিয়ে যাচ্ছি...`
+              : `Taking you to "${navMatch.titleEn}"...`,
+            time: new Date().toLocaleTimeString(isBn ? 'bn-BD' : 'en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            navCard,
+          }
+
+          setMessages((prev) => [...prev, aiMsg])
+
+          // Navigate after a brief moment so the user sees the message
+          setTimeout(() => {
+            router.push(navMatch.url)
+          }, 700)
+        }, 380)
+        return
+      }
+
+      // ─── STEP 2: CIVIC KNOWLEDGE KEYWORD ENGINE ───
       setTimeout(() => {
         let reply = ''
         const lower = text.toLowerCase()
@@ -479,7 +785,7 @@ export function JonobondhuChat() {
         setMessages((prev) => [...prev, aiMsg])
       }, 450)
     },
-    [input, isBn]
+    [input, isBn, router]
   )
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -627,12 +933,16 @@ export function JonobondhuChat() {
 
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200 transition-colors cursor-pointer rounded-none win-press"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsOpen(false)
+                  }}
+                  className="w-7 h-7 flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200 transition-colors cursor-pointer rounded-none win-press z-10"
                   title={isBn ? 'বন্ধ করুন (বাবলে ফিরুন)' : 'Close (Back to bubble)'}
                   aria-label={isBn ? 'চ্যাট বন্ধ করুন' : 'Close chat'}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 pointer-events-none" />
                 </button>
               </div>
             </div>
@@ -677,6 +987,46 @@ export function JonobondhuChat() {
                         }`}
                       >
                         {msg.text}
+                        {/* ─── NAVIGATION CARD ─── */}
+                        {msg.navCard && (
+                          <div className="mt-3 border border-[#006A4E] bg-[#F0FAF5] rounded-none overflow-hidden">
+                            {/* Card Header */}
+                            <div className="flex items-center gap-2 px-3 py-2 bg-[#006A4E] text-white">
+                              <Navigation className="w-3.5 h-3.5 shrink-0" />
+                              <span className="text-[11px] font-bold tracking-wide uppercase">
+                                {isBn ? 'ম্যানুয়াল পথ — পরবর্তীবার নিজে যেতে' : 'Manual Path — Find it yourself next time'}
+                              </span>
+                            </div>
+                            {/* Breadcrumb Steps */}
+                            <div className="px-3 py-2.5">
+                              <div className="flex items-center flex-wrap gap-1 text-[11px] font-medium text-neutral-700">
+                                {(isBn ? msg.navCard.breadcrumbBn : msg.navCard.breadcrumbEn)
+                                  .split('→')
+                                  .map((step, i, arr) => (
+                                    <React.Fragment key={i}>
+                                      <span className={`px-1.5 py-0.5 rounded-none border ${i === arr.length - 1 ? 'bg-[#006A4E] text-white border-[#004D38] font-bold' : 'bg-white border-neutral-300 text-neutral-600'}`}>
+                                        {step.trim()}
+                                      </span>
+                                      {i < arr.length - 1 && (
+                                        <ArrowRight className="w-3 h-3 text-neutral-400 shrink-0" />
+                                      )}
+                                    </React.Fragment>
+                                  ))}
+                              </div>
+                            </div>
+                            {/* Direct Link Button */}
+                            <div className="px-3 pb-2.5">
+                              <button
+                                type="button"
+                                onClick={() => router.push(msg.navCard!.url)}
+                                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#006A4E] border border-[#006A4E] px-2.5 py-1 hover:bg-[#006A4E] hover:text-white transition-colors cursor-pointer win-press"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                {isBn ? 'সরাসরি লিংকে যান' : 'Go there directly'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 px-1">
                         <span className="text-[9px] font-mono text-neutral-400">
