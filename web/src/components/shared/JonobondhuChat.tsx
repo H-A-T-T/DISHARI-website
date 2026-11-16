@@ -22,7 +22,7 @@ import {
   RotateCcw,
 } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
-import { WIN10_EASE_ENTRANCE, win10DialogMotion } from '@/lib/motion'
+import { WIN10_EASE_ENTRANCE, WIN10_EASE_EXIT, win10DialogMotion } from '@/lib/motion'
 
 interface NavCard {
   url: string
@@ -346,6 +346,9 @@ export function JonobondhuChat() {
   const [showHeroGreeting, setShowHeroGreeting] = useState(false)
   const [hasCheckedFirstOpen, setHasCheckedFirstOpen] = useState(false)
 
+  // Floating Bubble visibility (synchronized with window morph animation)
+  const [isBubbleVisible, setIsBubbleVisible] = useState(true)
+
   // Dimensions
   const BUBBLE_SIZE = 64
   const WINDOW_WIDTH = 430
@@ -524,7 +527,8 @@ export function JonobondhuChat() {
     setIsDraggingBubble(false)
 
     if (!hadMoved) {
-      // It was a crisp click/tap! Open the chat window.
+      // It was a crisp click/tap! Open the chat window with morph
+      setIsBubbleVisible(false)
       setIsOpen(true)
       return
     }
@@ -907,15 +911,63 @@ export function JonobondhuChat() {
     transition: isSnappingBubble ? 'left 0.28s cubic-bezier(0.1, 0.9, 0.2, 1), top 0.28s cubic-bezier(0.1, 0.9, 0.2, 1)' : 'none',
   }
 
-  const windowStyle: React.CSSProperties = {
-    position: 'fixed',
-    left: windowPos ? `${windowPos.x}px` : undefined,
-    top: windowPos ? `${windowPos.y}px` : undefined,
-    right: !windowPos ? `${EDGE_PADDING}px` : undefined,
-    bottom: !windowPos ? '24px' : undefined,
-    width: `min(${WINDOW_WIDTH}px, calc(100vw - 24px))`,
-    height: `min(${WINDOW_HEIGHT}px, calc(100vh - 40px))`,
-    zIndex: 99999,
+  // Computed coordinates for flawless FLIP morphing between bubble and window
+  const currentVw = getViewportWidth()
+  const currentVh = getViewportHeight()
+  const targetWidth = Math.min(WINDOW_WIDTH, currentVw - 24)
+  const targetHeight = Math.min(WINDOW_HEIGHT, currentVh - 40)
+
+  const defBubbleX = Math.max(EDGE_PADDING, currentVw - BUBBLE_SIZE - EDGE_PADDING)
+  const defBubbleY = Math.max(EDGE_PADDING, currentVh - BUBBLE_SIZE - (currentVw < 768 ? 96 : 48))
+  const startX = bubblePos ? bubblePos.x : defBubbleX
+  const startY = bubblePos ? bubblePos.y : defBubbleY
+
+  const defWinX = Math.max(EDGE_PADDING, currentVw - targetWidth - EDGE_PADDING)
+  const defWinY = Math.max(EDGE_PADDING, currentVh - targetHeight - (currentVw < 768 ? 84 : 28))
+  const endX = windowPos ? windowPos.x : defWinX
+  const endY = windowPos ? windowPos.y : defWinY
+
+  const morphVariants = {
+    initial: {
+      left: startX,
+      top: startY,
+      width: BUBBLE_SIZE,
+      height: BUBBLE_SIZE,
+      borderRadius: BUBBLE_SIZE / 2,
+      borderColor: '#006A4E',
+      borderWidth: 2,
+      boxShadow: '0 10px 25px -5px rgba(0, 106, 78, 0.35)',
+    },
+    animate: {
+      left: endX,
+      top: endY,
+      width: targetWidth,
+      height: targetHeight,
+      borderRadius: 0,
+      borderColor: '#D4D4D4',
+      borderWidth: 1,
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      transition: isDraggingWindow
+        ? { duration: 0 }
+        : {
+            duration: 0.36,
+            ease: WIN10_EASE_ENTRANCE,
+          },
+    },
+    exit: {
+      left: startX,
+      top: startY,
+      width: BUBBLE_SIZE,
+      height: BUBBLE_SIZE,
+      borderRadius: BUBBLE_SIZE / 2,
+      borderColor: '#006A4E',
+      borderWidth: 2,
+      boxShadow: '0 10px 25px -5px rgba(0, 106, 78, 0.35)',
+      transition: {
+        duration: 0.3,
+        ease: WIN10_EASE_EXIT,
+      },
+    },
   }
 
   if (!mounted) return null
@@ -923,7 +975,7 @@ export function JonobondhuChat() {
   return (
     <>
       {/* ─── MOVABLE FLOATING MESSENGER BUBBLE (100% SYMMETRICAL) ─── */}
-      {!isOpen && (
+      {!isOpen && isBubbleVisible && (
         <div
           ref={bubbleRef}
           style={bubbleStyle}
@@ -963,21 +1015,50 @@ export function JonobondhuChat() {
         </div>
       )}
 
-      {/* ─── MOVABLE POP-UP AI CHAT INTERFACE WITH WINDOWS 10 WINDOW ENTRANCE ─── */}
-      <AnimatePresence>
+      {/* ─── MORPHING AI CHAT INTERFACE WITH CIRCLE-TO-WINDOW EXPANSION & CONTRACTION ─── */}
+      <AnimatePresence onExitComplete={() => setIsBubbleVisible(true)}>
         {isOpen && (
           <motion.div
-            style={windowStyle}
-            variants={win10DialogMotion}
+            variants={morphVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="jonobondhu-window flex flex-col bg-white border border-neutral-300 rounded-none select-none overflow-hidden shadow-2xl"
+            style={{
+              position: 'fixed',
+              zIndex: 99999,
+              overflow: 'hidden',
+              backgroundColor: '#ffffff',
+            }}
+            className="jonobondhu-window flex flex-col select-none border"
           >
-            {/* Top 3px Bangladesh Green Accent Line */}
-            <div className="h-[3px] bg-[#006A4E] w-full shrink-0" />
+            {/* ─── MORPH TRANSITION ICON (Visible during circular collapse/expansion) ─── */}
+            <motion.div
+              initial={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: 0, scale: 0.7 }}
+              exit={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.16 }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
+            >
+              <img
+                src="/icons/jonobondhu.svg"
+                alt="Jonobondhu"
+                className="w-12 h-12 object-contain select-none"
+                draggable={false}
+              />
+            </motion.div>
 
-            {/* ─── MOVABLE TITLEBAR ─── */}
+            {/* ─── WINDOW CONTENT CONTAINER (Fades in smoothly as window expands) ─── */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22, delay: 0.08 }}
+              className="flex-1 flex flex-col h-full min-h-0 overflow-hidden"
+            >
+              {/* Top 3px Bangladesh Green Accent Line */}
+              <div className="h-[3px] bg-[#006A4E] w-full shrink-0" />
+
+              {/* ─── MOVABLE TITLEBAR ─── */}
             <div
               onPointerDown={handleWindowPointerDown}
               onPointerMove={handleWindowPointerMove}
@@ -1415,6 +1496,7 @@ export function JonobondhuChat() {
                 </div>
               </>
             )}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
