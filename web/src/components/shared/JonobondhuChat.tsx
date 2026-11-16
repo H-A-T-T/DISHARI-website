@@ -342,7 +342,7 @@ export function JonobondhuChat() {
     currentY: number
   } | null>(null)
 
-  // Promo / First-time Greeting Screen State
+  // Welcome & Civic Guide Screen State
   const [showHeroGreeting, setShowHeroGreeting] = useState(false)
   const [hasCheckedFirstOpen, setHasCheckedFirstOpen] = useState(false)
 
@@ -370,15 +370,15 @@ export function JonobondhuChat() {
     return typeof window !== 'undefined' ? window.innerHeight : 800
   }, [])
 
-  // Trigger mind-blowing greeting when opened for the first time
+  // Trigger welcome guide when opened for the first time
   useEffect(() => {
     if (isOpen && !hasCheckedFirstOpen) {
       setHasCheckedFirstOpen(true)
-      const seen = typeof window !== 'undefined' ? sessionStorage.getItem('dishari_intro_seen_promo') : null
+      const seen = typeof window !== 'undefined' ? sessionStorage.getItem('dishari_civic_welcome_seen') : null
       if (!seen) {
         setShowHeroGreeting(true)
         if (typeof window !== 'undefined') {
-          sessionStorage.setItem('dishari_intro_seen_promo', 'true')
+          sessionStorage.setItem('dishari_civic_welcome_seen', 'true')
         }
       }
     }
@@ -852,7 +852,7 @@ export function JonobondhuChat() {
         'Online application process for student stipend?',
       ]
 
-  // ─── PROMO HERO SHOWCASE CARDS ───
+  // ─── CIVIC SERVICE SHOWCASE CARDS ───
   const introCards = [
     {
       title: isBn ? 'ই-পাসপোর্ট আবেদন' : 'E-Passport Application',
@@ -1093,7 +1093,7 @@ export function JonobondhuChat() {
                 </div>
               </div>
 
-              {/* Action Buttons: Promo Replay, Drag indicator & Close Cross */}
+              {/* Action Buttons: Guide Toggle, Drag indicator & Close Cross */}
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
@@ -1107,13 +1107,13 @@ export function JonobondhuChat() {
                       ? 'bg-[#006A4E] text-white border-[#004D38]'
                       : 'bg-emerald-50 text-[#006A4E] border-emerald-300 hover:bg-emerald-100'
                   }`}
-                  title={isBn ? 'প্রমোশনাল ইন্ট্রো রি-প্লে (ভিডিও রেকর্ডিং এর জন্য)' : 'Replay Promo Intro (For video recording)'}
+                  title={isBn ? 'জনবন্ধু সেবা নির্দেশিকা ও ওভারভিউ' : 'Jonobondhu Service Guide & Overview'}
                 >
                   <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
                   <span className="hidden sm:inline font-mono">
                     {showHeroGreeting
                       ? (isBn ? 'চ্যাটে যান' : 'To Chat')
-                      : (isBn ? 'প্রমো ইন্ট্রো' : 'Promo Intro')}
+                      : (isBn ? 'নির্দেশিকা' : 'Guide')}
                   </span>
                 </button>
 
@@ -1140,7 +1140,7 @@ export function JonobondhuChat() {
               </div>
             </div>
 
-            {/* ─── CONDITIONAL VIEW: MIND-BLOWING PROMO GREETING VS CHAT ─── */}
+            {/* ─── CONDITIONAL VIEW: CIVIC WELCOME GUIDE VS CHAT ─── */}
             {showHeroGreeting ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.97 }}
@@ -1300,9 +1300,10 @@ export function JonobondhuChat() {
                       type="button"
                       onClick={() => setShowHeroGreeting(true)}
                       className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-[#006A4E] hover:underline cursor-pointer"
+                      title={isBn ? 'জনবন্ধু সেবা নির্দেশিকা দেখুন' : 'View Jonobondhu Service Guide'}
                     >
                       <Sparkles className="w-3 h-3 text-amber-500" />
-                      <span>{isBn ? 'ইন্ট্রো' : 'Intro'}</span>
+                      <span>{isBn ? 'নির্দেশিকা' : 'Guide'}</span>
                     </button>
                   </div>
 
