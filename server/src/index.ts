@@ -302,7 +302,7 @@ app.get('/api/documents', async (req, res) => {
   try {
     const { userId } = req.query
     let query = `
-      SELECT id, user_id, doc_type, file_name, file_size, mime_type, verified, extracted_meta, uploaded_at
+      SELECT id, user_id, doc_type, file_name, file_size, mime_type, verified, extracted_meta, uploaded_at, file_data
       FROM documents
     `
     const params: any[] = []

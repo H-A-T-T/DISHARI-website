@@ -92,9 +92,11 @@ function DashboardInner() {
   const loadDashboardData = async () => {
     setLoadingData(true)
     try {
+      const stored = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('dishari_user') || '{}') : {}
+      const effectiveUserId = user?.id || stored?.id || 1
       const [docs, apps, dls] = await Promise.all([
-        fetchDocuments(user?.id),
-        fetchApplications(user?.id),
+        fetchDocuments(effectiveUserId),
+        fetchApplications(effectiveUserId),
         fetchDeadlines(),
       ])
       setDocuments(docs)
@@ -106,10 +108,10 @@ function DashboardInner() {
   }
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (checkedAuth) {
       loadDashboardData()
     }
-  }, [isLoggedIn, user?.id])
+  }, [checkedAuth, isLoggedIn, user?.id])
 
   const handleLogout = () => {
     try {
@@ -531,6 +533,7 @@ function DashboardInner() {
                     documents={documents}
                     onRefresh={loadDashboardData}
                     lang={lang}
+                    user={user}
                   />
                 )}
 
