@@ -62,12 +62,50 @@ export default function ApplicationModal({
       if (doc.name_bn.includes('ট্রেড লাইসেন্স')) {
         return ud.doc_type === 'trade_license'
       }
+      if (doc.name_bn.includes('সনদ') || doc.name_bn.includes('নম্বরপত্র') || doc.name_bn.includes('প্রবেশপত্র')) {
+        return ud.doc_type === 'educational_transcript' || ud.doc_type === 'citizenship_certificate'
+      }
       return false
     })
     if (isMatched) {
       attachedDocNames.push(doc.name_bn)
     }
   })
+
+  // OCR Metadata Aggregation from Citizen Locker
+  const nidDoc = userDocs.find((d) => d.doc_type === 'nid_front')
+  const nidBackDoc = userDocs.find((d) => d.doc_type === 'nid_back')
+  const birthDoc = userDocs.find((d) => d.doc_type === 'birth_certificate')
+  const eduDoc = userDocs.find((d) => d.doc_type === 'educational_transcript')
+  const tinDoc = userDocs.find((d) => d.doc_type === 'tin_certificate')
+  const tradeDoc = userDocs.find((d) => d.doc_type === 'trade_license')
+
+  const ocrCitizenId =
+    nidDoc?.extracted_meta?.id_number ||
+    birthDoc?.extracted_meta?.id_number ||
+    user.citizen_id
+  const ocrDob = nidDoc?.extracted_meta?.dob || birthDoc?.extracted_meta?.dob
+  const ocrFather =
+    nidDoc?.extracted_meta?.father_name ||
+    birthDoc?.extracted_meta?.father_name
+  const ocrMother =
+    nidDoc?.extracted_meta?.mother_name ||
+    birthDoc?.extracted_meta?.mother_name
+  const ocrBlood =
+    nidDoc?.extracted_meta?.blood_group ||
+    nidBackDoc?.extracted_meta?.blood_group
+  const ocrAddress = nidBackDoc?.extracted_meta?.address
+  const ocrRoll = eduDoc?.extracted_meta?.roll
+  const ocrBoard = eduDoc?.extracted_meta?.board
+  const ocrReg = eduDoc?.extracted_meta?.reg_no
+
+  const hasOcrMeta = Boolean(
+    nidDoc?.extracted_meta ||
+      birthDoc?.extracted_meta ||
+      eduDoc?.extracted_meta ||
+      tinDoc?.extracted_meta ||
+      tradeDoc?.extracted_meta
+  )
 
   const handleGenerateDocket = async () => {
     setIsSubmitting(true)
@@ -89,7 +127,17 @@ export default function ApplicationModal({
           fullName: user.full_name,
           phone: user.phone,
           email: user.email,
-          citizenId: user.citizen_id,
+          citizenId: ocrCitizenId,
+          dob: ocrDob,
+          fatherName: ocrFather,
+          motherName: ocrMother,
+          bloodGroup: ocrBlood,
+          address: ocrAddress,
+          roll: ocrRoll,
+          regNo: ocrReg,
+          board: ocrBoard,
+          tin: tinDoc?.extracted_meta?.id_number,
+          businessName: tradeDoc?.extracted_meta?.business_name,
         },
         documentsAttached: attachedDocNames,
         officialPortalUrl: service.official_url,
@@ -164,9 +212,15 @@ export default function ApplicationModal({
             <div class="section-heading">${lang === 'bn' ? '১. আবেদনকারীর বিবরণ' : '1. Applicant Information'}</div>
             <table class="data-table">
               <tr><td class="label">${lang === 'bn' ? 'নাগরিক নাম' : 'Name'}:</td><td><strong>${applicant.fullName || 'নাগরিক'}</strong></td></tr>
-              <tr><td class="label">${lang === 'bn' ? 'ট্র্যাকিং আইডি' : 'ID'}:</td><td>${applicant.citizenId || 'BD-USER-782'}</td></tr>
+              <tr><td class="label">${lang === 'bn' ? 'জাতীয় পরিচয়পত্র / আইডি' : 'Citizen ID / NID'}:</td><td><strong>${applicant.citizenId || 'BD-USER-782'}</strong></td></tr>
+              ${applicant.dob ? `<tr><td class="label">${lang === 'bn' ? 'জন্মতারিখ' : 'Date of Birth'}:</td><td>${applicant.dob}</td></tr>` : ''}
+              ${applicant.fatherName ? `<tr><td class="label">${lang === 'bn' ? 'পিতার নাম' : "Father's Name"}:</td><td>${applicant.fatherName}</td></tr>` : ''}
+              ${applicant.motherName ? `<tr><td class="label">${lang === 'bn' ? 'মাতার নাম' : "Mother's Name"}:</td><td>${applicant.motherName}</td></tr>` : ''}
+              ${applicant.bloodGroup ? `<tr><td class="label">${lang === 'bn' ? 'রক্তের গ্রুপ' : 'Blood Group'}:</td><td>${applicant.bloodGroup}</td></tr>` : ''}
+              ${applicant.roll ? `<tr><td class="label">${lang === 'bn' ? 'রোল ও শিক্ষা বোর্ড' : 'Roll & Board'}:</td><td>রোল: ${applicant.roll}, রেজি: ${applicant.regNo || ''} (${applicant.board || ''})</td></tr>` : ''}
+              ${applicant.address ? `<tr><td class="label">${lang === 'bn' ? 'ঠিকানা' : 'Address'}:</td><td>${applicant.address}</td></tr>` : ''}
               <tr><td class="label">${lang === 'bn' ? 'মোবাইল' : 'Phone'}:</td><td>${applicant.phone || '+8801700000000'}</td></tr>
-              <tr><td class="label">${lang === 'bn' ? 'স্থিতি' : 'Status'}:</td><td><strong style="color: #006A4E;">✓ ${app.status.toUpperCase()}</strong></td></tr>
+              <tr><td class="label">${lang === 'bn' ? 'স্থিতি' : 'Status'}:</td><td><strong style="color: #006A4E;">✓ ${app.status.toUpperCase()} (AI VERIFIED)</strong></td></tr>
             </table>
 
             <div class="section-heading">${lang === 'bn' ? '২. সংযুক্ত নথিপত্র' : '2. Attached Documents'}</div>
@@ -263,16 +317,48 @@ export default function ApplicationModal({
             >
               {/* Citizen Info Snapshot */}
               <div className="p-3.5 border border-neutral-200 bg-neutral-50 rounded-none">
-                <span className="font-mono text-xs font-bold text-neutral-500 uppercase block mb-1.5">
-                  {lang === 'bn' ? 'আবেদনকারী নাগরিকের তথ্য:' : 'Applicant Citizen Profile:'}
-                </span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-mono text-xs font-bold text-neutral-500 uppercase">
+                    {lang === 'bn' ? 'আবেদনকারী নাগরিকের তথ্য:' : 'Applicant Citizen Profile:'}
+                  </span>
+                  {hasOcrMeta && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-[#006A4E] bg-emerald-100/70 border border-emerald-300 px-1.5 py-0.5">
+                      <Sparkles className="w-3 h-3 text-[#006A4E]" />
+                      <span>{lang === 'bn' ? 'এআই লকার অটোফিল প্রস্তুত' : 'AI Locker Autofill Active'}</span>
+                    </span>
+                  )}
+                </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-neutral-900">
                   <span>{user.full_name}</span>
                   <span className="font-mono text-neutral-600">{user.phone}</span>
                   <span className="font-mono text-[#006A4E] bg-emerald-50 px-2 py-0.5 border border-emerald-200 rounded-none">
-                    {user.citizen_id}
+                    {ocrCitizenId}
                   </span>
                 </div>
+                {hasOcrMeta && (
+                  <div className="mt-2.5 pt-2 border-t border-neutral-200 flex flex-wrap gap-1.5 text-[11px] font-mono text-neutral-600">
+                    {ocrDob && (
+                      <span className="bg-white border border-neutral-200 px-1.5 py-0.5">
+                        {lang === 'bn' ? 'জন্ম:' : 'DOB:'} {ocrDob}
+                      </span>
+                    )}
+                    {ocrFather && (
+                      <span className="bg-white border border-neutral-200 px-1.5 py-0.5">
+                        {lang === 'bn' ? 'পিতা:' : "Father:"} {ocrFather}
+                      </span>
+                    )}
+                    {ocrBlood && (
+                      <span className="bg-white border border-neutral-200 px-1.5 py-0.5">
+                        {lang === 'bn' ? 'রক্ত:' : 'Blood:'} {ocrBlood}
+                      </span>
+                    )}
+                    {ocrRoll && (
+                      <span className="bg-white border border-neutral-200 px-1.5 py-0.5">
+                        {lang === 'bn' ? 'রোল:' : 'Roll:'} {ocrRoll} ({ocrBoard || ''})
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Document Locker Match Audit */}

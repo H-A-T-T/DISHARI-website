@@ -101,3 +101,29 @@ def ping_api(endpoint: str, timeout: float = 2.0) -> Optional[Dict[str, Any] | L
     except (urllib.error.URLError, TimeoutError, ConnectionRefusedError, OSError):
         return None
     return None
+
+
+def post_api(endpoint: str, data: Dict[str, Any], timeout: float = 3.0) -> Optional[Dict[str, Any]]:
+    """
+    Attempts to POST JSON to the Dishari backend API.
+    Returns None if server is not currently running.
+    """
+    url = f"{API_URL}{endpoint}"
+    payload = json.dumps(data).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={
+            "User-Agent": "Dishari-Python-Test-Suite/1.0",
+            "Content-Type": "application/json",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            if response.status in (200, 201):
+                body = response.read().decode("utf-8")
+                return json.loads(body)
+    except (urllib.error.URLError, TimeoutError, ConnectionRefusedError, OSError):
+        return None
+    return None
+
