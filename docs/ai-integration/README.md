@@ -1,86 +1,51 @@
-# Dishari AI Integration
+# Dishari AI Integration Guide & System Specification
 
-## Overview
+## 1. Overview & System Architecture
+- Purpose & Vision (Civic AI for Web & Android)
+- Architecture Diagram (Web/Android -> Express Gateway -> OCR/NLP Engine / n8n / Gemini)
+- Client-Side vs Server-Side vs Cloud LLM Division
 
-This directory contains documentation for
-AI engineering and AI integration within
-the Dishari platform.
+## 2. Core AI Capabilities & Modules
+### 2.1 Optical Character Recognition (OCR) Pipeline
+- Supported Document Types (Smart NID, Birth Cert, Driving License)
+- Preprocessing Pipeline (Grayscale, Thresholding, Deskew via Sharp/OpenCV)
+- Bilingual Extraction & Digit Normalization (Bangla <-> English)
+- Output Schema & Confidence Scoring
 
-The goal is to provide reusable AI services
-and automation workflows for the Dishari
-Website and Android applications.
+### 2.2 Facial Analysis & Citizen Verification
+- Purpose & Use Case (e-KYC Liveness / Verification / Accessibility)
+- Supported Classes & Confidence Thresholds
+- Camera Capture Guidelines for Android & Web (Lighting, framing, angle)
+- Biometric Data & Privacy Policy (Zero-retention of raw biometric faces)
 
-## AI Engineering Responsibilities
+### 2.3 Jonobondhu AI (Conversational & Voice Engine)
+- Bengali NLP & Dialect Normalization
+- Sitemap Intent Mapping & Voice Navigation
+- Speech-to-Text (STT) & Audio Specs
 
-- Optical Character Recognition (OCR)
-- Image preprocessing
-- Facial Expression Analysis
-- AI API Integration
-- n8n Workflow Automation
-- AI Testing and Evaluation
+## 3. n8n Workflow Automation
+- Webhook Architecture & Authentication
+- Workflow Catalog & Export Standards (Directory: `/Structure/workflows/`)
+- Multimodal Fallback Pipelines (Gemini Vision integration)
+- Error Handling & Dead-Letter Retries
 
-## 1. OCR Integration
+## 4. Developer API Reference
+- Base URLs & Authentication Headers
+- Endpoint Specs (POST /ocr, POST /face, POST /nlp)
+- Request & Response JSON Payloads (Full schemas)
+- Standard Error Codes & Guidance Messages (in Bangla & English)
 
-OCR is an important AI capability in Dishari.
+## 5. Client Integration Guidelines
+- Web (Next.js / TypeScript fetch & file upload)
+- Android (CameraX, Retrofit, Bitmap compression before upload)
+- Human-in-the-Loop UI pattern (Verification/Editing step after scan)
 
-### Objectives
-- Extract text from uploaded documents.
-- Support document image preprocessing.
-- Improve text extraction quality.
-- Support structured document data extraction.
+## 6. Evaluation, Performance & SLAs
+- Target Latency & Accuracy Benchmarks
+- Automated QA Test Suite (`tests/test_ocr_pipeline.py`, `tests/test_ai_navigation.py`)
 
-### Integration
-AI services will communicate with the
-Dishari application through documented APIs.
-
-## 2. Facial Expression Analysis
-
-### Objectives
-- Analyze visible facial expressions.
-- Classify supported expression categories.
-- Return classification confidence scores.
-
-Note: Facial expression classification
-does not establish a person's actual
-emotional or mental state.
-
-## 3. Workflow Automation
-
-n8n is used to develop and manage
-AI automation workflows.
-
-### Responsibilities
-- Workflow development
-- Webhook integration
-- API orchestration
-- Error handling
-- Workflow testing
-
-Workflow JSON exports will be maintained
-in a designated version-controlled location.
-
-## 4. AI Testing and Evaluation
-
-AI features should be evaluated using:
-
-- Accuracy
-- Response time
-- Error handling
-- Reliability
-- Test case coverage
-
-## 5. Developer Integration
-
-This documentation is intended to help
-Web and Android developers integrate
-Dishari AI services.
-
-## Development Status
-
-Features are documented according to
-their actual implementation status.
-Planned features will be identified separately.
-
-## Team
-
-Dishari AI Engineering Team
+## 7. Security, PII & Ethical Guardrails
+- Disclaimers on Facial Analysis & AI hallucination
+- Temporary File Lifecycle (TTL)
+- Citizen PII Protection
+eta amr AI dise
